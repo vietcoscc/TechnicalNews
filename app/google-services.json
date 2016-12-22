@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1058858081722",
+    "firebase_url": "https://technicalnews-fbd7c.firebaseio.com",
+    "project_id": "technicalnews-fbd7c",
+    "storage_bucket": "technicalnews-fbd7c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1058858081722:android:854ab0778e29342c",
+        "android_client_info": {
+          "package_name": "com.example.vaio.technicalnews"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1058858081722-h2h819239puf80c9sa0legk2bh273uja.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTxkiXeW-yutEjQr7vB0-6VLDttBfwoZE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/home"
+            android:icon="@drawable/ic_home_black_24dp"
+            android:title="Home" />
+        <item
+            android:id="@+id/forum"
+            android:icon="@drawable/ic_forum_black_24dp"
+            android:title="Forum" />
+    </group>
+        <item android:title="Others">
+
+            <menu>
+                <group android:checkableBehavior="single">
+                    <item android:title="Setting"  android:icon="@drawable/ic_settings_black_24dp"/>
+                    <item android:title="Share"  android:icon="@drawable/ic_share_black_24dp"/>
+                    <item android:title="Feed back" android:icon="@android:drawable/ic_dialog_email" />
+                </group>
+            </menu>
+        </item>
+
+</menu>
