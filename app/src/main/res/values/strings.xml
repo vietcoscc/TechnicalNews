@@ -26,4 +26,8 @@
     <string name="tvRegister">Sign Up Now</string>
     <string name="regiter">Register</string>
     <string name="btnRegíter">Sign Up</string>
+    <string name="action_list_view">List</string>
+    <string name="action_grid_view">Grid</string>
+    <string name="action_login">Login</string>
+    <string name="action_logout">Logout</string>
 </resources>
