@@ -20,13 +20,28 @@
         android:textColor="@color/white"
         android:textSize="@dimen/tvLoginSize"
         android:textStyle="bold" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/user_name_top_margin"
+        android:background="@color/white">
+
+        <EditText
+            android:id="@+id/yourName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint=" Your name ..."
+            android:imeOptions="actionNext"
+            android:singleLine="true" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:background="@color/white">
 
         <EditText
@@ -54,22 +69,6 @@
             android:singleLine="true" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:background="@color/white">
-
-        <EditText
-            android:id="@+id/reEnterPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint=" Re-enter Password ..."
-            android:imeOptions="actionDone"
-            android:inputType="textPassword"
-            android:singleLine="true" />
-    </LinearLayout>
 
     <Button
         android:id="@+id/btnSignUp"

@@ -117,8 +117,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 onCreateOptionsMenu(menu);
                 loadContentFragment(FORUM_TAG);
                 Toast.makeText(this, "Forum", Toast.LENGTH_SHORT).show();
-//                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-//                startActivity(intent);
+
                 break;
         }
 //        Toast.makeText(this, contentTag, Toast.LENGTH_SHORT).show();
@@ -157,8 +156,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.action_grid:
                 break;
             case R.id.action_login:
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent);
                 break;
             case R.id.action_logout:
+
                 break;
         }
         return false;

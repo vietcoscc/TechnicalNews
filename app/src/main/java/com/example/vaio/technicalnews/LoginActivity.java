@@ -24,14 +24,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private Button btnLogin;
     private TextView tvSignUp;
     private int SIGN_UP_REQUEST_CODE = 1;
-
-    private FirebaseAuth mAuth;
+    private AccountManager accountManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        mAuth = FirebaseAuth.getInstance();
+        accountManager = new AccountManager(this);
         initViews();
     }
 
@@ -42,7 +41,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         btnLogin.setClickable(true);
         btnLogin.setOnClickListener(this);
         tvSignUp = (TextView) findViewById(R.id.tvSignUp);
-        tvSignUp.setText(Html.fromHtml("<u>Sign up now</u>"));
+        tvSignUp.setText(Html.fromHtml("<u>Not a member ? Sign up now</u>"));
         tvSignUp.setOnClickListener(this);
     }
 
@@ -51,26 +50,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         switch (view.getId()) {
             case R.id.btnLogin:
                 btnLogin.setClickable(false);
-                final ProgressDialog progressDialog = new ProgressDialog(this);
-                progressDialog.setCancelable(false);
-                progressDialog.show();
-                String userName = edtUserName.getText().toString();
-                String password = edtPassword.getText().toString();
 
-                mAuth.signInWithEmailAndPassword(userName, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        progressDialog.dismiss();
-                        btnLogin.setClickable(true);
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(LoginActivity.this, "failed", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(LoginActivity.this, "successful", Toast.LENGTH_SHORT).show();
-//                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//                            startActivity(intent);
-                        }
-                    }
-                });
                 break;
             case R.id.tvSignUp:
                 Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
