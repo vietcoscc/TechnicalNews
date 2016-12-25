@@ -8,7 +8,7 @@
     android:gravity="center"
     android:orientation="vertical"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.vaio.technicalnews.LoginActivity">
+    tools:context="com.example.vaio.technicalnews.LoginFragment">
 
     <TextView
         style="?android:attr/textAppearanceLarge"
@@ -16,17 +16,32 @@
         android:layout_height="wrap_content"
         android:fontFamily="serif"
         android:gravity="center"
-        android:text="@string/login"
+        android:text="@string/regiter"
         android:textColor="@color/white"
         android:textSize="@dimen/tvLoginSize"
         android:textStyle="bold" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/user_name_top_margin"
+        android:background="@color/white">
+
+        <EditText
+            android:id="@+id/yourName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint=" Your name ..."
+            android:imeOptions="actionNext"
+            android:singleLine="true" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:background="@color/white">
 
         <EditText
@@ -49,37 +64,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint=" Password ..."
-            android:imeOptions="actionDone"
+            android:imeOptions="actionNext"
             android:inputType="textPassword"
             android:singleLine="true" />
     </LinearLayout>
 
+
     <Button
-        android:id="@+id/btnLogin"
+        android:id="@+id/btnSignUp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:background="@drawable/ripple"
-        android:text="@string/btnLogin"
+        android:text="@string/btnRegíter"
         android:textColor="@color/colorPrimary"
         android:textStyle="bold" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:gravity="right"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/tvSignUp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:text="@string/tvRegister"
-            android:textColor="@color/white" />
-    </LinearLayout>
 
 </LinearLayout>
