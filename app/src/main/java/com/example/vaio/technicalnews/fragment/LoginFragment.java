@@ -1,10 +1,7 @@
-package com.example.vaio.technicalnews;
+package com.example.vaio.technicalnews.fragment;
 
 import android.app.Fragment;
-import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -13,6 +10,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.vaio.technicalnews.activity.MainActivity;
+import com.example.vaio.technicalnews.R;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
     private EditText edtUserName;
@@ -50,10 +51,15 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnLogin:
+                if (!MainActivity.isNetWorkAvailable(getContext())) {
+                    Toast.makeText(getContext(), "No internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 btnLogin.setClickable(false);
                 String userName = edtUserName.getText().toString();
                 String password = edtPassword.getText().toString();
                 if (userName.isEmpty() || password.isEmpty()) {
+                    btnLogin.setClickable(true);
                     return;
                 }
                 accountManager.login(userName, password);

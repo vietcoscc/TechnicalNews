@@ -1,15 +1,17 @@
-package com.example.vaio.technicalnews;
+package com.example.vaio.technicalnews.fragment;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.support.annotation.Nullable;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import com.example.vaio.technicalnews.activity.MainActivity;
+import com.example.vaio.technicalnews.R;
 
 public class RegisterFragment extends Fragment implements View.OnClickListener {
     private EditText edtYourName;
@@ -44,10 +46,18 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnSignUp:
+                if (!MainActivity.isNetWorkAvailable(getContext())) {
+                    Toast.makeText(getContext(), "No internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 btnSignUp.setClickable(false);
                 String yourName = edtYourName.getText().toString();
                 String userName = edtUserName.getText().toString();
                 String password = edtPassword.getText().toString();
+                if (userName.isEmpty() || password.isEmpty()) {
+                    btnSignUp.setClickable(true);
+                    return;
+                }
                 accountManager.register(yourName, userName, password);
                 btnSignUp.setClickable(true);
 //                setResult(RESULT_OK);

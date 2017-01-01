@@ -1,4 +1,4 @@
-package com.example.vaio.technicalnews;
+package com.example.vaio.technicalnews.fragment;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -7,6 +7,8 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.example.vaio.technicalnews.R;
 
 /**
  * Created by vaio on 12/22/2016.

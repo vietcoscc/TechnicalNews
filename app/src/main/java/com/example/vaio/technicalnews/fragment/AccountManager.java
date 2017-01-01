@@ -1,11 +1,14 @@
-package com.example.vaio.technicalnews;
+package com.example.vaio.technicalnews.fragment;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
+import com.example.vaio.technicalnews.activity.MainActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -21,10 +24,12 @@ import java.io.Serializable;
 public class AccountManager implements Serializable {
     private Context context;
     private FirebaseAuth mAuth;
+    private Handler handler;
 
-    public AccountManager(Context context) {
+    public AccountManager(Context context, Handler handler) {
         mAuth = FirebaseAuth.getInstance();
         this.context = context;
+        this.handler = handler;
     }
 
 
@@ -41,15 +46,20 @@ public class AccountManager implements Serializable {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 progressDialog.dismiss();
                 if (!task.isSuccessful()) {
-                    Toast.makeText(context, "failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(context, "successful", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
+                    Message message = new Message();
+                    message.what = MainActivity.WHAT_SIGN_IN_SIGN_UP;
+                    message.arg1 = 1;
+                    handler.sendMessage(message);
 //                            Intent intent = new Intent(LoginFragment.this, MainActivity.class);
 //                            startActivity(intent);
                 }
             }
         });
     }
+
     public void logout() {
         mAuth.signOut();
     }
@@ -58,7 +68,7 @@ public class AccountManager implements Serializable {
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setCancelable(false);
         progressDialog.show();
-        if(email.isEmpty()||password.isEmpty()){
+        if (email.isEmpty() || password.isEmpty()) {
             progressDialog.dismiss();
             return;
         }
@@ -75,10 +85,13 @@ public class AccountManager implements Serializable {
                 });
 
                 if (!task.isSuccessful()) {
-                    Toast.makeText(context, "failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(context, "successful", Toast.LENGTH_SHORT).show();
-
+                    Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
+                    Message message = new Message();
+                    message.what = MainActivity.WHAT_SIGN_IN_SIGN_UP;
+                    message.arg1 = 1;
+                    handler.sendMessage(message);
                 }
                 progressDialog.dismiss();
             }

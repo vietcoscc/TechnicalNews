@@ -1,9 +1,16 @@
-package com.example.vaio.technicalnews;
+package com.example.vaio.technicalnews.activity;
 
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -22,20 +29,30 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 
+import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.fragment.AccountManager;
+import com.example.vaio.technicalnews.fragment.ForumFragment;
+import com.example.vaio.technicalnews.fragment.HomeFragment;
+import com.example.vaio.technicalnews.fragment.LoginFragment;
+import com.example.vaio.technicalnews.fragment.RegisterFragment;
+import com.example.vaio.technicalnews.model.Topic;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MenuItem.OnMenuItemClickListener, View.OnClickListener {
     public static final String HOME_TAG = "home";
     public static final String FORUM_TAG = "forum";
-    public static final String ACCOUNT_MANAGER_EXTRA = "Account Manager";
-
+    public static final int WHAT_SIGN_IN_SIGN_UP = 1;
+    public static final String TOPIC = "Topic";
+    public static final String TYPE_1 = "Question and answer";
     private Toolbar toolbar; // toolbar main activity
     private FloatingActionButton floatingActionButton;
 
     private HomeFragment homeFragment;
     private ForumFragment forumFragment;
-    private FrameLayout loginRegisterLayout;
+    private FrameLayout signInSignOutLayout;
 
     private DrawerLayout drawerLayout;
     private Menu menu; // main activity option menu
@@ -44,12 +61,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private AccountManager accountManager;
     private Boolean signedIn = false;
     private Boolean onMenuItemForumSelected = false;
+    private Handler handlerSignInSignUp = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == WHAT_SIGN_IN_SIGN_UP) {
+                int result = msg.arg1; // 1 -> successful  0->failed
+                if (result == 1) {
+                    hideFragmentSignInSignUp();
+                }
+            }
+        }
+    };
+
+    public static boolean isNetWorkAvailable(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
+        return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        accountManager = new AccountManager(this);
+        accountManager = new AccountManager(this, handlerSignInSignUp);
         initToolbar();
         initDrawer();
         initFragment();
@@ -58,13 +92,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
 
-        myRef.child("hoten2").child("abc").setValue("Hello");
+        Calendar calendar = Calendar.getInstance();
+        String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.YEAR) + "";
+        String time = calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) + "";
+        Topic topic = new Topic("Nguyễn Quốc việt", date, time, 0, 0, 0, "vietcoscc@gmail.com");
+        myRef.child(TOPIC).child(TYPE_1).push().setValue(topic);
     }
 
     private void initOthers() {
         floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(this);
-        loginRegisterLayout = (FrameLayout) findViewById(R.id.login_register_content_main);
+        signInSignOutLayout = (FrameLayout) findViewById(R.id.login_register_content_main);
     }
 
     private void initToolbar() {
@@ -138,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-//                            showLoginDialog();
+                            showFragmentSignInSignUp(new LoginFragment(accountManager));
                         }
                     }).show();
                 }
@@ -165,12 +203,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 gridView.setOnMenuItemClickListener(this);
                 break;
             case R.menu.menu_forum:
-                MenuItem login = menu.findItem(R.id.action_login);
-                MenuItem register = menu.findItem(R.id.action_register);
-                MenuItem logout = menu.findItem(R.id.action_logout);
-                register.setOnMenuItemClickListener(this);
-                login.setOnMenuItemClickListener(this);
-                logout.setOnMenuItemClickListener(this);
+                MenuItem signIn = menu.findItem(R.id.action_sign_in);
+                MenuItem signUp = menu.findItem(R.id.action_sign_up);
+                MenuItem signOut = menu.findItem(R.id.action_sign_out);
+                signUp.setOnMenuItemClickListener(this);
+                signIn.setOnMenuItemClickListener(this);
+                signOut.setOnMenuItemClickListener(this);
                 break;
         }
 
@@ -184,13 +222,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.action_grid:
                 break;
-            case R.id.action_login:
-                showFragmentSignInSignOut(new LoginFragment(accountManager));
+            case R.id.action_sign_in:
+                showFragmentSignInSignUp(new LoginFragment(accountManager));
                 break;
-            case R.id.action_register:
-                showFragmentSignInSignOut(new RegisterFragment(accountManager));
+            case R.id.action_sign_up:
+                showFragmentSignInSignUp(new RegisterFragment(accountManager));
                 break;
-            case R.id.action_logout:
+            case R.id.action_sign_out:
                 break;
         }
         return false;
@@ -201,7 +239,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.fab:
-
+                Intent intent = new Intent(MainActivity.this, PostActivity.class);
+                startActivity(intent);
                 break;
         }
     }
@@ -209,24 +248,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onBackPressed() {
         if (onMenuItemForumSelected) {
-            hideFragmentSignInSignOut();
+            hideFragmentSignInSignUp();
             return;
         }
-        super.onBackPressed();
+        showAcceptQuitingDialog();
     }
 
-    public void showFragmentSignInSignOut(Fragment fragment) {
+    public void showAcceptQuitingDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this,android.R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar);
+        builder.setTitle("Are you sure you want to quit ?");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                finish();
+            }
+        });
+        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        builder.create().show();
+    }
+
+    public void showFragmentSignInSignUp(Fragment fragment) {
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        loginRegisterLayout.setVisibility(View.VISIBLE);
+        signInSignOutLayout.setVisibility(View.VISIBLE);
         onMenuItemForumSelected = true;
         TranslateAnimation animation = (TranslateAnimation) AnimationUtils.loadAnimation(this, R.anim.anim_fragment_in);
-        loginRegisterLayout.startAnimation(animation);
+        signInSignOutLayout.startAnimation(animation);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.login_register_content_main, fragment);
         transaction.commit();
     }
 
-    public void hideFragmentSignInSignOut() {
+    public void hideFragmentSignInSignUp() {
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         TranslateAnimation animation = (TranslateAnimation) AnimationUtils.loadAnimation(this, R.anim.anim_fragment_out);
         animation.setAnimationListener(new Animation.AnimationListener() {
@@ -237,8 +294,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                loginRegisterLayout.removeAllViews();
-                loginRegisterLayout.setFocusable(false);
+                signInSignOutLayout.removeAllViews();
             }
 
             @Override
@@ -247,7 +303,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
         });
-        loginRegisterLayout.startAnimation(animation);
+        signInSignOutLayout.startAnimation(animation);
         onMenuItemForumSelected = false;
     }
 }
