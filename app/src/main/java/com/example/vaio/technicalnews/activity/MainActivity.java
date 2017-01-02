@@ -39,6 +39,7 @@ import com.example.vaio.technicalnews.model.Topic;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MenuItem.OnMenuItemClickListener, View.OnClickListener {
@@ -114,7 +115,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initFragment() {
         homeFragment = new HomeFragment(this);
-        forumFragment = new ForumFragment(this);
+        ArrayList<Topic> arrTopic = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.YEAR) + "";
+        String time = calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) + "";
+        Topic topic = new Topic("Nguyễn Quốc việt", date, time, 0, 0, 0, "vietcoscc@gmail.com");
+        arrTopic.add(topic);
+        Topic topic2 = new Topic("Nguyễn Quốc việt2", date, time, 0, 0, 0, "vietcoscc@gmail.com");
+        arrTopic.add(topic2);
+        arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);
+
+        forumFragment = new ForumFragment(this,arrTopic);
     }
 
     private void initDrawer() {
