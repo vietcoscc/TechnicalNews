@@ -1,8 +1,10 @@
 package com.example.vaio.technicalnews.fragment;
 
 import android.app.Fragment;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import android.widget.Toast;
 
 import com.example.vaio.technicalnews.activity.MainActivity;
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.model.AccountManager;
 
 public class RegisterFragment extends Fragment implements View.OnClickListener {
     private EditText edtYourName;
@@ -42,6 +45,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         edtYourName.requestFocus();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onClick(View view) {
         switch (view.getId()) {

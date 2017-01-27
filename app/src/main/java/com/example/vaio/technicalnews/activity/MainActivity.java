@@ -7,7 +7,9 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -28,16 +30,24 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.fragment.AccountManager;
+import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.fragment.HomeFragment;
 import com.example.vaio.technicalnews.fragment.LoginFragment;
 import com.example.vaio.technicalnews.fragment.RegisterFragment;
 import com.example.vaio.technicalnews.model.Topic;
+import com.example.vaio.technicalnews.parser.NewsContentParser;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -46,22 +56,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final String HOME_TAG = "home";
     public static final String FORUM_TAG = "forum";
     public static final int WHAT_SIGN_IN_SIGN_UP = 1;
+    public static final int WHAT_SIGN_IN_SUCCESS = 2;
     public static final String TOPIC = "Topic";
-    public static final String TYPE_1 = "Question and answer";
+    public static final String TYPE_1 = "Ask and answer";
+    public static final String TYPE_2 = "Tips";
+    public static final String TYPE_3 = "Trading";
+
+    public static final int POST_REQUEST_CODE = 0;
+    //
+    public static final String DISPLAY_NAME = "display name";
+    public static final String EMAIL = "email";
+    // component
     private Toolbar toolbar; // toolbar main activity
     private FloatingActionButton floatingActionButton;
-
+    private ImageView ivAvatar;
+    private TextView tvDisplayName;
+    private TextView tvEmail;
+    // fragment
     private HomeFragment homeFragment;
     private ForumFragment forumFragment;
     private FrameLayout signInSignOutLayout;
-
+    //
     private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
     private Menu menu; // main activity option menu
     private int menuRes = R.menu.menu_home;
 
     private AccountManager accountManager;
     private Boolean signedIn = false;
     private Boolean onMenuItemForumSelected = false;
+
+
     private Handler handlerSignInSignUp = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -70,6 +95,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 int result = msg.arg1; // 1 -> successful  0->failed
                 if (result == 1) {
                     hideFragmentSignInSignUp();
+                    Uri uri = accountManager.getCurrentUser().getPhotoUrl();
+                    String displayName = accountManager.getCurrentUser().getDisplayName();
+                    String email = accountManager.getCurrentUser().getEmail();
+                    if (uri != null) {
+                        ivAvatar.setImageURI(uri);
+                    }
+                    if (!displayName.isEmpty()) {
+                        tvDisplayName.setText(displayName);
+                    }
+                    if (!email.isEmpty()) {
+                        tvEmail.setText(accountManager.getCurrentUser().getEmail());
+                    }
                 }
             }
         }
@@ -84,26 +121,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
         accountManager = new AccountManager(this, handlerSignInSignUp);
         initToolbar();
-        initDrawer();
+        initDrawerLayout();
         initFragment();
         loadContentFragment(HOME_TAG);
         initOthers();
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference();
-
-        Calendar calendar = Calendar.getInstance();
-        String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.YEAR) + "";
-        String time = calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) + "";
-        Topic topic = new Topic("Nguyễn Quốc việt", date, time, 0, 0, 0, "vietcoscc@gmail.com");
-        myRef.child(TOPIC).child(TYPE_1).push().setValue(topic);
     }
 
     private void initOthers() {
         floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
-        floatingActionButton.setOnClickListener(this);
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!signedIn) {
+                    Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            showFragmentSignInSignUp(new LoginFragment(accountManager));
+                        }
+                    }).show();
+                    return;
+                }
+                Intent intent = new Intent(MainActivity.this, PostActivity.class);
+                intent.putExtra(DISPLAY_NAME, accountManager.getCurrentUser().getDisplayName());
+                intent.putExtra(EMAIL, accountManager.getCurrentUser().getEmail());
+                startActivity(intent);
+            }
+        });
         signInSignOutLayout = (FrameLayout) findViewById(R.id.login_register_content_main);
+
+        ivAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.ivAvatar);
+        tvDisplayName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tvDisplayName);
+        tvEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tvEmail);
     }
 
     private void initToolbar() {
@@ -114,24 +166,54 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initFragment() {
+        final ArrayList<Topic> arrTopic = new ArrayList<>();
+        forumFragment = new ForumFragment(this, arrTopic);
         homeFragment = new HomeFragment(this);
-        ArrayList<Topic> arrTopic = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
-        String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.YEAR) + "";
-        String time = calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) + "";
-        Topic topic = new Topic("Nguyễn Quốc việt", date, time, 0, 0, 0, "vietcoscc@gmail.com");
-        arrTopic.add(topic);
-        Topic topic2 = new Topic("Nguyễn Quốc việt2", date, time, 0, 0, 0, "vietcoscc@gmail.com");
-        arrTopic.add(topic2);
-        arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);arrTopic.add(topic2);
 
-        forumFragment = new ForumFragment(this,arrTopic);
+        Calendar calendar = Calendar.getInstance();
+//        String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.YEAR) + "";
+//        String time = calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) + "";
+        //
+        ChildEventListener childEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Topic topic = dataSnapshot.getValue(Topic.class);
+                arrTopic.add(topic);
+                forumFragment.notifyData();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        //
+        DatabaseReference firebaseDatabase = FirebaseDatabase.getInstance().getReference();
+        firebaseDatabase.child(TOPIC).child(TYPE_1).addChildEventListener(childEventListener);
+//        Topic topic = new Topic("demo", date, time, 0, 0, 0, accountManager.getCurrentUser().getDisplayName());
+//        arrTopic.add(topic);
+
     }
 
-    private void initDrawer() {
+    private void initDrawerLayout() {
 
         final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout); // app_bar_main layout
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigationView);
+        navigationView = (NavigationView) findViewById(R.id.navigationView);
         navigationView.setNavigationItemSelectedListener(this);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
@@ -240,33 +322,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 showFragmentSignInSignUp(new RegisterFragment(accountManager));
                 break;
             case R.id.action_sign_out:
+                accountManager.logout();
+                signedIn = false;
                 break;
         }
         return false;
     }
 
-
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.fab:
-                Intent intent = new Intent(MainActivity.this, PostActivity.class);
-                startActivity(intent);
+
                 break;
         }
     }
+
 
     @Override
     public void onBackPressed() {
         if (onMenuItemForumSelected) {
             hideFragmentSignInSignUp();
+            signedIn = false;
             return;
         }
         showAcceptQuitingDialog();
     }
 
     public void showAcceptQuitingDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this,android.R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar);
         builder.setTitle("Are you sure you want to quit ?");
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -284,10 +368,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void showFragmentSignInSignUp(Fragment fragment) {
+
+
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         signInSignOutLayout.setVisibility(View.VISIBLE);
         onMenuItemForumSelected = true;
         TranslateAnimation animation = (TranslateAnimation) AnimationUtils.loadAnimation(this, R.anim.anim_fragment_in);
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                FrameLayout frameLayout = (FrameLayout) findViewById(R.id.content_main);
+                frameLayout.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
         signInSignOutLayout.startAnimation(animation);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.login_register_content_main, fragment);
@@ -295,12 +398,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void hideFragmentSignInSignUp() {
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.content_main);
+        frameLayout.setFocusable(true);
+        frameLayout.setClickable(true);
+        frameLayout.setFocusableInTouchMode(true);
+
+        signedIn = true;
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         TranslateAnimation animation = (TranslateAnimation) AnimationUtils.loadAnimation(this, R.anim.anim_fragment_out);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
+                FrameLayout frameLayout = (FrameLayout) findViewById(R.id.content_main);
+                frameLayout.setVisibility(View.VISIBLE);
             }
 
             @Override

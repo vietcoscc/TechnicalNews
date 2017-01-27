@@ -1,8 +1,11 @@
 package com.example.vaio.technicalnews.fragment;
 
 import android.app.Fragment;
+import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,14 +17,15 @@ import android.widget.Toast;
 
 import com.example.vaio.technicalnews.activity.MainActivity;
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.model.AccountManager;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
     private EditText edtUserName;
     private EditText edtPassword;
     private Button btnLogin;
     private TextView tvSignUp;
-
     private AccountManager accountManager;
+    private Handler handlerSigningInSuccess;
 
     public LoginFragment(AccountManager accountManager) {
         this.accountManager = accountManager;
@@ -47,24 +51,25 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         edtUserName.requestFocus();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnLogin:
                 if (!MainActivity.isNetWorkAvailable(getContext())) {
-                    Toast.makeText(getContext(), "No internet connection", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                btnLogin.setClickable(false);
-                String userName = edtUserName.getText().toString();
-                String password = edtPassword.getText().toString();
-                if (userName.isEmpty() || password.isEmpty()) {
-                    btnLogin.setClickable(true);
-                    return;
-                }
-                accountManager.login(userName, password);
+                Toast.makeText(getContext(), "No internet connection", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            btnLogin.setClickable(false);
+            String userName = edtUserName.getText().toString();
+            String password = edtPassword.getText().toString();
+            if (userName.isEmpty() || password.isEmpty()) {
                 btnLogin.setClickable(true);
-                break;
+                return;
+            }
+            accountManager.login(userName, password);
+            btnLogin.setClickable(true);
+            break;
             case R.id.tvSignUp:
 //                Intent intent = new Intent(LoginFragment.this, RegisterFragment.class);
 //                startActivityForResult(intent, SIGN_UP_REQUEST_CODE);

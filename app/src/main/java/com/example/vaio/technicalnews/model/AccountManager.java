@@ -1,4 +1,4 @@
-package com.example.vaio.technicalnews.fragment;
+package com.example.vaio.technicalnews.model;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -13,9 +13,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Created by vaio on 12/25/2016.
@@ -53,8 +55,6 @@ public class AccountManager implements Serializable {
                     message.what = MainActivity.WHAT_SIGN_IN_SIGN_UP;
                     message.arg1 = 1;
                     handler.sendMessage(message);
-//                            Intent intent = new Intent(LoginFragment.this, MainActivity.class);
-//                            startActivity(intent);
                 }
             }
         });
@@ -83,7 +83,6 @@ public class AccountManager implements Serializable {
 
                     }
                 });
-
                 if (!task.isSuccessful()) {
                     Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
                 } else {
@@ -97,5 +96,11 @@ public class AccountManager implements Serializable {
             }
         });
 
+
+    }
+
+
+    public FirebaseUser getCurrentUser() {
+        return mAuth.getCurrentUser();
     }
 }
