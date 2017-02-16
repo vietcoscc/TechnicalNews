@@ -16,9 +16,14 @@ import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.model.Topic;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 /**
@@ -62,11 +67,23 @@ public class PostActivity extends AppCompatActivity {
                 String time = calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) + "";
                 String email = getIntent().getExtras().getString(MainActivity.EMAIL);
                 String name = getIntent().getExtras().getString(MainActivity.DISPLAY_NAME);
-
-                Topic topic = new Topic(content, date, time, 0, 0, 0, email, name);
+                ArrayList<String> arrComment = new ArrayList<String>();
+                arrComment.add("NQV");
+                Topic topic = new Topic(content, date, time, 0, 0, 0, email, name, arrComment);
                 FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                 DatabaseReference reference = firebaseDatabase.getReference();
                 reference.child(MainActivity.TOPIC).child(type).push().setValue(topic);
+                reference.child(MainActivity.TOPIC).child(type).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
                 finish();
             }
         });

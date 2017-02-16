@@ -4,16 +4,16 @@ package com.example.vaio.technicalnews.adapter;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.database.MyDatabase;
 import com.example.vaio.technicalnews.model.NewsItem;
 import com.squareup.picasso.Picasso;
 
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 public class NewsHomeAdapter extends RecyclerView.Adapter<NewsHomeAdapter.ViewHolder> {
 
     private ArrayList<NewsItem> arrNewsItem;
-    private Handler handlerContentLoading;
+    private Handler handlerContentLoadingMore;
     private Context context;
 
     public interface ClickListener {
@@ -39,9 +39,9 @@ public class NewsHomeAdapter extends RecyclerView.Adapter<NewsHomeAdapter.ViewHo
         this.clickListener = clickListener;
     }
 
-    public NewsHomeAdapter(ArrayList<NewsItem> arrNewsItem, Handler handlerContentLoading) {
+    public NewsHomeAdapter(ArrayList<NewsItem> arrNewsItem, Handler handlerContentLoadingMore) {
         this.arrNewsItem = arrNewsItem;
-        this.handlerContentLoading = handlerContentLoading;
+        this.handlerContentLoadingMore = handlerContentLoadingMore;
     }
 
     @Override
@@ -54,17 +54,33 @@ public class NewsHomeAdapter extends RecyclerView.Adapter<NewsHomeAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        NewsItem newsItem = arrNewsItem.get(position);
-        Picasso.with(context).load(newsItem.getImageLinkWrapper()).placeholder(R.drawable.loading).error(R.drawable.warning).into(holder.ivWrapper);
-        holder.tvName.setText(newsItem.getName());
-        holder.tvContentPreview.setText(newsItem.getContentPreview());
-        holder.tvTopicName.setText(newsItem.getTopicName());
-        holder.tvAuthor.setText(newsItem.getAuthor());
-        holder.tvTimeStamp.setText(newsItem.getTimeStamp());
+
+        final NewsItem newsItem = arrNewsItem.get(position);
+        if (newsItem != null) {
+            Picasso.with(context).load(newsItem.getImageLinkWrapper()).placeholder(R.drawable.loading).error(R.drawable.warning).into(holder.ivWrapper);
+            holder.tvName.setText(newsItem.getName());
+            holder.tvContentPreview.setText(newsItem.getContentPreview());
+            holder.tvTopicName.setText(newsItem.getTopicName());
+            holder.tvAuthor.setText(newsItem.getAuthor());
+            holder.tvTimeStamp.setText(newsItem.getTimeStamp());
+            holder.ivWatchLater.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    try {
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        } else {
+
+        }
         if (position >= arrNewsItem.size() - 1) {
             Message message = new Message();
             message.what = 1;
-            handlerContentLoading.sendMessage(message);
+            handlerContentLoadingMore.sendMessage(message);
+            return;
         }
     }
 
@@ -80,6 +96,7 @@ public class NewsHomeAdapter extends RecyclerView.Adapter<NewsHomeAdapter.ViewHo
         TextView tvTopicName;
         TextView tvAuthor;
         TextView tvTimeStamp;
+        ImageView ivWatchLater;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -89,6 +106,7 @@ public class NewsHomeAdapter extends RecyclerView.Adapter<NewsHomeAdapter.ViewHo
             tvTopicName = (TextView) itemView.findViewById(R.id.tvTopicName);
             tvAuthor = (TextView) itemView.findViewById(R.id.tvAuthor);
             tvTimeStamp = (TextView) itemView.findViewById(R.id.tvTimeStamp);
+            ivWatchLater = (ImageView) itemView.findViewById(R.id.watchLater);
             itemView.setOnClickListener(this);
         }
 

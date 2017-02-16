@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.fragment.HomeFragment;
+import com.example.vaio.technicalnews.fragment.NewsFragment;
 
 public class WebContentActivity extends AppCompatActivity {
     private WebView wvContent;
@@ -28,7 +29,7 @@ public class WebContentActivity extends AppCompatActivity {
     private void initViews() {
         wvContent = (WebView) findViewById(R.id.wvContent);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        final String link = getIntent().getExtras().getString(HomeFragment.LINK_CONTENT);
+        final String link = getIntent().getExtras().getString(NewsFragment.LINK_CONTENT);
         wvContent.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {

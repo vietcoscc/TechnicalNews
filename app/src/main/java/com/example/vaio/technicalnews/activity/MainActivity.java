@@ -4,12 +4,14 @@ package com.example.vaio.technicalnews.activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -32,8 +34,11 @@ import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.database.MyDatabase;
+import com.example.vaio.technicalnews.fragment.NewsFragment;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.fragment.HomeFragment;
@@ -76,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private HomeFragment homeFragment;
     private ForumFragment forumFragment;
     private FrameLayout signInSignOutLayout;
+    private ArrayList<Topic> arrTopic;
+    private ArrayList<String> arrTopicKey;
     //
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -86,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Boolean signedIn = false;
     private Boolean onMenuItemForumSelected = false;
 
-
+    private ProgressDialog progressDialog;
     private Handler handlerSignInSignUp = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -122,16 +129,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        try {
+            accountManager = new AccountManager(this, handlerSignInSignUp);
+            initToolbar();
+            initDrawerLayout();
+            initFragment();
+            loadContentFragment(HOME_TAG);
+            initOthers();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        accountManager = new AccountManager(this, handlerSignInSignUp);
-        initToolbar();
-        initDrawerLayout();
-        initFragment();
-        loadContentFragment(HOME_TAG);
-        initOthers();
     }
 
-    private void initOthers() {
+    private void initOthers() throws Exception {
+        progressDialog = new ProgressDialog(this);
+
         floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -158,17 +171,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tvEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tvEmail);
     }
 
-    private void initToolbar() {
+    private void initToolbar() throws Exception {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setTitle("Home");
     }
 
-    private void initFragment() {
-        final ArrayList<Topic> arrTopic = new ArrayList<>();
-        forumFragment = new ForumFragment(this, arrTopic);
-        homeFragment = new HomeFragment(this);
+    private void initFragment() throws Exception {
+        DatabaseReference firebaseDatabase = FirebaseDatabase.getInstance().getReference();
+        arrTopic = new ArrayList<>();
+        arrTopicKey = new ArrayList<>();
+        forumFragment = new ForumFragment(this, firebaseDatabase, arrTopic, arrTopicKey, getWindowManager());
+        homeFragment = new HomeFragment(this, getSupportFragmentManager());
 
         Calendar calendar = Calendar.getInstance();
 //        String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.YEAR) + "";
@@ -179,6 +194,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Topic topic = dataSnapshot.getValue(Topic.class);
                 arrTopic.add(topic);
+                arrTopicKey.add(dataSnapshot.getKey());
+                Toast.makeText(MainActivity.this, dataSnapshot.getKey(), Toast.LENGTH_SHORT).show();
                 forumFragment.notifyData();
             }
 
@@ -203,14 +220,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         };
         //
-        DatabaseReference firebaseDatabase = FirebaseDatabase.getInstance().getReference();
+
         firebaseDatabase.child(TOPIC).child(TYPE_1).addChildEventListener(childEventListener);
 //        Topic topic = new Topic("demo", date, time, 0, 0, 0, accountManager.getCurrentUser().getDisplayName());
 //        arrTopic.add(topic);
 
     }
 
-    private void initDrawerLayout() {
+    private void initDrawerLayout() throws Exception {
 
         final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout); // app_bar_main layout
         navigationView = (NavigationView) findViewById(R.id.navigationView);
@@ -242,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         switch (contentTag) {
             case HOME_TAG:
+                homeFragment = new HomeFragment(this, getSupportFragmentManager());
                 transaction.replace(R.id.content_main, homeFragment);
                 break;
             case FORUM_TAG:
@@ -256,13 +274,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         switch (id) {
             case R.id.home:
+                loadContentFragment(HOME_TAG);
                 toolbar.setTitle("Home");
                 floatingActionButton.setVisibility(View.GONE);
                 menuRes = R.menu.menu_home;
                 onCreateOptionsMenu(menu);
-                loadContentFragment(HOME_TAG);
+                drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             case R.id.forum:
+                loadContentFragment(FORUM_TAG);
                 toolbar.setTitle("Forum");
                 floatingActionButton.setVisibility(View.VISIBLE);
                 if (!signedIn) {
@@ -275,12 +295,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 menuRes = R.menu.menu_forum;
                 onCreateOptionsMenu(menu);
-                loadContentFragment(FORUM_TAG);
+                drawerLayout.closeDrawer(GravityCompat.START);
+                break;
+            case R.id.setting:
+                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+                startActivity(intent);
                 break;
         }
 //        Toast.makeText(this, contentTag, Toast.LENGTH_SHORT).show();
 
-        drawerLayout.closeDrawer(GravityCompat.START);
+
         return true;
     }
 
@@ -350,6 +374,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void showAcceptQuitingDialog() {
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar);
         builder.setTitle("Are you sure you want to quit ?");
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -402,7 +427,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         frameLayout.setFocusable(true);
         frameLayout.setClickable(true);
         frameLayout.setFocusableInTouchMode(true);
-
         signedIn = true;
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         TranslateAnimation animation = (TranslateAnimation) AnimationUtils.loadAnimation(this, R.anim.anim_fragment_out);
@@ -426,5 +450,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
         signInSignOutLayout.startAnimation(animation);
         onMenuItemForumSelected = false;
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        try {
+            MyDatabase myDatabase = new MyDatabase(MainActivity.this);
+            myDatabase.clearTable(MyDatabase.TB_NAME_NEWS);
+            myDatabase.addArrNewsItem(homeFragment.getArrNewsItem());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }

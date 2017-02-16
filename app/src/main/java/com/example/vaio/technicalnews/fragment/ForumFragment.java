@@ -2,21 +2,41 @@ package com.example.vaio.technicalnews.fragment;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Point;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.service.notification.StatusBarNotification;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.transition.Transition;
+import android.support.transition.TransitionValues;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.Display;
+import android.view.DragEvent;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.activity.MainActivity;
 import com.example.vaio.technicalnews.adapter.TopicsForumAdapter;
 import com.example.vaio.technicalnews.model.Topic;
+import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
 
@@ -27,14 +47,23 @@ import java.util.ArrayList;
 public class ForumFragment extends Fragment {
     public static final int WHAT_COMPLETELY = 0;
     private Context context;
+    private DatabaseReference databaseReference;
+    private ArrayList<Topic> arrTopic;
+    private ArrayList<String> arrTopicKey;
+
     private TopicsForumAdapter adapter;
     private RecyclerView recyclerView;
-    private ArrayList<Topic> arrTopic;
-    private ContentLoadingProgressBar contentLoadingProgressBar;
 
-    public ForumFragment(Context context, ArrayList<Topic> arrTopic) {
+    private ContentLoadingProgressBar contentLoadingProgressBar;
+    private WindowManager windowManager;
+
+
+    public ForumFragment(Context context, DatabaseReference databaseReference, ArrayList<Topic> arrTopic, ArrayList<String> arrTopicKey, WindowManager windowManager) {
         this.arrTopic = arrTopic;
         this.context = context;
+        this.windowManager = windowManager;
+        this.databaseReference = databaseReference;
+        this.arrTopicKey = arrTopicKey;
     }
 
     private void initComponent(View view) {
@@ -52,8 +81,8 @@ public class ForumFragment extends Fragment {
         adapter = new TopicsForumAdapter(arrTopic, handlerContentLoadingCompletely);
         adapter.setClickListener(new TopicsForumAdapter.ClickListener() {
             @Override
-            public void onItemClick(View view, int position) {
-                Toast.makeText(context, position + "", Toast.LENGTH_SHORT).show();
+            public void onItemClick(final View view, final int position) {
+
             }
         });
         recyclerView.setAdapter(adapter);
@@ -61,7 +90,7 @@ public class ForumFragment extends Fragment {
     }
 
     public void notifyData() {
-        if(adapter!=null) {
+        if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
     }

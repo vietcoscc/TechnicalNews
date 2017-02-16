@@ -31,4 +31,19 @@
     <string name="action_login">Login</string>
     <string name="action_logout">Sign out</string>
     <string name="action_register">Sign up</string>
+    <string name="offline_mode_title_setting">Offline mode</string>
+    <string name="offline_mode_sumary_setting">Use without internet</string>
+    <string name="category_titile_setting">General</string>
+    <string-array name="listentries">
+        <item>List item 1</item>
+        <item>List item 2</item>
+        <item>List item 3</item>
+        <item>List item 4</item>
+    </string-array>
+    <string-array name="listvalues">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
 </resources>

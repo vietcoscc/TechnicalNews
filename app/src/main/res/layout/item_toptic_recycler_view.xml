@@ -5,8 +5,8 @@
     android:orientation="vertical"
     android:clickable="true"
     android:focusable="true"
+    android:background="@drawable/view_click_selector"
     android:descendantFocusability="blocksDescendants"
-    android:background="@drawable/ripple"
     android:padding="@dimen/activity_horizontal_margin">
 
     <TextView

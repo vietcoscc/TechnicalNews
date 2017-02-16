@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1058858081722-1j6nmev99rqbm9e910ljsko99q8t8pea.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.vaio.technicalnews",
+            "certificate_hash": "AAB33CB6E8BFE0249D263BB544E422E4AEB40BD1"
+          }
+        },
+        {
           "client_id": "1058858081722-h2h819239puf80c9sa0legk2bh273uja.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1058858081722-h2h819239puf80c9sa0legk2bh273uja.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

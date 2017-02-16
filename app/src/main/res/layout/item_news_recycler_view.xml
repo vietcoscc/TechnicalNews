@@ -10,14 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         card_view:cardBackgroundColor="@color/white"
-        card_view:cardCornerRadius="4dp"
-        card_view:cardElevation="2dp"
+        card_view:cardCornerRadius="@dimen/cardview_default_radius"
+        card_view:cardElevation="@dimen/cardview_default_elevation"
         card_view:cardUseCompatPadding="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/ripple"
+            android:background="@drawable/view_click_selector"
             android:weightSum="3">
 
             <ImageView
@@ -41,7 +41,7 @@
 
                 <TextView
                     android:id="@+id/tvName"
-                    style="?android:attr/textAppearanceMedium"
+                    style="?android:attr/textAppearanceSmall"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
@@ -61,45 +61,61 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvTopicName"
+                            style="?android:attr/textAppearanceSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:text="@string/app_name"
+                            android:textColor="@color/redA700" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" / " />
+
+                        <TextView
+                            android:id="@+id/tvAuthor"
+                            style="?android:attr/textAppearanceSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:text="@string/app_name"
+                            android:textColor="@color/redA700" />
+
+
+                    </LinearLayout>
 
                     <TextView
-                        android:id="@+id/tvTopicName"
-                        style="?android:attr/textAppearanceMedium"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/tvTimeStamp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:singleLine="true"
-                        android:text="@string/app_name"
-                        android:textColor="@color/redA700" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=" / " />
-
-                    <TextView
-                        android:id="@+id/tvAuthor"
-                        style="?android:attr/textAppearanceMedium"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:text="@string/app_name"
-                        android:textColor="@color/redA700" />
-
+                        android:text="@string/app_name" />
 
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tvTimeStamp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:text="@string/app_name" />
 
             </LinearLayout>
 
         </LinearLayout>
 
+        <ImageView
+            android:id="@+id/watchLater"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_marginBottom="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:src="@android:drawable/star_off" />
     </android.support.v7.widget.CardView>
 
 

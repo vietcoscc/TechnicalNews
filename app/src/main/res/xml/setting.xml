@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/category_titile_setting">
+        <EditTextPreference
+            android:key="username"
+            android:summary="Please provide your username"
+            android:title="Your Name"></EditTextPreference>
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:summary="@string/offline_mode_sumary_setting"
+            android:title="@string/offline_mode_title_setting" />
+        <CheckBoxPreference
+
+            android:defaultValue="false"
+            android:summary="This option if selected will allow the application to check for latest versions."
+            android:title="Application Updates" />
+        <RingtonePreference android:title="dfasdf"/>
+    </PreferenceCategory>
+
+
+</PreferenceScreen>
