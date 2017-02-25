@@ -2,13 +2,15 @@ package com.example.vaio.technicalnews.activity;
 
 
 import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -16,21 +18,30 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -60,7 +71,8 @@ import java.util.Calendar;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MenuItem.OnMenuItemClickListener, View.OnClickListener {
     public static final String HOME_TAG = "home";
     public static final String FORUM_TAG = "forum";
-    public static final int WHAT_SIGN_IN_SIGN_UP = 1;
+    public static final int WHAT_SIGN_IN = 1;
+    public static final int WHAT_SIGN_UP = 2;
     public static final int WHAT_SIGN_IN_SUCCESS = 2;
     public static final String TOPIC = "Topic";
     public static final String TYPE_1 = "Ask and answer";
@@ -80,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // fragment
     private HomeFragment homeFragment;
     private ForumFragment forumFragment;
+    private LoginFragment loginFragment;
+    private RegisterFragment registerFragment;
     private FrameLayout signInSignOutLayout;
     private ArrayList<Topic> arrTopic;
     private ArrayList<String> arrTopicKey;
@@ -98,23 +112,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if (msg.what == WHAT_SIGN_IN_SIGN_UP) {
-                int result = msg.arg1; // 1 -> successful  0->failed
-                if (result == 1) {
-                    hideFragmentSignInSignUp();
-                    Uri uri = accountManager.getCurrentUser().getPhotoUrl();
-                    String displayName = accountManager.getCurrentUser().getDisplayName();
-                    String email = accountManager.getCurrentUser().getEmail();
-                    if (uri != null) {
+            int result = msg.arg1; // 1 -> successful  0->failed
+            switch (msg.what) {
+
+                case WHAT_SIGN_IN:
+
+                    if (result == 1) {
+                        hideFragmentSignInSignUp();
+                        Uri uri = accountManager.getCurrentUser().getPhotoUrl();
+                        String displayName = accountManager.getCurrentUser().getDisplayName();
+                        String email = accountManager.getCurrentUser().getEmail();
                         ivAvatar.setImageURI(uri);
-                    }
-                    if (!displayName.isEmpty()) {
                         tvDisplayName.setText(displayName);
+                        tvEmail.setText(email);
+                        signedIn = true;
                     }
-                    if (!email.isEmpty()) {
-                        tvEmail.setText(accountManager.getCurrentUser().getEmail());
+                    break;
+
+                case WHAT_SIGN_UP:
+                    if (result == 1) {
+                        hideFragmentSignInSignUp();
                     }
-                }
+                    break;
+
+            }
+        }
+    };
+    private Handler handlerSignUp = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == WHAT_SIGN_UP) {
+                registerFragment = new RegisterFragment(accountManager);
+                showFragmentSignInSignUp(registerFragment);
             }
         }
     };
@@ -153,7 +183,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            showFragmentSignInSignUp(new LoginFragment(accountManager));
+                            loginFragment = new LoginFragment(accountManager, handlerSignUp);
+                            showFragmentSignInSignUp(loginFragment);
                         }
                     }).show();
                     return;
@@ -182,49 +213,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DatabaseReference firebaseDatabase = FirebaseDatabase.getInstance().getReference();
         arrTopic = new ArrayList<>();
         arrTopicKey = new ArrayList<>();
-        forumFragment = new ForumFragment(this, firebaseDatabase, arrTopic, arrTopicKey, getWindowManager());
+        forumFragment = new ForumFragment(this, firebaseDatabase);
         homeFragment = new HomeFragment(this, getSupportFragmentManager());
-
-        Calendar calendar = Calendar.getInstance();
-//        String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.YEAR) + "";
-//        String time = calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) + "";
-        //
-        ChildEventListener childEventListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Topic topic = dataSnapshot.getValue(Topic.class);
-                arrTopic.add(topic);
-                arrTopicKey.add(dataSnapshot.getKey());
-                Toast.makeText(MainActivity.this, dataSnapshot.getKey(), Toast.LENGTH_SHORT).show();
-                forumFragment.notifyData();
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-        //
-
-        firebaseDatabase.child(TOPIC).child(TYPE_1).addChildEventListener(childEventListener);
-//        Topic topic = new Topic("demo", date, time, 0, 0, 0, accountManager.getCurrentUser().getDisplayName());
-//        arrTopic.add(topic);
-
+        loginFragment = new LoginFragment(accountManager, handlerSignUp);
+        registerFragment = new RegisterFragment(accountManager);
     }
 
     private void initDrawerLayout() throws Exception {
@@ -256,7 +248,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void loadContentFragment(String contentTag) {
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         switch (contentTag) {
             case HOME_TAG:
                 homeFragment = new HomeFragment(this, getSupportFragmentManager());
@@ -289,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            showFragmentSignInSignUp(new LoginFragment(accountManager));
+                            showFragmentSignInSignUp(loginFragment);
                         }
                     }).show();
                 }
@@ -323,27 +316,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 MenuItem signIn = menu.findItem(R.id.action_sign_in);
                 MenuItem signUp = menu.findItem(R.id.action_sign_up);
                 MenuItem signOut = menu.findItem(R.id.action_sign_out);
+
                 signUp.setOnMenuItemClickListener(this);
                 signIn.setOnMenuItemClickListener(this);
                 signOut.setOnMenuItemClickListener(this);
+
+//                SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+                SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+//                searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+                searchView.setQueryHint("Search ... ");
                 break;
         }
 
-        return super.onCreateOptionsMenu(menu);
+
+        return true;
     }
 
     @Override
     public boolean onMenuItemClick(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.action_list:
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+                builder.setSmallIcon(android.R.drawable.ic_menu_zoom);
+                builder.setContentTitle("Nguyễn Quốc Việt");
+                builder.setContentInfo("Hệ quản trị cơ sở dữ liệu");
+                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_menu_camera);
+                builder.setLargeIcon(bitmap);
+                Notification notificationCompat = builder.build();
+                NotificationManagerCompat.from(this).notify(0, notificationCompat);
+
                 break;
             case R.id.action_grid:
                 break;
             case R.id.action_sign_in:
-                showFragmentSignInSignUp(new LoginFragment(accountManager));
+                showFragmentSignInSignUp(loginFragment);
                 break;
             case R.id.action_sign_up:
-                showFragmentSignInSignUp(new RegisterFragment(accountManager));
+                showFragmentSignInSignUp(registerFragment);
                 break;
             case R.id.action_sign_out:
                 accountManager.logout();
@@ -375,15 +384,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void showAcceptQuitingDialog() {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Are you sure you want to quit ?");
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 finish();
             }
         });
-        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
@@ -392,72 +401,53 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.create().show();
     }
 
-    public void showFragmentSignInSignUp(Fragment fragment) {
-
+    public void showFragmentSignInSignUp(final Fragment fragment) {
 
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         signInSignOutLayout.setVisibility(View.VISIBLE);
         onMenuItemForumSelected = true;
-        TranslateAnimation animation = (TranslateAnimation) AnimationUtils.loadAnimation(this, R.anim.anim_fragment_in);
-        animation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
 
-            }
+        FrameLayout contentMainLayout = (FrameLayout) findViewById(R.id.content_main);
+        contentMainLayout.setFocusable(false);
+        FrameLayout loginRegisterContentMainLayout = (FrameLayout) findViewById(R.id.login_register_content_main);
+        AnimationSet animationSet = (AnimationSet) AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
+        loginRegisterContentMainLayout.startAnimation(animationSet);
+        contentMainLayout.setVisibility(View.GONE);
+        replaceFragment(R.id.login_register_content_main, fragment);
 
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                FrameLayout frameLayout = (FrameLayout) findViewById(R.id.content_main);
-                frameLayout.setVisibility(View.GONE);
-            }
+    }
 
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-        signInSignOutLayout.startAnimation(animation);
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.login_register_content_main, fragment);
+    public void replaceFragment(int idRes, Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        transaction.replace(idRes, fragment);
         transaction.commit();
     }
 
     public void hideFragmentSignInSignUp() {
-        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.content_main);
-        frameLayout.setFocusable(true);
-        frameLayout.setClickable(true);
-        frameLayout.setFocusableInTouchMode(true);
-        signedIn = true;
+        final FrameLayout contentMainLayout = (FrameLayout) findViewById(R.id.content_main);
+        contentMainLayout.setFocusable(true);
+        contentMainLayout.setClickable(true);
+        contentMainLayout.setFocusableInTouchMode(true);
+        contentMainLayout.setVisibility(View.VISIBLE);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        TranslateAnimation animation = (TranslateAnimation) AnimationUtils.loadAnimation(this, R.anim.anim_fragment_out);
-        animation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-                FrameLayout frameLayout = (FrameLayout) findViewById(R.id.content_main);
-                frameLayout.setVisibility(View.VISIBLE);
-            }
 
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                signInSignOutLayout.removeAllViews();
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-
-        });
-        signInSignOutLayout.startAnimation(animation);
+        FrameLayout loginRegisterContentMainLayout = (FrameLayout) findViewById(R.id.login_register_content_main);
+        AnimationSet animationSet = (AnimationSet) AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
+        loginRegisterContentMainLayout.startAnimation(animationSet);
+        loginRegisterContentMainLayout.setVisibility(View.GONE);
         onMenuItemForumSelected = false;
     }
+
     @Override
     protected void onStop() {
         super.onStop();
         try {
-            MyDatabase myDatabase = new MyDatabase(MainActivity.this);
-            myDatabase.clearTable(MyDatabase.TB_NAME_NEWS);
-            myDatabase.addArrNewsItem(homeFragment.getArrNewsItem());
+            if (MainActivity.isNetWorkAvailable(this) && !homeFragment.getArrNewsItem().isEmpty()) {
+                MyDatabase myDatabase = new MyDatabase(MainActivity.this);
+                myDatabase.clearTable(MyDatabase.TB_NAME_NEWS);
+                myDatabase.addArrNewsItem(homeFragment.getArrNewsItem());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -23,7 +23,7 @@ import java.util.ArrayList;
  * Created by vaio on 12/22/2016.
  */
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends android.support.v4.app.Fragment {
     private Context context;
 
     private ViewPager viewPagerHome;

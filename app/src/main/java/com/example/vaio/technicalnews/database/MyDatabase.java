@@ -1,5 +1,6 @@
 package com.example.vaio.technicalnews.database;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -41,37 +42,14 @@ public class MyDatabase {
 
     public MyDatabase(Context context) throws Exception {
         this.context = context;
-        copyDatabase();
     }
 
     public void openDatabase() {
-        database = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null);
+        database = Database.initDatabase((Activity) context, DB_NAME);
     }
 
     public void closeDatabase() {
         database.close();
-    }
-
-    public void copyDatabase() throws IOException {
-        File file = new File(PATH);
-        if (file.exists()) {
-            return;
-        }
-        File parentFile = file.getParentFile();
-        parentFile.mkdirs();
-
-        InputStream inputStream = context.getAssets().open(DB_NAME);
-
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
-        byte b[] = new byte[1024];
-        int count = inputStream.read(b);
-        while (count != -1) {
-            fileOutputStream.write(b, 0, count);
-            count = inputStream.read(b);
-        }
-        Toast.makeText(context, "Copy successful !", Toast.LENGTH_SHORT).show();
-        inputStream.close();
-        fileOutputStream.close();
     }
 
     public ArrayList<NewsItem> getArrNewsItem() throws Exception {
@@ -131,7 +109,7 @@ public class MyDatabase {
         openDatabase();
         switch (tableName) {
             case TB_NAME_NEWS:
-                database.delete(tableName,null,null);
+                database.delete(tableName, null, null);
                 break;
         }
         closeDatabase();

@@ -64,7 +64,12 @@ public class PostActivity extends AppCompatActivity {
                 Calendar calendar = Calendar.getInstance();
 
                 String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + (calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.YEAR) + "";
-                String time = calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) + "";
+                String time;
+                if (calendar.get(Calendar.AM_PM) == 1) {
+                    time = calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) + " PM";
+                } else {
+                    time = calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) + " AM";
+                }
                 String email = getIntent().getExtras().getString(MainActivity.EMAIL);
                 String name = getIntent().getExtras().getString(MainActivity.DISPLAY_NAME);
                 ArrayList<String> arrComment = new ArrayList<String>();

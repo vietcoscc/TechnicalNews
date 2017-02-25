@@ -59,7 +59,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        android:background="@drawable/view_click_selector"
+        android:background="@drawable/ripple"
         android:text="@string/btnLogin"
         android:textColor="@color/colorPrimary"
         android:textStyle="bold" />

@@ -15,6 +15,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class AccountManager implements Serializable {
     public void login(String email, String password) {
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setCancelable(false);
+        progressDialog.setMessage("Signing in ... ");
         progressDialog.show();
         if (email.isEmpty() || password.isEmpty()) {
             progressDialog.dismiss();
@@ -52,7 +54,7 @@ public class AccountManager implements Serializable {
                 } else {
                     Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
                     Message message = new Message();
-                    message.what = MainActivity.WHAT_SIGN_IN_SIGN_UP;
+                    message.what = MainActivity.WHAT_SIGN_IN;
                     message.arg1 = 1;
                     handler.sendMessage(message);
                 }
@@ -64,8 +66,9 @@ public class AccountManager implements Serializable {
         mAuth.signOut();
     }
 
-    public void register(final String yourName, String email, String password) {
+    public void register(final String yourName, final String email, final String password) {
         final ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.setMessage("Signing up ... ");
         progressDialog.setCancelable(false);
         progressDialog.show();
         if (email.isEmpty() || password.isEmpty()) {
@@ -75,24 +78,30 @@ public class AccountManager implements Serializable {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener((Activity) context, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().setDisplayName(yourName).build();
-
-                mAuth.getCurrentUser().updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                final FirebaseAuth auth = FirebaseAuth.getInstance();
+                auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().setDisplayName(yourName).build();
+                        auth.getCurrentUser().updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (!task.isSuccessful()) {
+                                    Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
+                                    Message message = new Message();
+                                    message.what = MainActivity.WHAT_SIGN_UP;
+                                    message.arg1 = 1;
+                                    handler.sendMessage(message);
+                                }
+                                progressDialog.dismiss();
+                            }
+                        });
                     }
                 });
-                if (!task.isSuccessful()) {
-                    Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
-                    Message message = new Message();
-                    message.what = MainActivity.WHAT_SIGN_IN_SIGN_UP;
-                    message.arg1 = 1;
-                    handler.sendMessage(message);
-                }
-                progressDialog.dismiss();
+
+
             }
         });
 

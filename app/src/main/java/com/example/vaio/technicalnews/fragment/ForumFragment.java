@@ -2,6 +2,7 @@ package com.example.vaio.technicalnews.fragment;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.transition.Transition;
 import android.support.transition.TransitionValues;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -33,18 +35,24 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.activity.CommentActivity;
 import com.example.vaio.technicalnews.activity.MainActivity;
 import com.example.vaio.technicalnews.adapter.TopicsForumAdapter;
 import com.example.vaio.technicalnews.model.Topic;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
+
+import static com.example.vaio.technicalnews.activity.MainActivity.TYPE_1;
 
 /**
  * Created by vaio on 12/22/2016.
  */
 
-public class ForumFragment extends Fragment {
+public class ForumFragment extends android.support.v4.app.Fragment {
     public static final int WHAT_COMPLETELY = 0;
     private Context context;
     private DatabaseReference databaseReference;
@@ -53,21 +61,71 @@ public class ForumFragment extends Fragment {
 
     private TopicsForumAdapter adapter;
     private RecyclerView recyclerView;
-
+    private SwipeRefreshLayout swipeRefreshLayout;
     private ContentLoadingProgressBar contentLoadingProgressBar;
-    private WindowManager windowManager;
 
-
-    public ForumFragment(Context context, DatabaseReference databaseReference, ArrayList<Topic> arrTopic, ArrayList<String> arrTopicKey, WindowManager windowManager) {
-        this.arrTopic = arrTopic;
+    public ForumFragment(final Context context, DatabaseReference databaseReference) {
+        arrTopicKey = new ArrayList<>();
+        arrTopic = new ArrayList<>();
         this.context = context;
-        this.windowManager = windowManager;
         this.databaseReference = databaseReference;
-        this.arrTopicKey = arrTopicKey;
+        receiveData();
+    }
+
+    public void receiveData() {
+        arrTopic.clear();
+        arrTopicKey.clear();
+
+
+        ChildEventListener childEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Topic topic = dataSnapshot.getValue(Topic.class);
+                arrTopic.add(topic);
+                arrTopicKey.add(dataSnapshot.getKey());
+                Toast.makeText(context, dataSnapshot.getKey(), Toast.LENGTH_SHORT).show();
+                notifyData();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                receiveData();
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        databaseReference.removeEventListener(childEventListener);
+        databaseReference.child(MainActivity.TOPIC).child(TYPE_1).addChildEventListener(childEventListener);
     }
 
     private void initComponent(View view) {
         contentLoadingProgressBar = (ContentLoadingProgressBar) view.findViewById(R.id.contentLoadingProgressBar);
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                receiveData();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                }, 1000);
+            }
+        });
     }
 
     @Nullable
@@ -82,7 +140,8 @@ public class ForumFragment extends Fragment {
         adapter.setClickListener(new TopicsForumAdapter.ClickListener() {
             @Override
             public void onItemClick(final View view, final int position) {
-
+                Intent intent = new Intent(context, CommentActivity.class);
+                startActivity(intent);
             }
         });
         recyclerView.setAdapter(adapter);

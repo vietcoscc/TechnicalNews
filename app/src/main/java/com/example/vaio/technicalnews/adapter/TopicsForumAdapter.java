@@ -37,6 +37,7 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+
         Topic topic = arrTopic.get(arrTopic.size() - position - 1);
         holder.tvEmail.setText(topic.getName());
         holder.tvContent.setText(topic.getContent().toString());
@@ -66,7 +67,7 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
             tvEmail = (TextView) itemView.findViewById(R.id.tvEmail);
             tvContent = (TextView) itemView.findViewById(R.id.tvContent);
             tvDate = (TextView) itemView.findViewById(R.id.tvDate);
-            tvTime = (TextView) itemView.findViewById(R.id.tvTime);
+            tvTime = (TextView) itemView.findViewById(R.id.tvTimeStamp);
             itemView.setOnClickListener(this);
         }
 

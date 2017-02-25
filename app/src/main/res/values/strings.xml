@@ -34,6 +34,8 @@
     <string name="offline_mode_title_setting">Offline mode</string>
     <string name="offline_mode_sumary_setting">Use without internet</string>
     <string name="category_titile_setting">General</string>
+    <string name="search_title">searchView</string>
+    <string name="search_hint">....</string>
     <string-array name="listentries">
         <item>List item 1</item>
         <item>List item 2</item>
