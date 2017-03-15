@@ -31,7 +31,6 @@ public class CommentActivity extends AppCompatActivity {
 
 
     private void initViews() {
-        Intent intent = getIntent();
         tvObject = (TextView) findViewById(R.id.tvObject);
         tvContent = (TextView) findViewById(R.id.tvContent);
         toolbar = (Toolbar) findViewById(R.id.toolbar);

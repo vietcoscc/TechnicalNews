@@ -28,9 +28,10 @@ public class HomeFragment extends android.support.v4.app.Fragment {
 
     private ViewPager viewPagerHome;
     private TabLayout tabLayoutHome;
-    private FragmentManager fragmentManager;
+    private android.app.FragmentManager fragmentManager;
     private ViewPagerHomeAdapter viewPagerHomeAdapter;
-    public HomeFragment(Context context, FragmentManager fragmentManager) {
+
+    public HomeFragment(Context context, android.app.FragmentManager fragmentManager) {
         this.context = context;
         this.fragmentManager = fragmentManager;
     }
@@ -52,14 +53,15 @@ public class HomeFragment extends android.support.v4.app.Fragment {
         viewPagerHome = (ViewPager) view.findViewById(R.id.viewPagerHome);
         tabLayoutHome = (TabLayout) view.findViewById(R.id.tabLayoutHome);
         tabLayoutHome.setupWithViewPager(viewPagerHome);
-        viewPagerHomeAdapter = new ViewPagerHomeAdapter(fragmentManager, context, tabLayoutHome.getTabCount());
+        viewPagerHomeAdapter = new ViewPagerHomeAdapter(getFragmentManager(), fragmentManager, context, tabLayoutHome.getTabCount());
         viewPagerHome.setAdapter(viewPagerHomeAdapter);
         viewPagerHome.setOffscreenPageLimit(2);
         tabLayoutHome.getTabAt(0).setIcon(R.drawable.news);
         tabLayoutHome.getTabAt(1).setIcon(R.drawable.reviews);
 
     }
-    public ArrayList<NewsItem> getArrNewsItem(){
+
+    public ArrayList<NewsItem> getArrNewsItem() {
         return viewPagerHomeAdapter.getArrNewsItem();
     }
 }

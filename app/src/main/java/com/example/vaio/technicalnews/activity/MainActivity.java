@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -33,6 +34,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -56,6 +58,7 @@ import com.example.vaio.technicalnews.fragment.HomeFragment;
 import com.example.vaio.technicalnews.fragment.LoginFragment;
 import com.example.vaio.technicalnews.fragment.RegisterFragment;
 import com.example.vaio.technicalnews.model.Topic;
+import com.example.vaio.technicalnews.parser.NewsClipParser;
 import com.example.vaio.technicalnews.parser.NewsContentParser;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -108,6 +111,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Boolean onMenuItemForumSelected = false;
 
     private ProgressDialog progressDialog;
+
+    public static boolean isNetWorkAvailable(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
+        return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
+    }
+
+    ;
+
     private Handler handlerSignInSignUp = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -138,7 +149,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     };
-    private Handler handlerSignUp = new Handler() {
+
+
+    private Handler handlerOnClickSignUp = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -148,11 +161,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     };
-
-    public static boolean isNetWorkAvailable(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
-        return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            loginFragment = new LoginFragment(accountManager, handlerSignUp);
+                            loginFragment = new LoginFragment(accountManager, handlerOnClickSignUp);
                             showFragmentSignInSignUp(loginFragment);
                         }
                     }).show();
@@ -214,8 +222,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         arrTopic = new ArrayList<>();
         arrTopicKey = new ArrayList<>();
         forumFragment = new ForumFragment(this, firebaseDatabase);
-        homeFragment = new HomeFragment(this, getSupportFragmentManager());
-        loginFragment = new LoginFragment(accountManager, handlerSignUp);
+        homeFragment = new HomeFragment(this, getFragmentManager());
+        loginFragment = new LoginFragment(accountManager, handlerOnClickSignUp);
         registerFragment = new RegisterFragment(accountManager);
     }
 
@@ -252,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         switch (contentTag) {
             case HOME_TAG:
-                homeFragment = new HomeFragment(this, getSupportFragmentManager());
+                homeFragment = new HomeFragment(this, getFragmentManager());
                 transaction.replace(R.id.content_main, homeFragment);
                 break;
             case FORUM_TAG:
@@ -290,6 +298,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 onCreateOptionsMenu(menu);
                 drawerLayout.closeDrawer(GravityCompat.START);
                 break;
+            case R.id.chat_room:
+                break;
             case R.id.setting:
                 Intent intent = new Intent(MainActivity.this, SettingActivity.class);
                 startActivity(intent);
@@ -316,16 +326,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 MenuItem signIn = menu.findItem(R.id.action_sign_in);
                 MenuItem signUp = menu.findItem(R.id.action_sign_up);
                 MenuItem signOut = menu.findItem(R.id.action_sign_out);
-
                 signUp.setOnMenuItemClickListener(this);
                 signIn.setOnMenuItemClickListener(this);
                 signOut.setOnMenuItemClickListener(this);
-
-//                SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
                 SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-//                searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
                 searchView.setQueryHint("Search ... ");
                 break;
+
         }
 
 

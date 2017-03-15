@@ -21,12 +21,12 @@ public class ViewPagerHomeAdapter extends FragmentStatePagerAdapter {
     private NewsFragment newsFragment;
     private ReviewsFragment reviewsFragment;
 
-    public ViewPagerHomeAdapter(FragmentManager fm, Context context, int tabCount) {
+    public ViewPagerHomeAdapter(FragmentManager fm, android.app.FragmentManager fm2, Context context, int tabCount) {
         super(fm);
         this.context = context;
         this.tabCount = tabCount;
         newsFragment = new NewsFragment(context);
-        reviewsFragment = new ReviewsFragment(context);
+        reviewsFragment = new ReviewsFragment(fm2, context);
     }
 
     @Override

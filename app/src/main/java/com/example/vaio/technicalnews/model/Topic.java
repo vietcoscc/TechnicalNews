@@ -7,6 +7,7 @@ import java.util.ArrayList;
  */
 
 public class Topic {
+    private String subject;
     private String content;
     private String date;
     private String time;
@@ -23,7 +24,8 @@ public class Topic {
     public Topic() {
     }
 
-    public Topic(String content, String date, String time, int numberCare, int numberView, int numberReply, String mail, String name, ArrayList<String> arrComment) {
+    public Topic(String subject, String content, String date, String time, int numberCare, int numberView, int numberReply, String mail, String name, ArrayList<String> arrComment) {
+        this.subject = subject;
         this.content = content;
         this.date = date;
         this.time = time;
@@ -33,6 +35,10 @@ public class Topic {
         this.mail = mail;
         this.name = name;
         this.arrComment = arrComment;
+    }
+
+    public String getSubject() {
+        return subject;
     }
 
     public String getContent() {
@@ -69,6 +75,10 @@ public class Topic {
 
     public ArrayList<String> getArrComment() {
         return arrComment;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
 
     public void setContent(String content) {

@@ -42,6 +42,7 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.DeviceDefault.Light" />
         <activity android:name=".activity.CommentActivity" />
+        <activity android:name=".activity.YoutubePlayerActivity" />
     </application>
 
 </manifest>

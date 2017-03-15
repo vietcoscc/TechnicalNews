@@ -44,7 +44,7 @@ public class NewsContentParser extends AsyncTask<String, Void, ArrayList<NewsIte
         try {
             Document doc = Jsoup.connect(params[0])
                     .userAgent("Mozilla")
-                    .timeout(3000)
+                    .timeout(10000)
                     .get();
             Elements elements = doc.select("div.fdListingContainer").select("div.riverPost");
             for (int i = 0; i < elements.size(); i++) {

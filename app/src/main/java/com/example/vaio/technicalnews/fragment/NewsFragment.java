@@ -146,7 +146,6 @@ public class NewsFragment extends Fragment {
                     if (contentNewsLoading.isShown()) {
                         contentNewsLoading.hide();
                     }
-
                     arrNewsItem.addAll((Collection<? extends NewsItem>) msg.obj);
                     notifyData();
                     (new Handler()).postDelayed(new Runnable() {

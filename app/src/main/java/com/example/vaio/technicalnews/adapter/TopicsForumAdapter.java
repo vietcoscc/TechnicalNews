@@ -40,7 +40,7 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
 
         Topic topic = arrTopic.get(arrTopic.size() - position - 1);
         holder.tvEmail.setText(topic.getName());
-        holder.tvContent.setText(topic.getContent().toString());
+        holder.tvSubject.setText(topic.getContent().toString());
         holder.tvDate.setText(topic.getDate().toString());
         holder.tvTime.setText(topic.getTime().toString());
         if (position >= arrTopic.size() - 1) {
@@ -58,14 +58,14 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView tvEmail;
-        TextView tvContent;
+        TextView tvSubject;
         TextView tvDate;
         TextView tvTime;
 
         public ViewHolder(View itemView) {
             super(itemView);
             tvEmail = (TextView) itemView.findViewById(R.id.tvEmail);
-            tvContent = (TextView) itemView.findViewById(R.id.tvContent);
+            tvSubject = (TextView) itemView.findViewById(R.id.tvSubject);
             tvDate = (TextView) itemView.findViewById(R.id.tvDate);
             tvTime = (TextView) itemView.findViewById(R.id.tvTimeStamp);
             itemView.setOnClickListener(this);
