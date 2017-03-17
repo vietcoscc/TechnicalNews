@@ -51,12 +51,14 @@ import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.database.MyDatabase;
+import com.example.vaio.technicalnews.fragment.ChatRoomFragment;
 import com.example.vaio.technicalnews.fragment.NewsFragment;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.fragment.HomeFragment;
 import com.example.vaio.technicalnews.fragment.LoginFragment;
 import com.example.vaio.technicalnews.fragment.RegisterFragment;
+import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.Topic;
 import com.example.vaio.technicalnews.parser.NewsClipParser;
 import com.example.vaio.technicalnews.parser.NewsContentParser;
@@ -74,9 +76,7 @@ import java.util.Calendar;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MenuItem.OnMenuItemClickListener, View.OnClickListener {
     public static final String HOME_TAG = "home";
     public static final String FORUM_TAG = "forum";
-    public static final int WHAT_SIGN_IN = 1;
-    public static final int WHAT_SIGN_UP = 2;
-    public static final int WHAT_SIGN_IN_SUCCESS = 2;
+    public static final String CHAT_ROOM_TAG = "chat room";
     public static final String TOPIC = "Topic";
     public static final String TYPE_1 = "Ask and answer";
     public static final String TYPE_2 = "Tips";
@@ -95,8 +95,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // fragment
     private HomeFragment homeFragment;
     private ForumFragment forumFragment;
+    private ChatRoomFragment chatRoomFragment;
     private LoginFragment loginFragment;
     private RegisterFragment registerFragment;
+
+
     private FrameLayout signInSignOutLayout;
     private ArrayList<Topic> arrTopic;
     private ArrayList<String> arrTopicKey;
@@ -117,58 +120,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
     }
 
-    ;
-
-    private Handler handlerSignInSignUp = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            int result = msg.arg1; // 1 -> successful  0->failed
-            switch (msg.what) {
-
-                case WHAT_SIGN_IN:
-
-                    if (result == 1) {
-                        hideFragmentSignInSignUp();
-                        Uri uri = accountManager.getCurrentUser().getPhotoUrl();
-                        String displayName = accountManager.getCurrentUser().getDisplayName();
-                        String email = accountManager.getCurrentUser().getEmail();
-                        ivAvatar.setImageURI(uri);
-                        tvDisplayName.setText(displayName);
-                        tvEmail.setText(email);
-                        signedIn = true;
-                    }
-                    break;
-
-                case WHAT_SIGN_UP:
-                    if (result == 1) {
-                        hideFragmentSignInSignUp();
-                    }
-                    break;
-
-            }
-        }
-    };
-
-
-    private Handler handlerOnClickSignUp = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == WHAT_SIGN_UP) {
-                registerFragment = new RegisterFragment(accountManager);
-                showFragmentSignInSignUp(registerFragment);
-            }
-        }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         try {
-            accountManager = new AccountManager(this, handlerSignInSignUp);
+            initAccountManager();
             initToolbar();
             initDrawerLayout();
             initFragment();
@@ -178,6 +136,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             e.printStackTrace();
         }
 
+    }
+
+    private void initAccountManager() {
+        accountManager = new AccountManager(this);
+        GlobalData globalData = (GlobalData) getApplication();
+        globalData.setAccountManager(accountManager);
+
+        accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
+            @Override
+            public void onSuccess() {
+                hideFragmentSignInSignUp();
+                Uri uri = accountManager.getCurrentUser().getPhotoUrl();
+                String displayName = accountManager.getCurrentUser().getDisplayName();
+                String email = accountManager.getCurrentUser().getEmail();
+                ivAvatar.setImageURI(uri);
+                tvDisplayName.setText(displayName);
+                tvEmail.setText(email);
+                signedIn = true;
+            }
+        });
+        accountManager.setOnRegisterSuccess(new AccountManager.OnRegisterSuccess() {
+            @Override
+            public void onSuccses() {
+                hideFragmentSignInSignUp();
+            }
+        });
     }
 
     private void initOthers() throws Exception {
@@ -191,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            loginFragment = new LoginFragment(accountManager, handlerOnClickSignUp);
                             showFragmentSignInSignUp(loginFragment);
                         }
                     }).show();
@@ -223,7 +206,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         arrTopicKey = new ArrayList<>();
         forumFragment = new ForumFragment(this, firebaseDatabase);
         homeFragment = new HomeFragment(this, getFragmentManager());
-        loginFragment = new LoginFragment(accountManager, handlerOnClickSignUp);
+
+
+        GlobalData globalData = (GlobalData) getApplication();
+        AccountManager acc  = globalData.getAccountManager();
+        chatRoomFragment = new ChatRoomFragment(acc);
+
+
+        loginFragment = new LoginFragment(accountManager);
+        loginFragment.setOnClickButtonSignUp(new LoginFragment.OnClickButtonSignUp() {
+            @Override
+            public void onClick() {
+                registerFragment = new RegisterFragment(accountManager);
+                showFragmentSignInSignUp(registerFragment);
+            }
+        });
         registerFragment = new RegisterFragment(accountManager);
     }
 
@@ -266,6 +263,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case FORUM_TAG:
                 transaction.replace(R.id.content_main, forumFragment);
                 break;
+            case CHAT_ROOM_TAG:
+                transaction.replace(R.id.content_main, chatRoomFragment);
+                break;
         }
         transaction.commit();
     }
@@ -299,6 +299,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             case R.id.chat_room:
+                loadContentFragment(CHAT_ROOM_TAG);
+                drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             case R.id.setting:
                 Intent intent = new Intent(MainActivity.this, SettingActivity.class);

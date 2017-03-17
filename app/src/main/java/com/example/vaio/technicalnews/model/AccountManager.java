@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.activity.MainActivity;
@@ -25,17 +26,18 @@ import java.util.ArrayList;
  */
 
 public class AccountManager implements Serializable {
+    private static final String TAG = "AccountManager";
     private Context context;
     private FirebaseAuth mAuth;
-    private Handler handler;
 
-    public AccountManager(Context context, Handler handler) {
+    public AccountManager(Context context) {
         mAuth = FirebaseAuth.getInstance();
         this.context = context;
-        this.handler = handler;
     }
 
-
+    public void log(){
+        Log.e(TAG,"Log");
+    }
     public void login(String email, String password) {
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setCancelable(false);
@@ -52,11 +54,9 @@ public class AccountManager implements Serializable {
                 if (!task.isSuccessful()) {
                     Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
-                    Message message = new Message();
-                    message.what = MainActivity.WHAT_SIGN_IN;
-                    message.arg1 = 1;
-                    handler.sendMessage(message);
+                    if (onLoginSuccess != null) {
+                        onLoginSuccess.onSuccess();
+                    }
                 }
             }
         });
@@ -90,10 +90,9 @@ public class AccountManager implements Serializable {
                                     Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
                                 } else {
                                     Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
-                                    Message message = new Message();
-                                    message.what = MainActivity.WHAT_SIGN_UP;
-                                    message.arg1 = 1;
-                                    handler.sendMessage(message);
+                                    if (onRegisterSuccess != null) {
+                                        onLoginSuccess.onSuccess();
+                                    }
                                 }
                                 progressDialog.dismiss();
                             }
@@ -111,5 +110,25 @@ public class AccountManager implements Serializable {
 
     public FirebaseUser getCurrentUser() {
         return mAuth.getCurrentUser();
+    }
+
+    public void setOnLoginSuccess(OnLoginSuccess onLoginSuccess) {
+        this.onLoginSuccess = onLoginSuccess;
+    }
+
+    private OnLoginSuccess onLoginSuccess;
+
+    public interface OnLoginSuccess {
+        void onSuccess();
+    }
+
+    public void setOnRegisterSuccess(OnRegisterSuccess onRegisterSuccess) {
+        this.onRegisterSuccess = onRegisterSuccess;
+    }
+
+    private OnRegisterSuccess onRegisterSuccess;
+
+    public interface OnRegisterSuccess {
+        void onSuccses();
     }
 }

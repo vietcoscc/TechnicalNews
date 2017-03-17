@@ -70,19 +70,6 @@ public class NewsContentParser extends AsyncTask<String, Void, ArrayList<NewsIte
                 NewsItem newsItem = new NewsItem(name, contentPreview, timeStamp, contentLink, imageLinkWrapper, topicName, author);
 
                 arrNewsItem.add(newsItem);
-
-//
-//                if (contentLink.isEmpty()) {
-//                    Log.e("TAG", "empty");
-//                } else {
-//                    Log.e("TAG", name);
-//                    Log.e("TAG", contentPreview);
-//                    Log.e("TAG", contentLink);
-//                    Log.e("TAG", imageLinkWrapper.trim());
-//                    Log.e("TAG", timeStamp);
-//                    Log.e("TAG", topicName);
-//                    Log.e("TAG", author);
-//                }
             }
 
         } catch (Exception e) {

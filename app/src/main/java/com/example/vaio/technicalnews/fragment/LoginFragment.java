@@ -29,11 +29,9 @@ public class LoginFragment extends android.support.v4.app.Fragment implements Vi
     private Button btnLogin;
     private TextView tvSignUp;
     private AccountManager accountManager;
-    private Handler handlerSignUp;
 
-    public LoginFragment(AccountManager accountManager, Handler handlerSignUp) {
+    public LoginFragment(AccountManager accountManager) {
         this.accountManager = accountManager;
-        this.handlerSignUp = handlerSignUp;
     }
 
     @Nullable
@@ -86,10 +84,20 @@ public class LoginFragment extends android.support.v4.app.Fragment implements Vi
                 btnLogin.setClickable(true);
                 break;
             case R.id.tvSignUp:
-                Message message = new Message();
-                message.what = MainActivity.WHAT_SIGN_UP;
-                handlerSignUp.sendMessage(message);
+                if (onClickButtonSignUp != null) {
+                    onClickButtonSignUp.onClick();
+                }
                 break;
         }
+    }
+
+    public void setOnClickButtonSignUp(OnClickButtonSignUp onClickButtonSignUp) {
+        this.onClickButtonSignUp = onClickButtonSignUp;
+    }
+
+    private OnClickButtonSignUp onClickButtonSignUp;
+
+    public interface OnClickButtonSignUp {
+        void onClick();
     }
 }
