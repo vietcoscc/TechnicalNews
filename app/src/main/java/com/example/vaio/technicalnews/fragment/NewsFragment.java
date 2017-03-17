@@ -12,6 +12,7 @@ import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,10 +32,11 @@ import java.util.Collection;
  * Created by vaio on 2/5/2017.
  */
 
-public class NewsFragment extends Fragment {
+public class NewsFragment extends Fragment implements NewsContentParser.OnReceiveData {
 
     public static final int WHAT_RECEIVE_DATA = 0;
     public static final int WHAT_SCROLL_POSITION_BOTTOM = 1;
+    private static final String TAG = "NewsFragment";
     public static String linkNews = "https://www.cnet.com/news/";
     protected int currentPage = 1;
     protected Context context;
@@ -78,7 +80,25 @@ public class NewsFragment extends Fragment {
         final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
 
-        newsHomeAdapter = new NewsHomeAdapter(arrNewsItem, handlerContentNewsLoading);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                arrNewsItem.clear();
+                receiveNewsItem(linkNews, 1);
+                newsHomeAdapter.notifyDataSetChanged();
+            }
+        });
+
+        newsHomeAdapter = new NewsHomeAdapter(arrNewsItem);
+        newsHomeAdapter.setOnCompleteLoading(new NewsHomeAdapter.OnCompleteLoading() {
+            @Override
+            public void onSuccess() {
+                swipeRefreshLayout.setRefreshing(true);
+                receiveNewsItem(linkNews, currentPage);
+            }
+        });
         newsHomeAdapter.setClickListener(new NewsHomeAdapter.ClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -91,21 +111,14 @@ public class NewsFragment extends Fragment {
         });
         recyclerView.setAdapter(newsHomeAdapter);
         //
-        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                arrNewsItem.clear();
-                receiveNewsItem(linkNews, 1);
-                notifyData();
-            }
-        });
+
         receiveNewsItem(linkNews, currentPage);
     }
 
 
     protected void receiveNewsItem(String link, int page) {
-        NewsContentParser newsContentParser = new NewsContentParser(context, handlerReceiveNewsData);
+        NewsContentParser newsContentParser = new NewsContentParser(context);
+        newsContentParser.setOnReceiveData(this);
         if (page == 1) {
             newsContentParser.execute(link);
         } else {
@@ -115,60 +128,29 @@ public class NewsFragment extends Fragment {
     }
 
 
-    public void notifyData() {
-        if (newsHomeAdapter != null) {
-            newsHomeAdapter.notifyDataSetChanged();
-        }
-    }
 
-    private Handler handlerContentNewsLoading = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == WHAT_SCROLL_POSITION_BOTTOM) {
-                swipeRefreshLayout.setRefreshing(true);
-                receiveNewsItem(linkNews, currentPage);
-            }
-
-        }
-    };
-    private Handler handlerReceiveNewsData = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            try {
-                if (msg.what == WHAT_RECEIVE_DATA) {
-                    if (msg.arg1 == NewsContentParser.FAIL) {
-                        Toast.makeText(context, "Failed from connection ", Toast.LENGTH_SHORT).show();
-                        swipeRefreshLayout.setRefreshing(false);
-                        return;
-                    }
-                    if (contentNewsLoading.isShown()) {
-                        contentNewsLoading.hide();
-                    }
-                    arrNewsItem.addAll((Collection<? extends NewsItem>) msg.obj);
-                    notifyData();
-                    (new Handler()).postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            swipeRefreshLayout.setRefreshing(false);
-
-                            try {
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, 1000);
-
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
 
     public ArrayList<NewsItem> getArrNewsItem() {
         return arrNewsItem;
+    }
+
+    @Override
+    public void onReceive(ArrayList<NewsItem> arrNewsItem) {
+        if (arrNewsItem.isEmpty()) {
+            Toast.makeText(context, "Failed from connection ", Toast.LENGTH_SHORT).show();
+            swipeRefreshLayout.setRefreshing(false);
+            return;
+        }
+        if (contentNewsLoading.isShown()) {
+            contentNewsLoading.hide();
+        }
+        this.arrNewsItem.addAll(arrNewsItem);
+        newsHomeAdapter.notifyDataSetChanged();
+        (new Handler()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        }, 1000);
     }
 }

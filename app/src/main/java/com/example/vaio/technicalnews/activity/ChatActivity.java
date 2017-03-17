@@ -134,7 +134,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
 //                    Log.e(TAG, chat);
                     String date = MyCalendar.getDay() + " / " + MyCalendar.getMonth() + " / " + MyCalendar.getYear();
-                    String timeStamp = MyCalendar.getSecond() + " : " + MyCalendar.getMinute() + " : " + MyCalendar.getHour();
+                    String timeStamp = MyCalendar.getHour() + " : " + MyCalendar.getMinute() + " : " + MyCalendar.getSecond();
                     arrChat.add(new ItemChat("admin", chat, date, timeStamp));
                     chatAdapter.notifyDataSetChanged();
                     databaseReference.child(ChatRoomFragment.ROOM_CHAT).child(key).child(ChatRoomFragment.ARR_CHAT).setValue(arrChat);

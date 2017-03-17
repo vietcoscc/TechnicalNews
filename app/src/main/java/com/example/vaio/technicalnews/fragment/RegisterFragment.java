@@ -53,18 +53,8 @@ public class RegisterFragment extends android.support.v4.app.Fragment implements
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnSignUp:
-                edtPassword.setInputType(0);
-                edtUserName.setInputType(0);
-                edtYourName.setInputType(0);
-                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(getContext().INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(edtUserName.getWindowToken(), 0);
-                imm.hideSoftInputFromWindow(edtPassword.getWindowToken(), 0);
                 if (!MainActivity.isNetWorkAvailable(getContext())) {
                     Toast.makeText(getContext(), "No internet connection", Toast.LENGTH_SHORT).show();
-                    edtPassword.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    edtYourName.setInputType(InputType.TYPE_CLASS_TEXT);
-                    edtUserName.setInputType(InputType.TYPE_CLASS_TEXT);
-                    edtPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     return;
                 }
                 btnSignUp.setClickable(false);
@@ -74,10 +64,6 @@ public class RegisterFragment extends android.support.v4.app.Fragment implements
                 if (userName.isEmpty() || password.isEmpty() || yourName.isEmpty()) {
                     btnSignUp.setClickable(true);
                     Toast.makeText(getContext(), "The feilds must not empty", Toast.LENGTH_SHORT).show();
-                    edtPassword.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    edtYourName.setInputType(InputType.TYPE_CLASS_TEXT);
-                    edtUserName.setInputType(InputType.TYPE_CLASS_TEXT);
-                    edtPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     return;
                 }
                 accountManager.register(yourName, userName, password);

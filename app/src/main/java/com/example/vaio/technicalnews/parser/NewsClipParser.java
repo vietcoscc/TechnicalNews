@@ -51,15 +51,9 @@ public class NewsClipParser extends AsyncTask<String, Void, ArrayList<NewsClipIt
                 String timeStamp = elementsLockUpMetaInfo.get(1).text();
                 String clipLink = element.select("a.yt-uix-sessionlink").attr("href").substring(9);
 
-                Log.e(TAG, imageLink);
-                Log.e(TAG, title);
-                Log.e(TAG, viewNumber);
-                Log.e(TAG, timeStamp);
-                Log.e(TAG, clipLink);
-
                 arrNewsClip.add(new NewsClipItem(imageLink, title, viewNumber, timeStamp, clipLink));
             }
-            Log.e(TAG, elementsNewsClip.size() + "");
+
         } catch (Exception e) {
             e.printStackTrace();
         }

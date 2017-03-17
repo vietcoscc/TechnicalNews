@@ -3,6 +3,7 @@ package com.example.vaio.technicalnews.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.activity.ChatActivity;
+import com.example.vaio.technicalnews.activity.LoginActivity;
 import com.example.vaio.technicalnews.activity.MainActivity;
 import com.example.vaio.technicalnews.adapter.RoomChatAdapter;
 import com.example.vaio.technicalnews.model.AccountManager;
@@ -59,14 +61,17 @@ public class ChatRoomFragment extends Fragment {
         this.accountManager = accountManager;
     }
 
+    private View view;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.fragment_chat_room, container, false);
-        accountManager.log();
         getData();
         initViews(view);
+        this.view = view;
+        Log.e(TAG, "");
         return view;
     }
 
@@ -76,12 +81,13 @@ public class ChatRoomFragment extends Fragment {
         databaseReference.child(ROOM_CHAT).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                RoomChat roomChat = dataSnapshot.getValue(RoomChat.class);
+                final RoomChat roomChat = dataSnapshot.getValue(RoomChat.class);
                 arrRoomChat.add(roomChat);
                 String key = dataSnapshot.getKey();
                 arrKeyRoomChat.add(key);
                 Log.e(TAG, arrRoomChat.size() + "");
                 adapter.notifyDataSetChanged();
+//                databaseReference.child(ROOM_CHAT).child(key).child(ONLINE_NUMBER).get;
             }
 
             @Override
@@ -104,6 +110,7 @@ public class ChatRoomFragment extends Fragment {
 
             }
         });
+
     }
 
     private void initViews(View view) {
@@ -115,6 +122,15 @@ public class ChatRoomFragment extends Fragment {
         adapter.setOnItemClick(new RoomChatAdapter.OnItemClick() {
             @Override
             public void onClick(View view, int position) {
+                if (!accountManager.isSignedIn()) {
+                    Snackbar.make(view, "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            showActivityLogin();
+                        }
+                    }).show();
+                    return;
+                }
                 if (!MainActivity.isNetWorkAvailable(getContext())) {
                     Toast.makeText(getContext(), "No internet connection !", Toast.LENGTH_SHORT).show();
                     return;
@@ -125,13 +141,16 @@ public class ChatRoomFragment extends Fragment {
                 intent.putExtra(POSITION, position);
                 intent.putExtra(KEY, arrKeyRoomChat.get(position));
 
-                RoomChat roomChat = arrRoomChat.get(position);
-                roomChat.setOnlineNumber(roomChat.getOnlineNumber() + 1);
-
-                databaseReference.child(ROOM_CHAT).child(arrKeyRoomChat.get(position)).setValue(roomChat);
                 startActivityForResult(intent, REQUEST_CODE);
             }
         });
+    }
+
+    private void showActivityLogin() {
+        Intent intent = new Intent(getContext(), LoginActivity.class);
+        startActivity(intent);
+        MainActivity mainActivity = (MainActivity) getContext();
+        mainActivity.overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
     }
 
     @Override
@@ -139,14 +158,14 @@ public class ChatRoomFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                int position = data.getExtras().getInt(POSITION);
-                RoomChat roomChat = arrRoomChat.get(position);
-                if (roomChat.getOnlineNumber() > 0) {
-                    roomChat.setOnlineNumber(roomChat.getOnlineNumber() - 1);
-                } else {
-                    roomChat.setOnlineNumber(0);
-                }
-                databaseReference.child(ROOM_CHAT).child(arrKeyRoomChat.get(position)).setValue(roomChat);
+//                int position = data.getExtras().getInt(POSITION);
+//                RoomChat roomChat = arrRoomChat.get(position);
+//                if (roomChat.getOnlineNumber() > 0) {
+//                    roomChat.setOnlineNumber(roomChat.getOnlineNumber() - 1);
+//                } else {
+//                    roomChat.setOnlineNumber(0);
+//                }
+//                databaseReference.child(ROOM_CHAT).child(arrKeyRoomChat.get(position)).setValue(roomChat);
             }
         }
     }

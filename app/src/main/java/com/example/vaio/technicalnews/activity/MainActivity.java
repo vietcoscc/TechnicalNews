@@ -3,23 +3,17 @@ package com.example.vaio.technicalnews.activity;
 
 import android.app.AlertDialog;
 import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -34,25 +28,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.view.Display;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.TranslateAnimation;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.database.MyDatabase;
 import com.example.vaio.technicalnews.fragment.ChatRoomFragment;
-import com.example.vaio.technicalnews.fragment.NewsFragment;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.fragment.HomeFragment;
@@ -60,18 +49,8 @@ import com.example.vaio.technicalnews.fragment.LoginFragment;
 import com.example.vaio.technicalnews.fragment.RegisterFragment;
 import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.Topic;
-import com.example.vaio.technicalnews.parser.NewsClipParser;
-import com.example.vaio.technicalnews.parser.NewsContentParser;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MenuItem.OnMenuItemClickListener, View.OnClickListener {
     public static final String HOME_TAG = "home";
@@ -110,10 +89,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int menuRes = R.menu.menu_home;
 
     private AccountManager accountManager;
-    private Boolean signedIn = false;
     private Boolean onMenuItemForumSelected = false;
-
-    private ProgressDialog progressDialog;
 
     public static boolean isNetWorkAvailable(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
@@ -127,6 +103,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         try {
             initAccountManager();
+            if (isNetWorkAvailable(this)) {
+                checkLogin();
+            }
             initToolbar();
             initDrawerLayout();
             initFragment();
@@ -136,6 +115,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             e.printStackTrace();
         }
 
+    }
+
+    private void checkLogin() {
+        SharedPreferences sharedPreferences = getSharedPreferences(LoginActivity.SHARED_PREF, MODE_PRIVATE);
+        String userName = sharedPreferences.getString(LoginActivity.USER_NAME, "");
+        String password = sharedPreferences.getString(LoginActivity.PASSWORD, "");
+        if (userName.isEmpty() || password.isEmpty()) {
+            return;
+        }
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loging in ... ");
+        progressDialog.show();
+        progressDialog.setCancelable(false);
+        accountManager.login(userName, password);
+        accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
+            @Override
+            public void onSuccess() {
+                progressDialog.hide();
+            }
+        });
     }
 
     private void initAccountManager() {
@@ -153,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 ivAvatar.setImageURI(uri);
                 tvDisplayName.setText(displayName);
                 tvEmail.setText(email);
-                signedIn = true;
+                accountManager.setSignedIn(true);
             }
         });
         accountManager.setOnRegisterSuccess(new AccountManager.OnRegisterSuccess() {
@@ -165,17 +164,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initOthers() throws Exception {
-        progressDialog = new ProgressDialog(this);
 
         floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!signedIn) {
+                if (!accountManager.isSignedIn()) {
                     Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            showFragmentSignInSignUp(loginFragment);
+//                            showFragmentSignInSignUp(loginFragment);
+                            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                            overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
+
                         }
                     }).show();
                     return;
@@ -201,18 +203,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initFragment() throws Exception {
-        DatabaseReference firebaseDatabase = FirebaseDatabase.getInstance().getReference();
         arrTopic = new ArrayList<>();
         arrTopicKey = new ArrayList<>();
-        forumFragment = new ForumFragment(this, firebaseDatabase);
+        forumFragment = new ForumFragment(accountManager);
         homeFragment = new HomeFragment(this, getFragmentManager());
-
-
-        GlobalData globalData = (GlobalData) getApplication();
-        AccountManager acc  = globalData.getAccountManager();
-        chatRoomFragment = new ChatRoomFragment(acc);
-
-
+        chatRoomFragment = new ChatRoomFragment(accountManager);
         loginFragment = new LoginFragment(accountManager);
         loginFragment.setOnClickButtonSignUp(new LoginFragment.OnClickButtonSignUp() {
             @Override
@@ -286,11 +281,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 loadContentFragment(FORUM_TAG);
                 toolbar.setTitle("Forum");
                 floatingActionButton.setVisibility(View.VISIBLE);
-                if (!signedIn) {
+                if (!accountManager.isSignedIn()) {
                     Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            showFragmentSignInSignUp(loginFragment);
+//                            showFragmentSignInSignUp(loginFragment);
+                            showActivityLogin();
                         }
                     }).show();
                 }
@@ -299,18 +295,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             case R.id.chat_room:
+                onCreateOptionsMenu(menu);
+                floatingActionButton.setVisibility(View.GONE);
                 loadContentFragment(CHAT_ROOM_TAG);
                 drawerLayout.closeDrawer(GravityCompat.START);
+                if (!accountManager.isSignedIn()) {
+                    Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+//                            showFragmentSignInSignUp(loginFragment);
+                            showActivityLogin();
+                        }
+                    }).show();
+                }
                 break;
             case R.id.setting:
                 Intent intent = new Intent(MainActivity.this, SettingActivity.class);
                 startActivity(intent);
                 break;
         }
-//        Toast.makeText(this, contentTag, Toast.LENGTH_SHORT).show();
-
-
         return true;
+    }
+
+    private void showActivityLogin() {
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
+    }
+
+    private void showActivityRegister() {
+        Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
     }
 
     @Override
@@ -345,27 +361,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onMenuItemClick(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.action_list:
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-                builder.setSmallIcon(android.R.drawable.ic_menu_zoom);
-                builder.setContentTitle("Nguyễn Quốc Việt");
-                builder.setContentInfo("Hệ quản trị cơ sở dữ liệu");
-                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_menu_camera);
-                builder.setLargeIcon(bitmap);
-                Notification notificationCompat = builder.build();
-                NotificationManagerCompat.from(this).notify(0, notificationCompat);
 
                 break;
             case R.id.action_grid:
                 break;
             case R.id.action_sign_in:
-                showFragmentSignInSignUp(loginFragment);
+//                showFragmentSignInSignUp(loginFragment);
+                showActivityLogin();
                 break;
             case R.id.action_sign_up:
-                showFragmentSignInSignUp(registerFragment);
+//                showFragmentSignInSignUp(registerFragment);
+                showActivityRegister();
                 break;
             case R.id.action_sign_out:
+                SharedPreferences sharedPreferences = getSharedPreferences(LoginActivity.SHARED_PREF, MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.clear();
+                editor.commit();
+
                 accountManager.logout();
-                signedIn = false;
+                accountManager.setSignedIn(false);
                 break;
         }
         return false;
@@ -385,7 +400,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         if (onMenuItemForumSelected) {
             hideFragmentSignInSignUp();
-            signedIn = false;
+            accountManager.setSignedIn(false);
             return;
         }
         showAcceptQuitingDialog();

@@ -10,10 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.database.MyDatabase;
 import com.example.vaio.technicalnews.model.NewsItem;
 import com.squareup.picasso.Picasso;
 
@@ -26,7 +24,6 @@ import java.util.ArrayList;
 public class NewsHomeAdapter extends RecyclerView.Adapter<NewsHomeAdapter.ViewHolder> {
 
     private ArrayList<NewsItem> arrNewsItem;
-    private Handler handlerContentLoadingMore;
     private Context context;
 
     public interface ClickListener {
@@ -39,9 +36,9 @@ public class NewsHomeAdapter extends RecyclerView.Adapter<NewsHomeAdapter.ViewHo
         this.clickListener = clickListener;
     }
 
-    public NewsHomeAdapter(ArrayList<NewsItem> arrNewsItem, Handler handlerContentLoadingMore) {
+    public NewsHomeAdapter(ArrayList<NewsItem> arrNewsItem) {
         this.arrNewsItem = arrNewsItem;
-        this.handlerContentLoadingMore = handlerContentLoadingMore;
+
     }
 
     @Override
@@ -77,9 +74,9 @@ public class NewsHomeAdapter extends RecyclerView.Adapter<NewsHomeAdapter.ViewHo
 
         }
         if (position >= arrNewsItem.size() - 1) {
-            Message message = new Message();
-            message.what = 1;
-            handlerContentLoadingMore.sendMessage(message);
+            if(onCompleteLoading!=null){
+                onCompleteLoading.onSuccess();
+            }
             return;
         }
     }
@@ -117,5 +114,15 @@ public class NewsHomeAdapter extends RecyclerView.Adapter<NewsHomeAdapter.ViewHo
             }
         }
 
+    }
+
+    public void setOnCompleteLoading(OnCompleteLoading onCompleteLoading) {
+        this.onCompleteLoading = onCompleteLoading;
+    }
+
+    private OnCompleteLoading onCompleteLoading;
+
+    public interface OnCompleteLoading {
+        void onSuccess();
     }
 }

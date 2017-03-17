@@ -23,9 +23,8 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
     private ClickListener clickListener;
     private Handler handlerContentLoadingCompletely;
 
-    public TopicsForumAdapter(ArrayList<Topic> arrTopic, Handler handlerContentLoadingCompletely) {
+    public TopicsForumAdapter(ArrayList<Topic> arrTopic) {
         this.arrTopic = arrTopic;
-        this.handlerContentLoadingCompletely = handlerContentLoadingCompletely;
     }
 
     @Override
@@ -44,9 +43,9 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
         holder.tvDate.setText(topic.getDate().toString());
         holder.tvTime.setText(topic.getTime().toString());
         if (position >= arrTopic.size() - 1) {
-            Message message = new Message();
-            message.what = ForumFragment.WHAT_COMPLETELY;
-            handlerContentLoadingCompletely.sendMessage(message);
+            if (onCompleteLoading != null) {
+                onCompleteLoading.onComplete();
+            }
         }
     }
 
@@ -86,5 +85,15 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
 
     public void setClickListener(ClickListener clickListener) {
         this.clickListener = clickListener;
+    }
+
+    public void setOnCompleteLoading(OnCompleteLoading onCompleteLoading) {
+        this.onCompleteLoading = onCompleteLoading;
+    }
+
+    private OnCompleteLoading onCompleteLoading;
+
+    public interface OnCompleteLoading {
+        void onComplete();
     }
 }

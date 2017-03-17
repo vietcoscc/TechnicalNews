@@ -3,6 +3,7 @@ package com.example.vaio.technicalnews.model;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -29,16 +30,15 @@ public class AccountManager implements Serializable {
     private static final String TAG = "AccountManager";
     private Context context;
     private FirebaseAuth mAuth;
+    private boolean signedIn = false;
 
     public AccountManager(Context context) {
         mAuth = FirebaseAuth.getInstance();
         this.context = context;
     }
 
-    public void log(){
-        Log.e(TAG,"Log");
-    }
     public void login(String email, String password) {
+        logout();
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setCancelable(false);
         progressDialog.setMessage("Signing in ... ");
@@ -52,10 +52,12 @@ public class AccountManager implements Serializable {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 progressDialog.dismiss();
                 if (!task.isSuccessful()) {
+                    signedIn = false;
                     Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
                 } else {
                     if (onLoginSuccess != null) {
                         onLoginSuccess.onSuccess();
+                        signedIn = true;
                     }
                 }
             }
@@ -63,6 +65,7 @@ public class AccountManager implements Serializable {
     }
 
     public void logout() {
+        signedIn = false;
         mAuth.signOut();
     }
 
@@ -91,7 +94,7 @@ public class AccountManager implements Serializable {
                                 } else {
                                     Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
                                     if (onRegisterSuccess != null) {
-                                        onLoginSuccess.onSuccess();
+                                        onRegisterSuccess.onSuccses();
                                     }
                                 }
                                 progressDialog.dismiss();
@@ -110,6 +113,14 @@ public class AccountManager implements Serializable {
 
     public FirebaseUser getCurrentUser() {
         return mAuth.getCurrentUser();
+    }
+
+    public boolean isSignedIn() {
+        return signedIn;
+    }
+
+    public void setSignedIn(boolean signedIn) {
+        this.signedIn = signedIn;
     }
 
     public void setOnLoginSuccess(OnLoginSuccess onLoginSuccess) {

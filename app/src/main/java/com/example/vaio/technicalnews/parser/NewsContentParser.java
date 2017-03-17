@@ -27,15 +27,11 @@ import java.util.ArrayList;
  */
 
 public class NewsContentParser extends AsyncTask<String, Void, ArrayList<NewsItem>> {
-    public static final int SUCCESS = 1;
-    public static final int FAIL = 0;
     private static final String TAG = "NewsContentParser";
     private Context context;
-    private Handler handlerReceiveData;
 
-    public NewsContentParser(Context context, Handler handlerReceiveData) {
+    public NewsContentParser(Context context) {
         this.context = context;
-        this.handlerReceiveData = handlerReceiveData;
     }
 
     @Override
@@ -44,7 +40,7 @@ public class NewsContentParser extends AsyncTask<String, Void, ArrayList<NewsIte
         try {
             Document doc = Jsoup.connect(params[0])
                     .userAgent("Mozilla")
-                    .timeout(10000)
+                    .timeout(5000)
                     .get();
             Elements elements = doc.select("div.fdListingContainer").select("div.riverPost");
             for (int i = 0; i < elements.size(); i++) {
@@ -81,14 +77,18 @@ public class NewsContentParser extends AsyncTask<String, Void, ArrayList<NewsIte
     @Override
     protected void onPostExecute(ArrayList<NewsItem> newsItems) {
         super.onPostExecute(newsItems);
-        Message message = new Message();
-        message.what = NewsFragment.WHAT_RECEIVE_DATA;
-        message.obj = newsItems;
-        if (!newsItems.isEmpty()) {
-            message.arg1 = SUCCESS;
-        } else {
-            message.arg1 = FAIL;
+        if (onReceiveData != null) {
+            onReceiveData.onReceive(newsItems);
         }
-        handlerReceiveData.sendMessage(message);
+    }
+
+    public void setOnReceiveData(OnReceiveData onReceiveData) {
+        this.onReceiveData = onReceiveData;
+    }
+
+    private OnReceiveData onReceiveData;
+
+    public interface OnReceiveData {
+        void onReceive(ArrayList<NewsItem> arrNewsItem);
     }
 }
