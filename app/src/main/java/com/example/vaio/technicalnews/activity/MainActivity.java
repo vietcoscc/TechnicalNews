@@ -295,6 +295,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             case R.id.chat_room:
+                menuRes = R.menu.menu_forum;
                 onCreateOptionsMenu(menu);
                 floatingActionButton.setVisibility(View.GONE);
                 loadContentFragment(CHAT_ROOM_TAG);

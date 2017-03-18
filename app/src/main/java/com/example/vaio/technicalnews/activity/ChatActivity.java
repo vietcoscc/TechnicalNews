@@ -16,6 +16,8 @@ import android.widget.ImageButton;
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.adapter.ChatAdapter;
 import com.example.vaio.technicalnews.fragment.ChatRoomFragment;
+import com.example.vaio.technicalnews.model.AccountManager;
+import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.ItemChat;
 import com.example.vaio.technicalnews.model.MyCalendar;
 import com.example.vaio.technicalnews.model.RoomChat;
@@ -39,18 +41,21 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private String key;
     private ArrayList<ItemChat> arrChat = new ArrayList<>();
     private ChatAdapter chatAdapter;
+    private AccountManager accountManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-
-
+        initAccountManager();
         initToolbar();
-
         initData();
         initComponent();
+    }
 
+    private void initAccountManager() {
+        GlobalData globalData = (GlobalData) getApplication();
+        accountManager = globalData.getAccountManager();
     }
 
     private void initData() {
@@ -135,7 +140,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 //                    Log.e(TAG, chat);
                     String date = MyCalendar.getDay() + " / " + MyCalendar.getMonth() + " / " + MyCalendar.getYear();
                     String timeStamp = MyCalendar.getHour() + " : " + MyCalendar.getMinute() + " : " + MyCalendar.getSecond();
-                    arrChat.add(new ItemChat("admin", chat, date, timeStamp));
+                    arrChat.add(new ItemChat(accountManager.getCurrentUser().getDisplayName(), chat, date, timeStamp));
                     chatAdapter.notifyDataSetChanged();
                     databaseReference.child(ChatRoomFragment.ROOM_CHAT).child(key).child(ChatRoomFragment.ARR_CHAT).setValue(arrChat);
                     arrChat.remove(arrChat.size() - 1);

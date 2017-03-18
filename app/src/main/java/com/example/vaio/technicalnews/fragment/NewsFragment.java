@@ -136,6 +136,7 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
 
     @Override
     public void onReceive(ArrayList<NewsItem> arrNewsItem) {
+
         if (arrNewsItem.isEmpty()) {
             Toast.makeText(context, "Failed from connection ", Toast.LENGTH_SHORT).show();
             swipeRefreshLayout.setRefreshing(false);
