@@ -3,5 +3,5 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:color="@android:color/black"
     tools:targetApi="lollipop">
-    <item android:drawable="@color/translucentColor" />
+    <!--<item android:drawable="@color/translucentColor" />-->
 </ripple>

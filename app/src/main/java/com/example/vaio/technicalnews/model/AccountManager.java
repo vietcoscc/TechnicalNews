@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -35,29 +36,45 @@ public class AccountManager implements Serializable {
     public AccountManager(Context context) {
         mAuth = FirebaseAuth.getInstance();
         this.context = context;
+        mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    signedIn = true;
+                } else {
+                    signedIn = false;
+                }
+                Log.e(TAG, signedIn + "");
+            }
+        });
     }
 
     public void login(String email, String password) {
+        if (!MainActivity.isNetWorkAvailable(context)) {
+            Toast.makeText(context, "No internet connection !", Toast.LENGTH_SHORT).show();
+            return;
+        }
         logout();
-        final ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setCancelable(false);
-        progressDialog.setMessage("Signing in ... ");
-        progressDialog.show();
+
         if (email.isEmpty() || password.isEmpty()) {
-            progressDialog.dismiss();
+            Toast.makeText(context, "The feilds must not empty !", Toast.LENGTH_SHORT).show();
             return;
         }
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener((Activity) context, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                progressDialog.dismiss();
+
                 if (!task.isSuccessful()) {
                     signedIn = false;
                     Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+                    if (onLoginFail != null) {
+                        onLoginFail.onFail();
+                    }
                 } else {
+                    Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
                     if (onLoginSuccess != null) {
                         onLoginSuccess.onSuccess();
-                        signedIn = true;
                     }
                 }
             }
@@ -65,17 +82,18 @@ public class AccountManager implements Serializable {
     }
 
     public void logout() {
-        signedIn = false;
         mAuth.signOut();
     }
 
     public void register(final String yourName, final String email, final String password) {
-        final ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage("Signing up ... ");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        if (!MainActivity.isNetWorkAvailable(context)) {
+            Toast.makeText(context, "No internet connection !", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
         if (email.isEmpty() || password.isEmpty()) {
-            progressDialog.dismiss();
+
             return;
         }
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener((Activity) context, new OnCompleteListener<AuthResult>() {
@@ -91,13 +109,16 @@ public class AccountManager implements Serializable {
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (!task.isSuccessful()) {
                                     Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+                                    if (onRegisterFail != null) {
+                                        onRegisterFail.onFail();
+                                    }
                                 } else {
                                     Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
                                     if (onRegisterSuccess != null) {
                                         onRegisterSuccess.onSuccses();
                                     }
                                 }
-                                progressDialog.dismiss();
+
                             }
                         });
                     }
@@ -133,6 +154,16 @@ public class AccountManager implements Serializable {
         void onSuccess();
     }
 
+    public void setOnLoginFail(OnLoginFail onLoginFail) {
+        this.onLoginFail = onLoginFail;
+    }
+
+    private OnLoginFail onLoginFail;
+
+    public interface OnLoginFail {
+        void onFail();
+    }
+
     public void setOnRegisterSuccess(OnRegisterSuccess onRegisterSuccess) {
         this.onRegisterSuccess = onRegisterSuccess;
     }
@@ -141,5 +172,15 @@ public class AccountManager implements Serializable {
 
     public interface OnRegisterSuccess {
         void onSuccses();
+    }
+
+    public void setOnRegisterFail(OnRegisterFail onRegisterFail) {
+        this.onRegisterFail = onRegisterFail;
+    }
+
+    private OnRegisterFail onRegisterFail;
+
+    public interface OnRegisterFail {
+        void onFail();
     }
 }

@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="@color/md_white_1000"
         android:src="@drawable/folded_newspaper" />
 
     <android.support.v4.widget.ContentLoadingProgressBar

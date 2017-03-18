@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_login"
     android:layout_width="match_parent"
@@ -7,27 +8,27 @@
     android:background="@color/colorPrimary"
     android:gravity="center"
     android:orientation="vertical"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.vaio.technicalnews.fragment.LoginFragment">
+    android:paddingTop="@dimen/activity_vertical_margin">
 
     <TextView
         style="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="serif"
+        android:fontFamily="cursive"
         android:gravity="center"
-        android:text="@string/regiter"
-        android:textColor="@color/white"
+        android:text="@string/app_name"
+        android:textColor="@color/md_white_1000"
         android:textSize="@dimen/tvLoginSize"
         android:textStyle="bold" />
 
-    <LinearLayout
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/user_name_top_margin"
-        android:background="@color/white">
+        android:textColorHint="@color/md_white_1000"
+        app:theme="@style/Theme.TextInputLayout">
 
         <EditText
             android:id="@+id/yourName"
@@ -35,41 +36,53 @@
             android:layout_height="wrap_content"
             android:hint=" Your name ..."
             android:imeOptions="actionNext"
-            android:singleLine="true" />
-    </LinearLayout>
+            android:singleLine="true"
+            android:textColor="@color/md_white_1000" />
+    </android.support.design.widget.TextInputLayout>
 
-    <LinearLayout
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:background="@color/white">
+        android:textColorHint="@color/md_white_1000"
+        app:theme="@style/Theme.TextInputLayout">
 
         <EditText
             android:id="@+id/userName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_username"
+            android:drawableTint="@color/md_white_1000"
+            android:drawableTintMode="src_in"
             android:hint=" Email ..."
             android:imeOptions="actionNext"
-            android:singleLine="true" />
-    </LinearLayout>
+            android:singleLine="true"
+            android:textColor="@color/md_white_1000" />
+    </android.support.design.widget.TextInputLayout>
 
-    <LinearLayout
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        android:background="@color/white">
+        android:textColorHint="@color/md_white_1000"
+        app:theme="@style/Theme.TextInputLayout">
 
         <EditText
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_password"
+            android:drawableTint="@color/md_white_1000"
+            android:drawableTintMode="src_in"
             android:hint=" Password ..."
             android:imeOptions="actionDone"
             android:inputType="textPassword"
-            android:singleLine="true" />
-    </LinearLayout>
+            android:singleLine="true"
+            android:textColor="@color/md_white_1000"
+            android:textColorHint="@color/md_white_1000" />
+    </android.support.design.widget.TextInputLayout>
 
 
     <Button

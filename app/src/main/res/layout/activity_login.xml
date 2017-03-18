@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_login"
     android:layout_width="match_parent"
@@ -13,43 +14,52 @@
         style="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="serif"
+        android:fontFamily="cursive"
         android:gravity="center"
-        android:text="@string/login"
-        android:textColor="@color/white"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:text="@string/app_name"
+        android:textColor="@color/md_white_1000"
         android:textSize="@dimen/tvLoginSize"
         android:textStyle="bold" />
 
-    <LinearLayout
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/user_name_top_margin"
-        android:background="@color/white">
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:textColorHint="@android:color/white"
+        app:theme="@style/Theme.TextInputLayout">
 
         <EditText
             android:id="@+id/userName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_uername"
+            android:drawableTint="@color/md_white_1000"
             android:hint=" Email ..."
-            android:singleLine="true" />
-    </LinearLayout>
+            android:singleLine="true"
+            android:textColor="@color/md_white_1000" />
+    </android.support.design.widget.TextInputLayout>
 
-    <LinearLayout
+
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        android:background="@color/white">
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:textColorHint="@android:color/white"
+        app:theme="@style/Theme.TextInputLayout">
 
         <EditText
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_password"
+            android:drawableTint="@color/md_white_1000"
             android:hint=" Password ..."
             android:inputType="textPassword"
-            android:singleLine="true" />
-    </LinearLayout>
+            android:singleLine="true"
+            android:textColor="@color/md_white_1000" />
+    </android.support.design.widget.TextInputLayout>
 
     <Button
         android:id="@+id/btnLogin"
@@ -76,7 +86,21 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:text="@string/tvRegister"
-            android:textColor="@color/white" />
+            android:textColor="@color/md_white_1000" />
+    </LinearLayout>
+    <LinearLayout
+        android:background="@color/md_white_1000"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:src="@drawable/common_google_signin_btn_icon_light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:text="@string/action_sign_in"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
 </LinearLayout>

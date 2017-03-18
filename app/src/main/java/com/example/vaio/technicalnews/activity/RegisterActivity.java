@@ -15,14 +15,13 @@ import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.GlobalData;
 
-public class RegisterActivity extends AppCompatActivity implements View.OnClickListener,  AccountManager.OnRegisterSuccess {
+public class RegisterActivity extends AppCompatActivity implements View.OnClickListener, AccountManager.OnRegisterSuccess {
     private EditText edtYourName;
     private EditText edtUserName;
     private EditText edtPassword;
     private Button btnSignUp;
 
     private AccountManager accountManager;
-    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,9 +39,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         edtPassword = (EditText) findViewById(R.id.password);
         btnSignUp = (Button) findViewById(R.id.btnSignUp);
         btnSignUp.setOnClickListener(this);
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Signing Up ... ");
-        progressDialog.setCancelable(false);
 
     }
 
@@ -51,13 +47,17 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnSignUp:
+                btnSignUp.setClickable(false);
+                final ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setMessage("Signing up ... ");
+                progressDialog.setCancelable(false);
                 progressDialog.show();
+
                 if (!MainActivity.isNetWorkAvailable(this)) {
                     Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
-                    progressDialog.hide();
                     return;
                 }
-                btnSignUp.setClickable(false);
+
                 String yourName = edtYourName.getText().toString();
                 String userName = edtUserName.getText().toString();
                 String password = edtPassword.getText().toString();
@@ -66,6 +66,19 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     Toast.makeText(this, "The feilds must not empty", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                accountManager.setOnRegisterSuccess(new AccountManager.OnRegisterSuccess() {
+                    @Override
+                    public void onSuccses() {
+                        onBackPressed();
+                        progressDialog.hide();
+                    }
+                });
+                accountManager.setOnRegisterFail(new AccountManager.OnRegisterFail() {
+                    @Override
+                    public void onFail() {
+                        progressDialog.hide();
+                    }
+                });
                 accountManager.register(yourName, userName, password);
                 btnSignUp.setClickable(true);
                 break;
@@ -80,7 +93,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onSuccses() {
-        progressDialog.hide();
         Intent intent = new Intent();
         intent.putExtra(LoginActivity.USER_NAME, edtUserName.getText().toString());
         intent.putExtra(LoginActivity.PASSWORD, edtPassword.getText().toString());

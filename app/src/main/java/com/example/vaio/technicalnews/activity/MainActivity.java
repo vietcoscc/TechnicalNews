@@ -2,14 +2,11 @@ package com.example.vaio.technicalnews.activity;
 
 
 import android.app.AlertDialog;
-import android.app.Notification;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,15 +17,12 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,7 +30,6 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
@@ -45,8 +38,6 @@ import com.example.vaio.technicalnews.fragment.ChatRoomFragment;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.fragment.HomeFragment;
-import com.example.vaio.technicalnews.fragment.LoginFragment;
-import com.example.vaio.technicalnews.fragment.RegisterFragment;
 import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.Topic;
 
@@ -75,8 +66,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private HomeFragment homeFragment;
     private ForumFragment forumFragment;
     private ChatRoomFragment chatRoomFragment;
-    private LoginFragment loginFragment;
-    private RegisterFragment registerFragment;
 
 
     private FrameLayout signInSignOutLayout;
@@ -118,23 +107,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void checkLogin() {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Signing up ... ");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
         SharedPreferences sharedPreferences = getSharedPreferences(LoginActivity.SHARED_PREF, MODE_PRIVATE);
         String userName = sharedPreferences.getString(LoginActivity.USER_NAME, "");
         String password = sharedPreferences.getString(LoginActivity.PASSWORD, "");
         if (userName.isEmpty() || password.isEmpty()) {
+            progressDialog.hide();
             return;
         }
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loging in ... ");
-        progressDialog.show();
-        progressDialog.setCancelable(false);
-        accountManager.login(userName, password);
         accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
             @Override
             public void onSuccess() {
                 progressDialog.hide();
             }
         });
+        accountManager.setOnLoginFail(new AccountManager.OnLoginFail() {
+            @Override
+            public void onFail() {
+                progressDialog.hide();
+            }
+        });
+        accountManager.login(userName, password);
     }
 
     private void initAccountManager() {
@@ -208,15 +205,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         forumFragment = new ForumFragment(accountManager);
         homeFragment = new HomeFragment(this, getFragmentManager());
         chatRoomFragment = new ChatRoomFragment(accountManager);
-        loginFragment = new LoginFragment(accountManager);
-        loginFragment.setOnClickButtonSignUp(new LoginFragment.OnClickButtonSignUp() {
-            @Override
-            public void onClick() {
-                registerFragment = new RegisterFragment(accountManager);
-                showFragmentSignInSignUp(registerFragment);
-            }
-        });
-        registerFragment = new RegisterFragment(accountManager);
     }
 
     private void initDrawerLayout() throws Exception {
@@ -426,28 +414,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.create().show();
     }
 
-    public void showFragmentSignInSignUp(final Fragment fragment) {
-
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        signInSignOutLayout.setVisibility(View.VISIBLE);
-        onMenuItemForumSelected = true;
-
-        FrameLayout contentMainLayout = (FrameLayout) findViewById(R.id.content_main);
-        contentMainLayout.setFocusable(false);
-        FrameLayout loginRegisterContentMainLayout = (FrameLayout) findViewById(R.id.login_register_content_main);
-        AnimationSet animationSet = (AnimationSet) AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
-        loginRegisterContentMainLayout.startAnimation(animationSet);
-        contentMainLayout.setVisibility(View.GONE);
-        replaceFragment(R.id.login_register_content_main, fragment);
-
-    }
-
-    public void replaceFragment(int idRes, Fragment fragment) {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        transaction.replace(idRes, fragment);
-        transaction.commit();
-    }
 
     public void hideFragmentSignInSignUp() {
         final FrameLayout contentMainLayout = (FrameLayout) findViewById(R.id.content_main);

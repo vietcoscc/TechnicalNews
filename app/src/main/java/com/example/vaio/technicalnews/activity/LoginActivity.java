@@ -5,26 +5,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.InputType;
-import android.text.method.PasswordTransformationMethod;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.fragment.LoginFragment;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.GlobalData;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener, AccountManager.OnLoginSuccess {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     public static final String USER_NAME = "User name";
     public static final String PASSWORD = "Password";
     public static final int REQUEST_REGISTER = 1;
@@ -34,7 +28,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText edtPassword;
     private Button btnLogin;
     private TextView tvSignUp;
-    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +35,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
-        accountManager.setOnLoginSuccess(this);
         initViews();
     }
 
@@ -55,10 +47,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         tvSignUp = (TextView) findViewById(R.id.tvSignUp);
         tvSignUp.setText(Html.fromHtml("<u>Not a member ? Sign up now</u>"));
         tvSignUp.setOnClickListener(this);
-
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loging in ... ");
-        progressDialog.setCancelable(false);
     }
 
     @Override
@@ -72,20 +60,40 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnLogin:
+                btnLogin.setClickable(false);
+                final ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setMessage("Signing up ... ");
+                progressDialog.setCancelable(false);
                 progressDialog.show();
+
                 if (!MainActivity.isNetWorkAvailable(this)) {
                     Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
                     progressDialog.hide();
                     return;
                 }
-                btnLogin.setClickable(false);
+
                 String userName = edtUserName.getText().toString();
                 String password = edtPassword.getText().toString();
                 if (userName.isEmpty() || password.isEmpty()) {
                     btnLogin.setClickable(true);
                     Toast.makeText(this, "The feilds must not empty", Toast.LENGTH_SHORT).show();
+                    progressDialog.hide();
                     return;
                 }
+                accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
+                    @Override
+                    public void onSuccess() {
+                        progressDialog.hide();
+                        onBackPressed();
+
+                    }
+                });
+                accountManager.setOnLoginFail(new AccountManager.OnLoginFail() {
+                    @Override
+                    public void onFail() {
+                        progressDialog.hide();
+                    }
+                });
                 accountManager.login(userName, password);
                 btnLogin.setClickable(true);
                 break;
@@ -105,21 +113,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_REGISTER) {
             if (resultCode == RESULT_OK) {
-            edtUserName.setText(data.getExtras().getString(USER_NAME));
-            edtPassword.setText(data.getExtras().getString(PASSWORD));
+                edtUserName.setText(data.getExtras().getString(USER_NAME));
+                edtPassword.setText(data.getExtras().getString(PASSWORD));
+            }
         }
     }
-}
 
-    @Override
-    public void onSuccess() {
-        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(USER_NAME, edtUserName.getText().toString());
-        editor.putString(PASSWORD, edtPassword.getText().toString());
-        editor.commit();
-
-        progressDialog.hide();
-        onBackPressed();
-    }
 }
