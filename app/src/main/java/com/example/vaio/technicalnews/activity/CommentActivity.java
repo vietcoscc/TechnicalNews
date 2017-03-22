@@ -32,7 +32,7 @@ public class CommentActivity extends AppCompatActivity {
 
     private void initViews() {
         tvObject = (TextView) findViewById(R.id.tvObject);
-        tvContent = (TextView) findViewById(R.id.tvContent);
+//        tvContent = (TextView) findViewById(R.id.tvContent);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

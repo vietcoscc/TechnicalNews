@@ -9,4 +9,5 @@
     <dimen name="user_name_top_margin">50dp</dimen>
     <dimen name="tvLoginSize">40sp</dimen>
     <dimen name="default_margin">16dp</dimen>
+    <dimen name="buttonGravity">48dp</dimen>
 </resources>

@@ -1,16 +1,21 @@
 package com.example.vaio.technicalnews.adapter;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
+import com.example.vaio.technicalnews.model.AccountManager;
+import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.Topic;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -21,7 +26,7 @@ import java.util.ArrayList;
 public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.ViewHolder> {
     private ArrayList<Topic> arrTopic;
     private ClickListener clickListener;
-    private Handler handlerContentLoadingCompletely;
+    private Context context;
 
     public TopicsForumAdapter(ArrayList<Topic> arrTopic) {
         this.arrTopic = arrTopic;
@@ -29,7 +34,8 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        this.context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
         View itemView = inflater.inflate(R.layout.item_toptic_recycler_view, parent, false);
         return new ViewHolder(itemView);
     }
@@ -38,8 +44,9 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         Topic topic = arrTopic.get(arrTopic.size() - position - 1);
+        Picasso.with(context).load(topic.getPhotoPath()).into(holder.ivAvatar);
         holder.tvEmail.setText(topic.getName());
-        holder.tvSubject.setText(topic.getContent().toString());
+        holder.tvSubject.setText(topic.getSubject().toString());
         holder.tvDate.setText(topic.getDate().toString());
         holder.tvTime.setText(topic.getTime().toString());
         if (position >= arrTopic.size() - 1) {
@@ -56,6 +63,7 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        ImageView ivAvatar;
         TextView tvEmail;
         TextView tvSubject;
         TextView tvDate;
@@ -63,6 +71,7 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
 
         public ViewHolder(View itemView) {
             super(itemView);
+            ivAvatar = (ImageView) itemView.findViewById(R.id.ivAvatar);
             tvEmail = (TextView) itemView.findViewById(R.id.tvEmail);
             tvSubject = (TextView) itemView.findViewById(R.id.tvSubject);
             tvDate = (TextView) itemView.findViewById(R.id.tvDate);

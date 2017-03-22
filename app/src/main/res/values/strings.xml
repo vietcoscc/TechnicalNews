@@ -5,7 +5,7 @@
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
-    <string name="action_sign_in">Sign in with google</string>
+    <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
@@ -36,6 +36,8 @@
     <string name="category_titile_setting">General</string>
     <string name="search_title">searchView</string>
     <string name="search_hint">....</string>
+    <string name="action_sign_in_facebook">Sign in with facebook</string>
+    <string name="action_google_sign_in">Sign in with google</string>
     <string-array name="listentries">
         <item>List item 1</item>
         <item>List item 2</item>

@@ -79,4 +79,20 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity {
             }
         });
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (youTubePlayer != null) {
+            youTubePlayer.release();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (youTubePlayer != null) {
+            youTubePlayer.release();
+        }
+    }
 }

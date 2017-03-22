@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -27,6 +28,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -56,6 +58,7 @@ public class ChatRoomFragment extends Fragment {
     private ArrayList<String> arrKeyRoomChat = new ArrayList<>();
     private RoomChatAdapter adapter;
     private AccountManager accountManager;
+    private ContentLoadingProgressBar contentLoadingProgressBar;
 
     public ChatRoomFragment(AccountManager accountManager) {
         this.accountManager = accountManager;
@@ -87,7 +90,6 @@ public class ChatRoomFragment extends Fragment {
                 arrKeyRoomChat.add(key);
                 Log.e(TAG, arrRoomChat.size() + "");
                 adapter.notifyDataSetChanged();
-//                databaseReference.child(ROOM_CHAT).child(key).child(ONLINE_NUMBER).get;
             }
 
             @Override
@@ -110,10 +112,22 @@ public class ChatRoomFragment extends Fragment {
 
             }
         });
+        databaseReference.child(ROOM_CHAT).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                contentLoadingProgressBar.hide();
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void initViews(View view) {
+        contentLoadingProgressBar = (ContentLoadingProgressBar) view.findViewById(R.id.contentLoadingProgressBar);
+        contentLoadingProgressBar.show();
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         Log.e(TAG, arrRoomChat.size() + "");
 
@@ -158,14 +172,7 @@ public class ChatRoomFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-//                int position = data.getExtras().getInt(POSITION);
-//                RoomChat roomChat = arrRoomChat.get(position);
-//                if (roomChat.getOnlineNumber() > 0) {
-//                    roomChat.setOnlineNumber(roomChat.getOnlineNumber() - 1);
-//                } else {
-//                    roomChat.setOnlineNumber(0);
-//                }
-//                databaseReference.child(ROOM_CHAT).child(arrKeyRoomChat.get(position)).setValue(roomChat);
+//
             }
         }
     }

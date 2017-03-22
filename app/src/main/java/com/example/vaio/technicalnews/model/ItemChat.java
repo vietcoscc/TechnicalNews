@@ -11,15 +11,19 @@ public class ItemChat implements Serializable {
     private String chat;
     private String date;
     private String time;
+    private String uid;
+    private String uri;
 
     public ItemChat() {
     }
 
-    public ItemChat(String name, String chat, String date, String time) {
+    public ItemChat(String name, String chat, String date, String time, String uid, String uri) {
         this.name = name;
         this.chat = chat;
         this.date = date;
         this.time = time;
+        this.uid = uid;
+        this.uri = uri;
     }
 
     public String getName() {
@@ -52,5 +56,21 @@ public class ItemChat implements Serializable {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 }

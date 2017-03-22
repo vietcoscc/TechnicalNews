@@ -1,6 +1,7 @@
 package com.example.vaio.technicalnews.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,11 +22,14 @@ import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.ItemChat;
 import com.example.vaio.technicalnews.model.MyCalendar;
 import com.example.vaio.technicalnews.model.RoomChat;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 
@@ -42,6 +46,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayList<ItemChat> arrChat = new ArrayList<>();
     private ChatAdapter chatAdapter;
     private AccountManager accountManager;
+    private Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +64,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initData() {
+
+
         Intent intent = getIntent();
         roomChat = (RoomChat) intent.getExtras().getSerializable(ChatRoomFragment.ROOM_CHAT);
         position = intent.getExtras().getInt(ChatRoomFragment.POSITION);
@@ -107,7 +114,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private void initComponent() {
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        chatAdapter = new ChatAdapter(arrChat);
+        chatAdapter = new ChatAdapter(arrChat, this);
         recyclerView.setAdapter(chatAdapter);
         edtComment = (EditText) findViewById(R.id.edtComment);
         ibSend = (ImageButton) findViewById(R.id.ibSend);
@@ -134,19 +141,21 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ibSend:
-                String chat = edtComment.getText().toString();
+                final String chat = edtComment.getText().toString();
                 if (!chat.isEmpty()) {
 
 //                    Log.e(TAG, chat);
+
+
                     String date = MyCalendar.getDay() + " / " + MyCalendar.getMonth() + " / " + MyCalendar.getYear();
                     String timeStamp = MyCalendar.getHour() + " : " + MyCalendar.getMinute() + " : " + MyCalendar.getSecond();
-                    arrChat.add(new ItemChat(accountManager.getCurrentUser().getDisplayName(), chat, date, timeStamp));
+                    arrChat.add(new ItemChat(accountManager.getCurrentUser().getDisplayName(), chat,
+                            date, timeStamp, accountManager.getCurrentUser().getUid(), accountManager.getPathPhoto()));
                     chatAdapter.notifyDataSetChanged();
                     databaseReference.child(ChatRoomFragment.ROOM_CHAT).child(key).child(ChatRoomFragment.ARR_CHAT).setValue(arrChat);
+                    recyclerView.scrollToPosition(arrChat.size() - 1);
                     arrChat.remove(arrChat.size() - 1);
                     edtComment.setText("");
-                    recyclerView.scrollToPosition(arrChat.size() - 1);
-
                 }
                 break;
         }

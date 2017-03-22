@@ -13,9 +13,9 @@
         app:cardUseCompatPadding="true">
 
         <LinearLayout
-            android:background="@drawable/view_click_selector"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/view_click_selector"
             android:orientation="vertical">
 
             <ImageView
@@ -23,7 +23,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
-                android:scaleType="fitXY" />
+                android:scaleType="fitCenter" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -45,17 +45,20 @@
                     android:orientation="horizontal">
 
                     <TextView
-
                         android:id="@+id/tvViewNumber"
+                        style="?android:attr/textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:singleLine="true"
                         android:text="@string/app_name" />
 
                     <TextView
                         android:id="@+id/tvTimeStamp"
+                        style="?android:attr/textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:singleLine="true"
                         android:text="@string/app_name" />
                 </LinearLayout>
             </LinearLayout>

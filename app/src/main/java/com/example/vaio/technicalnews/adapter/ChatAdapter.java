@@ -1,5 +1,8 @@
 package com.example.vaio.technicalnews.adapter;
 
+import android.content.Context;
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,24 +10,26 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.activity.MainActivity;
-import com.example.vaio.technicalnews.database.MyDatabase;
 import com.example.vaio.technicalnews.model.ItemChat;
-import com.example.vaio.technicalnews.model.MyCalendar;
+import com.squareup.picasso.Picasso;
 
-import org.w3c.dom.Text;
-
+import java.sql.Timestamp;
 import java.util.ArrayList;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by vaio on 16/03/2017.
  */
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
+    private static final String TAG = "ChatAdapter";
     private ArrayList<ItemChat> arrChat;
+    private Context context;
 
-    public ChatAdapter(ArrayList<ItemChat> arrChat) {
+    public ChatAdapter(ArrayList<ItemChat> arrChat, Context context) {
         this.arrChat = arrChat;
+        this.context = context;
     }
 
     @Override
@@ -35,13 +40,18 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.tvChat.setText(arrChat.get(position).getChat());
-        holder.tvName.setText(arrChat.get(position).getName());
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        ItemChat itemChat = arrChat.get(position);
+        holder.tvChat.setText(itemChat.getChat());
+        holder.tvName.setText(itemChat.getName());
 
-        holder.tvDate.setText(arrChat.get(position).getDate());
+        holder.tvDate.setText(itemChat.getDate());
 
-        holder.tvTimeStamp.setText(arrChat.get(position).getTime());
+        holder.tvTimeStamp.setText(itemChat.getTime());
+
+        Picasso.with(context).
+                load(arrChat.get(position).getUri()).
+                into(holder.circleImageView);
     }
 
     @Override
@@ -54,6 +64,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         TextView tvChat;
         TextView tvDate;
         TextView tvTimeStamp;
+        CircleImageView circleImageView;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -61,6 +72,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             tvChat = (TextView) itemView.findViewById(R.id.tvChat);
             tvDate = (TextView) itemView.findViewById(R.id.tvDate);
             tvTimeStamp = (TextView) itemView.findViewById(R.id.tvTimeStamp);
+            circleImageView = (CircleImageView) itemView.findViewById(R.id.ivAvatar);
         }
     }
 }

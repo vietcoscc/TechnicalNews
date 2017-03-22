@@ -54,7 +54,7 @@ public class NewsHomeAdapter extends RecyclerView.Adapter<NewsHomeAdapter.ViewHo
 
         final NewsItem newsItem = arrNewsItem.get(position);
         if (newsItem != null) {
-            Picasso.with(context).load(newsItem.getImageLinkWrapper()).placeholder(R.drawable.loading).error(R.drawable.warning).into(holder.ivWrapper);
+            Picasso.with(context).load(newsItem.getImageLinkWrapper()).placeholder(R.drawable.loading_list).into(holder.ivWrapper);
             holder.tvName.setText(newsItem.getName());
             holder.tvContentPreview.setText(newsItem.getContentPreview());
             holder.tvTopicName.setText(newsItem.getTopicName());

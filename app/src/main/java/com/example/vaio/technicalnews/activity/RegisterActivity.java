@@ -15,13 +15,14 @@ import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.GlobalData;
 
-public class RegisterActivity extends AppCompatActivity implements View.OnClickListener, AccountManager.OnRegisterSuccess {
+public class RegisterActivity extends AppCompatActivity implements View.OnClickListener, AccountManager.OnRegisterSuccess, AccountManager.OnRegisterFail {
     private EditText edtYourName;
     private EditText edtUserName;
     private EditText edtPassword;
     private Button btnSignUp;
 
     private AccountManager accountManager;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +31,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
         accountManager.setOnRegisterSuccess(this);
+        accountManager.setOnRegisterFail(this);
         initViews();
     }
 
@@ -40,6 +42,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         btnSignUp = (Button) findViewById(R.id.btnSignUp);
         btnSignUp.setOnClickListener(this);
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Signing up ... ");
+        progressDialog.setCancelable(false);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -48,9 +53,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         switch (view.getId()) {
             case R.id.btnSignUp:
                 btnSignUp.setClickable(false);
-                final ProgressDialog progressDialog = new ProgressDialog(this);
-                progressDialog.setMessage("Signing up ... ");
-                progressDialog.setCancelable(false);
+
                 progressDialog.show();
 
                 if (!MainActivity.isNetWorkAvailable(this)) {
@@ -66,19 +69,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     Toast.makeText(this, "The feilds must not empty", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                accountManager.setOnRegisterSuccess(new AccountManager.OnRegisterSuccess() {
-                    @Override
-                    public void onSuccses() {
-                        onBackPressed();
-                        progressDialog.hide();
-                    }
-                });
-                accountManager.setOnRegisterFail(new AccountManager.OnRegisterFail() {
-                    @Override
-                    public void onFail() {
-                        progressDialog.hide();
-                    }
-                });
+
                 accountManager.register(yourName, userName, password);
                 btnSignUp.setClickable(true);
                 break;
@@ -93,10 +84,18 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onSuccses() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.hide();
+        }
         Intent intent = new Intent();
         intent.putExtra(LoginActivity.USER_NAME, edtUserName.getText().toString());
         intent.putExtra(LoginActivity.PASSWORD, edtPassword.getText().toString());
         setResult(RESULT_OK, intent);
         onBackPressed();
+    }
+
+    @Override
+    public void onFail() {
+
     }
 }

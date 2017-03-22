@@ -3,27 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-
     android:orientation="vertical">
 
-    <android.support.v7.widget.CardView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="@dimen/cardview_default_radius"
-        app:cardElevation="@dimen/cardview_default_elevation"
-        app:cardUseCompatPadding="true">
+        android:orientation="vertical">
+
 
         <LinearLayout
+            android:weightSum="10"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:id="@+id/ivAvatar"
+                android:layout_weight="1"
+
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/ic_launcher" />
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_weight="9"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:orientation="horizontal">
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/tvName"
@@ -34,42 +42,39 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvChat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:text=":" />
-
-                <TextView
-                    android:id="@+id/tvChat"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chat"
+                    android:padding="@dimen/activity_horizontal_margin"
                     android:text="@string/app_name" />
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="right"
-                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/tvTimeStamp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:text="07:04:33" />
-
-                <TextView
-                    android:id="@+id/tvDate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:text="23/10/1996" />
-
-
-            </LinearLayout>
         </LinearLayout>
-    </android.support.v7.widget.CardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvTimeStamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:text="07:04:33" />
+
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:text="23/10/1996" />
+
+
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

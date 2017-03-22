@@ -95,7 +95,7 @@ public class MyDatabase {
         contentValues.put(AUTHOR, newsItem.getAuthor());
 
         long rowID = database.insert(TB_NAME_NEWS, null, contentValues);
-        Log.e("TAG", rowID + "");
+
         closeDatabase();
     }
 

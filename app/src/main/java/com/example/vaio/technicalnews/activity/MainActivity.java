@@ -7,10 +7,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -23,14 +27,17 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.database.MyDatabase;
@@ -40,8 +47,22 @@ import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.fragment.HomeFragment;
 import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.Topic;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MenuItem.OnMenuItemClickListener, View.OnClickListener {
     public static final String HOME_TAG = "home";
@@ -52,14 +73,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final String TYPE_2 = "Tips";
     public static final String TYPE_3 = "Trading";
 
-    public static final int POST_REQUEST_CODE = 0;
+    public static final int RC_POST = 0;
     //
     public static final String DISPLAY_NAME = "display name";
     public static final String EMAIL = "email";
+    private static final int RC_LOGIN = 1;
+    private static final String TAG = "MainActivity";
     // component
     private Toolbar toolbar; // toolbar main activity
-    private FloatingActionButton floatingActionButton;
-    private ImageView ivAvatar;
+    //    private FloatingActionButton floatingActionButton;
+    private CircleImageView ivAvatar;
     private TextView tvDisplayName;
     private TextView tvEmail;
     // fragment
@@ -78,6 +101,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int menuRes = R.menu.menu_home;
 
     private AccountManager accountManager;
+    private StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+
+    private ProgressDialog progressDialog;
     private Boolean onMenuItemForumSelected = false;
 
     public static boolean isNetWorkAvailable(Context context) {
@@ -100,16 +126,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             initFragment();
             loadContentFragment(HOME_TAG);
             initOthers();
+            updateUI();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    private void checkLogin() {
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Signing up ... ");
-        progressDialog.setCancelable(false);
+    private void checkLogin() throws Exception {
         progressDialog.show();
 
         SharedPreferences sharedPreferences = getSharedPreferences(LoginActivity.SHARED_PREF, MODE_PRIVATE);
@@ -122,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
             @Override
             public void onSuccess() {
+                updateUI();
                 progressDialog.hide();
             }
         });
@@ -134,62 +159,79 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         accountManager.login(userName, password);
     }
 
-    private void initAccountManager() {
+    private void initAccountManager() throws Exception {
+        //
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Signing up ... ");
+        progressDialog.setCancelable(false);
+        //
         accountManager = new AccountManager(this);
         GlobalData globalData = (GlobalData) getApplication();
         globalData.setAccountManager(accountManager);
-
-        accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
+        accountManager.setOnLogout(new AccountManager.OnLogout() {
             @Override
-            public void onSuccess() {
-                hideFragmentSignInSignUp();
-                Uri uri = accountManager.getCurrentUser().getPhotoUrl();
-                String displayName = accountManager.getCurrentUser().getDisplayName();
-                String email = accountManager.getCurrentUser().getEmail();
-                ivAvatar.setImageURI(uri);
-                tvDisplayName.setText(displayName);
-                tvEmail.setText(email);
-                accountManager.setSignedIn(true);
-            }
-        });
-        accountManager.setOnRegisterSuccess(new AccountManager.OnRegisterSuccess() {
-            @Override
-            public void onSuccses() {
-                hideFragmentSignInSignUp();
+            public void logout() {
+                updateUI();
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (progressDialog != null && progressDialog.isShowing()) {
+                            progressDialog.hide();
+                        }
+                    }
+                }, 2000);
             }
         });
     }
 
-    private void initOthers() throws Exception {
-
-        floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!accountManager.isSignedIn()) {
-                    Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-//                            showFragmentSignInSignUp(loginFragment);
-                            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                            startActivity(intent);
-                            overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
-
-                        }
-                    }).show();
-                    return;
-                }
-                Intent intent = new Intent(MainActivity.this, PostActivity.class);
-                intent.putExtra(DISPLAY_NAME, accountManager.getCurrentUser().getDisplayName());
-                intent.putExtra(EMAIL, accountManager.getCurrentUser().getEmail());
-                startActivity(intent);
+    private void updateUI() {
+        Log.e(TAG, "updateUI");
+        try {
+            FirebaseUser user = accountManager.getCurrentUser();
+            if (user == null) {
+                ivAvatar.setVisibility(View.GONE);
+                tvDisplayName.setText("");
+                tvEmail.setText("");
+                return;
             }
-        });
-        signInSignOutLayout = (FrameLayout) findViewById(R.id.login_register_content_main);
+            ivAvatar.setVisibility(View.VISIBLE);
+            Uri uri = accountManager.getCurrentUser().getPhotoUrl();
 
-        ivAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.ivAvatar);
+            Log.e(TAG, uri + "");
+            if (uri != null) {
+                Picasso.with(this).load(uri).error(R.drawable.warning).placeholder(R.drawable.loading).into(ivAvatar);
+            }
+
+            String displayName = accountManager.getCurrentUser().getDisplayName();
+            Log.e(TAG, displayName);
+            String email = accountManager.getCurrentUser().getEmail();
+
+            tvDisplayName.setText(displayName);
+            tvEmail.setText(email);
+            accountManager.setSignedIn(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_LOGIN) {
+            if (resultCode == RESULT_OK) {
+                updateUI();
+            }
+        }
+    }
+
+    private void initOthers() throws Exception {
+        signInSignOutLayout = (FrameLayout) findViewById(R.id.login_register_content_main);
         tvDisplayName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tvDisplayName);
         tvEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tvEmail);
+        ivAvatar = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.ivAvatar);
     }
 
     private void initToolbar() throws Exception {
@@ -258,22 +300,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         switch (id) {
             case R.id.home:
+                AppBarLayout.LayoutParams params = new AppBarLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
+                toolbar.setLayoutParams(params);
                 loadContentFragment(HOME_TAG);
                 toolbar.setTitle("Home");
-                floatingActionButton.setVisibility(View.GONE);
+//                floatingActionButton.setVisibility(View.GONE);
                 menuRes = R.menu.menu_home;
                 onCreateOptionsMenu(menu);
                 drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             case R.id.forum:
+                AppBarLayout.LayoutParams params1 = new AppBarLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params1.setScrollFlags(0);
+                toolbar.setLayoutParams(params1);
                 loadContentFragment(FORUM_TAG);
                 toolbar.setTitle("Forum");
-                floatingActionButton.setVisibility(View.VISIBLE);
+//                floatingActionButton.setVisibility(View.VISIBLE);
                 if (!accountManager.isSignedIn()) {
                     Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-//                            showFragmentSignInSignUp(loginFragment);
                             showActivityLogin();
                         }
                     }).show();
@@ -283,16 +331,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             case R.id.chat_room:
+                toolbar.setTitle("Chat room");
+                AppBarLayout.LayoutParams params2 = new AppBarLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params2.setScrollFlags(0);
+                toolbar.setLayoutParams(params2);
                 menuRes = R.menu.menu_forum;
                 onCreateOptionsMenu(menu);
-                floatingActionButton.setVisibility(View.GONE);
+//                floatingActionButton.setVisibility(View.GONE);
                 loadContentFragment(CHAT_ROOM_TAG);
                 drawerLayout.closeDrawer(GravityCompat.START);
                 if (!accountManager.isSignedIn()) {
                     Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-//                            showFragmentSignInSignUp(loginFragment);
                             showActivityLogin();
                         }
                     }).show();
@@ -308,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void showActivityLogin() {
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, RC_LOGIN);
         overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
     }
 
@@ -336,8 +387,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 signUp.setOnMenuItemClickListener(this);
                 signIn.setOnMenuItemClickListener(this);
                 signOut.setOnMenuItemClickListener(this);
-                SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-                searchView.setQueryHint("Search ... ");
+//                SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+//                searchView.setQueryHint("Search ... ");
                 break;
 
         }
@@ -363,6 +414,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 showActivityRegister();
                 break;
             case R.id.action_sign_out:
+                progressDialog.setMessage("Singing out ...");
+                progressDialog.show();
                 SharedPreferences sharedPreferences = getSharedPreferences(LoginActivity.SHARED_PREF, MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.clear();
@@ -388,7 +441,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onBackPressed() {
         if (onMenuItemForumSelected) {
-            hideFragmentSignInSignUp();
             accountManager.setSignedIn(false);
             return;
         }
@@ -396,49 +448,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void showAcceptQuitingDialog() {
+        try {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Are you sure you want to quit ?");
+            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Are you sure you want to quit ?");
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                finish();
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-            }
-        });
-        builder.create().show();
+                }
+            });
+            builder.create().show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-
-    public void hideFragmentSignInSignUp() {
-        final FrameLayout contentMainLayout = (FrameLayout) findViewById(R.id.content_main);
-        contentMainLayout.setFocusable(true);
-        contentMainLayout.setClickable(true);
-        contentMainLayout.setFocusableInTouchMode(true);
-        contentMainLayout.setVisibility(View.VISIBLE);
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-
-        FrameLayout loginRegisterContentMainLayout = (FrameLayout) findViewById(R.id.login_register_content_main);
-        AnimationSet animationSet = (AnimationSet) AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
-        loginRegisterContentMainLayout.startAnimation(animationSet);
-        loginRegisterContentMainLayout.setVisibility(View.GONE);
-        onMenuItemForumSelected = false;
-    }
 
     @Override
     protected void onStop() {
         super.onStop();
         try {
-            if (MainActivity.isNetWorkAvailable(this) && !homeFragment.getArrNewsItem().isEmpty()) {
-                MyDatabase myDatabase = new MyDatabase(MainActivity.this);
-                myDatabase.clearTable(MyDatabase.TB_NAME_NEWS);
-                myDatabase.addArrNewsItem(homeFragment.getArrNewsItem());
-            }
+//            if (MainActivity.isNetWorkAvailable(this) && !homeFragment.getArrNewsItem().isEmpty()) {
+//                MyDatabase myDatabase = new MyDatabase(MainActivity.this);
+//                myDatabase.clearTable(MyDatabase.TB_NAME_NEWS);
+//                myDatabase.addArrNewsItem(homeFragment.getArrNewsItem());
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }

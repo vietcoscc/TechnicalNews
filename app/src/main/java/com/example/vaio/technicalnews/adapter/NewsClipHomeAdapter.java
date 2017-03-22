@@ -34,7 +34,6 @@ public class NewsClipHomeAdapter extends RecyclerView.Adapter<NewsClipHomeAdapte
     public NewsClipHomeAdapter(Context context, ArrayList<NewsClipItem> arrNewsClipItem) {
         this.arrNewsClipItem = arrNewsClipItem;
         this.context = context;
-        this.fragmentManager = fragmentManager;
     }
 
     @Override
@@ -47,19 +46,9 @@ public class NewsClipHomeAdapter extends RecyclerView.Adapter<NewsClipHomeAdapte
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final NewsClipItem newsClipItem = arrNewsClipItem.get(position);
-//        holder.youTubePlayerFragment.initialize(ReviewsFragment.API_KEY, new YouTubePlayer.OnInitializedListener() {
-//            @Override
-//            public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
-//                youTubePlayer.loadVideo(newsClipItem.getClipLink());
-//            }
-//
-//            @Override
-//            public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
-//
-//            }
-//        });
-        Picasso.with(context).load(newsClipItem.getImageLink()).error(R.drawable.warning).placeholder(R.drawable.loading).into(holder.ivImage);
-
+        Picasso.with(context).
+                load(newsClipItem.getImageLink()).
+                into(holder.ivImage);
         holder.ivImage.setY(holder.ivImage.getX() * 2 / 3);
         holder.tvTitle.setText(newsClipItem.getTitle());
         holder.tvTimeStamp.setText(newsClipItem.getTimeStamp());
@@ -80,7 +69,6 @@ public class NewsClipHomeAdapter extends RecyclerView.Adapter<NewsClipHomeAdapte
 
         public ViewHolder(View itemView) {
             super(itemView);
-//            youTubePlayerFragment = (YouTubePlayerSupportFragment) fragmentManager.findFragmentById(R.id.youtubePlayerFragment);
             ivImage = (ImageView) itemView.findViewById(R.id.ivImage);
             tvTitle = (TextView) itemView.findViewById(R.id.tvTitle);
             tvViewNumber = (TextView) itemView.findViewById(R.id.tvViewNumber);
