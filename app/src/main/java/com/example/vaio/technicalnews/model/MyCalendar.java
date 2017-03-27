@@ -32,4 +32,12 @@ public class MyCalendar {
     public static int getHour() {
         return calendar.get(Calendar.HOUR);
     }
+
+    public static String getDate() {
+        return getDay() + " / " + getMonth() + " / " + getYear();
+    }
+
+    public static String getTimeStamp() {
+        return getHour() + " : " + getMinute() + " : " + getSecond();
+    }
 }

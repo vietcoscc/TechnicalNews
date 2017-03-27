@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -20,6 +21,7 @@ import com.example.vaio.technicalnews.activity.LoginActivity;
 import com.example.vaio.technicalnews.activity.MainActivity;
 import com.example.vaio.technicalnews.adapter.RoomChatAdapter;
 import com.example.vaio.technicalnews.model.AccountManager;
+import com.example.vaio.technicalnews.model.FireBaseReference;
 import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.ItemChat;
 import com.example.vaio.technicalnews.model.RoomChat;
@@ -33,6 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
+import static com.example.vaio.technicalnews.model.FireBaseReference.ROOM_CHAT;
 
 /**
  * Created by vaio on 15/03/2017.
@@ -40,12 +43,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class ChatRoomFragment extends Fragment {
     public static final String TAG = "ChatRoomFragment";
-    public static final String AREA = "area";
-    public static final String ROOM_CHAT = "Room chat";
-    public static final String ARR_CHAT = "arrChat";
-    public static final String ONLINE_NUMBER = "onlineNumber";
-    public static final String NAME = "name";
-    public static final String CHAT = "chat";
+
     public static final int REQUEST_CODE = 4;
     public static final String POSITION = "position";
     public static final String KEY = "key";
@@ -81,7 +79,8 @@ public class ChatRoomFragment extends Fragment {
     private void getData() {
         arrRoomChat.clear();
         adapter = new RoomChatAdapter(arrRoomChat);
-        databaseReference.child(ROOM_CHAT).addChildEventListener(new ChildEventListener() {
+        FireBaseReference.getRoomChatRef().keepSynced(true);
+        FireBaseReference.getRoomChatRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 final RoomChat roomChat = dataSnapshot.getValue(RoomChat.class);
@@ -112,7 +111,7 @@ public class ChatRoomFragment extends Fragment {
 
             }
         });
-        databaseReference.child(ROOM_CHAT).addListenerForSingleValueEvent(new ValueEventListener() {
+        FireBaseReference.getRoomChatRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 contentLoadingProgressBar.hide();
@@ -132,6 +131,7 @@ public class ChatRoomFragment extends Fragment {
         Log.e(TAG, arrRoomChat.size() + "");
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClick(new RoomChatAdapter.OnItemClick() {
             @Override

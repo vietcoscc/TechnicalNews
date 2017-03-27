@@ -38,7 +38,7 @@ public class MyDatabase {
 
     public static final String PATH = Environment.getDataDirectory() + "/data/com.example.vaio.technicalnews/databases/" + DB_NAME;
     private Context context;
-    private SQLiteDatabase database;
+    private SQLiteDatabase database;  
 
     public MyDatabase(Context context) throws Exception {
         this.context = context;

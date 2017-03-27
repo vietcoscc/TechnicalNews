@@ -98,7 +98,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        if(progressDialog!=null && progressDialog.isShowing()){
+                        if (progressDialog != null && progressDialog.isShowing()) {
                             progressDialog.hide();
                         }
                     }
@@ -130,8 +130,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             Log.w(TAG, "signInWithCredential", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-                            if(progressDialog!=null && progressDialog.isShowing()){
-                                progressDialog.hide();
+                            if (progressDialog != null && progressDialog.isShowing()) {
+                                progressDialog.dismiss();
                             }
                         } else {
 
@@ -139,6 +139,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             uploadAvatarFromStream.setOnUploadComplete(new UploadAvatarFromRegister.OnUploadComplete() {
                                 @Override
                                 public void onComplete() {
+
                                     Toast.makeText(LoginActivity.this, "Authentication successful !",
                                             Toast.LENGTH_SHORT).show();
                                     FirebaseStorage.getInstance().getReference().
@@ -150,17 +151,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                                     Log.e(TAG, uri.toString());
                                                     accountManager.setPathPhoto(uri.toString());
                                                     if (progressDialog != null && progressDialog.isShowing()) {
-                                                        progressDialog.hide();
+                                                        progressDialog.dismiss();
+                                                        Toast.makeText(LoginActivity.this, "Authentication successful !",
+                                                                Toast.LENGTH_SHORT).show();
+                                                        onBackPressed();
                                                     }
-                                                    Toast.makeText(LoginActivity.this, "Authentication successful !",
-                                                            Toast.LENGTH_SHORT).show();
-                                                    onBackPressed();
                                                 }
                                             }).addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
-                                            if(progressDialog!=null && progressDialog.isShowing()){
-                                                progressDialog.hide();
+                                            if (progressDialog != null && progressDialog.isShowing()) {
+                                                progressDialog.dismiss();
                                             }
                                         }
                                     });
@@ -266,17 +267,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         try {
             if (requestCode == RC_SIGN_IN) {
-                progressDialog.show();
+                if (progressDialog != null && !progressDialog.isShowing()) {
+                    progressDialog.show();
+                }
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 if (result != null) {
                     if (result.isSuccess()) {
-
-                        // Google Sign In was successful, authenticate with Firebase
                         GoogleSignInAccount account = result.getSignInAccount();
                         firebaseAuthWithGoogle(account);
                     } else {
-                        // Google Sign In failed, update UI appropriately
-                        // ...
+
                     }
                 }
             }

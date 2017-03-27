@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,12 +25,15 @@ import java.util.ArrayList;
  */
 
 public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.ViewHolder> {
+    private static final String TAG = "TopicsForumAdapter";
     private ArrayList<Topic> arrTopic;
+    private AccountManager accountManager;
     private ClickListener clickListener;
     private Context context;
 
-    public TopicsForumAdapter(ArrayList<Topic> arrTopic) {
+    public TopicsForumAdapter(ArrayList<Topic> arrTopic, AccountManager accountManager) {
         this.arrTopic = arrTopic;
+        this.accountManager = accountManager;
     }
 
     @Override
@@ -44,7 +48,13 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         Topic topic = arrTopic.get(arrTopic.size() - position - 1);
-        Picasso.with(context).load(topic.getPhotoPath()).into(holder.ivAvatar);
+        Log.e(TAG, topic.getPhotoPath());
+        if (accountManager.getCurrentUser() != null && accountManager.getCurrentUser().getEmail().equals(topic.getMail())) {
+            Picasso.with(context).load(accountManager.getCurrentUser().getPhotoUrl()).into(holder.ivAvatar);
+        } else {
+            Picasso.with(context).load(topic.getPhotoPath()).into(holder.ivAvatar);
+        }
+
         holder.tvEmail.setText(topic.getName());
         holder.tvSubject.setText(topic.getSubject().toString());
         holder.tvDate.setText(topic.getDate().toString());

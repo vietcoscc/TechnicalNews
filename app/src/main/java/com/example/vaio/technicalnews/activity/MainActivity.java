@@ -51,6 +51,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -65,20 +66,11 @@ import java.util.ArrayList;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MenuItem.OnMenuItemClickListener, View.OnClickListener {
+    public static final String TAG = "MainActivity";
     public static final String HOME_TAG = "home";
     public static final String FORUM_TAG = "forum";
     public static final String CHAT_ROOM_TAG = "chat room";
-    public static final String TOPIC = "Topic";
-    public static final String TYPE_1 = "Ask and answer";
-    public static final String TYPE_2 = "Tips";
-    public static final String TYPE_3 = "Trading";
-
-    public static final int RC_POST = 0;
-    //
-    public static final String DISPLAY_NAME = "display name";
-    public static final String EMAIL = "email";
-    private static final int RC_LOGIN = 1;
-    private static final String TAG = "MainActivity";
+    public static final int RC_LOGIN = 1;
     // component
     private Toolbar toolbar; // toolbar main activity
     //    private FloatingActionButton floatingActionButton;
@@ -101,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int menuRes = R.menu.menu_home;
 
     private AccountManager accountManager;
-    private StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
     private ProgressDialog progressDialog;
     private Boolean onMenuItemForumSelected = false;
@@ -117,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         try {
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
             initAccountManager();
             if (isNetWorkAvailable(this)) {
                 checkLogin();
@@ -340,14 +332,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //                floatingActionButton.setVisibility(View.GONE);
                 loadContentFragment(CHAT_ROOM_TAG);
                 drawerLayout.closeDrawer(GravityCompat.START);
-                if (!accountManager.isSignedIn()) {
-                    Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            showActivityLogin();
-                        }
-                    }).show();
-                }
+
                 break;
             case R.id.setting:
                 Intent intent = new Intent(MainActivity.this, SettingActivity.class);
@@ -357,10 +342,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    private void showActivityLogin() {
+    public void showActivityLogin() {
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivityForResult(intent, RC_LOGIN);
         overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
+    }
+
+    public void showLoginSnackBar() {
+        if (accountManager.getCurrentUser() == null) {
+            Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showActivityLogin();
+                }
+            }).show();
+        }
     }
 
     private void showActivityRegister() {
@@ -387,8 +383,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 signUp.setOnMenuItemClickListener(this);
                 signIn.setOnMenuItemClickListener(this);
                 signOut.setOnMenuItemClickListener(this);
-//                SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-//                searchView.setQueryHint("Search ... ");
+
                 break;
 
         }
@@ -406,11 +401,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.action_grid:
                 break;
             case R.id.action_sign_in:
-//                showFragmentSignInSignUp(loginFragment);
                 showActivityLogin();
                 break;
             case R.id.action_sign_up:
-//                showFragmentSignInSignUp(registerFragment);
                 showActivityRegister();
                 break;
             case R.id.action_sign_out:
@@ -473,19 +466,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onStop() {
         super.onStop();
-        try {
-//            if (MainActivity.isNetWorkAvailable(this) && !homeFragment.getArrNewsItem().isEmpty()) {
-//                MyDatabase myDatabase = new MyDatabase(MainActivity.this);
-//                myDatabase.clearTable(MyDatabase.TB_NAME_NEWS);
-//                myDatabase.addArrNewsItem(homeFragment.getArrNewsItem());
-//            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        try {
+            if (MainActivity.isNetWorkAvailable(this) && !homeFragment.getArrNewsItem().isEmpty()) {
+                MyDatabase myDatabase = new MyDatabase(MainActivity.this);
+                myDatabase.clearTable(MyDatabase.TB_NAME_NEWS);
+                myDatabase.addArrNewsItem(homeFragment.getArrNewsItem());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

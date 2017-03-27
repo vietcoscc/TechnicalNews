@@ -25,8 +25,8 @@ public class ViewPagerHomeAdapter extends FragmentStatePagerAdapter {
         super(fm);
         this.context = context;
         this.tabCount = tabCount;
-        newsFragment = new NewsFragment(context);
-        reviewsFragment = new ReviewsFragment(fm2, context);
+        newsFragment = new NewsFragment();
+        reviewsFragment = new ReviewsFragment(fm2);
     }
 
     @Override

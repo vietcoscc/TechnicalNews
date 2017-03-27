@@ -41,7 +41,9 @@
             android:label="Setting"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.DeviceDefault.Light" />
-        <activity android:name=".activity.CommentActivity" />
+        <activity android:name=".activity.CommentActivity">
+
+        </activity>
         <activity android:name=".activity.YoutubePlayerActivity" />
         <activity android:name=".activity.ChatActivity" />
         <activity

@@ -12,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -48,35 +49,20 @@ public class ReviewsFragment extends Fragment {
     public static final String LINK_CHANEL = "https://www.youtube.com/user/CNETTV/videos?shelf_id=0&view=0&sort=dd";
     public static final String YOUTUBE_ID = "youtubeId";
     public static final String ARR_CLIPS_DATA = "arrClipsData";
-    private Context context;
     private RecyclerView recyclerView;
     private NewsClipHomeAdapter newsClipHomeAdapter;
     private ArrayList<NewsClipItem> arrNewsClipItem = new ArrayList<>();
     private ContentLoadingProgressBar contentLoadingProgressBar;
     private SwipeRefreshLayout swipeRefreshLayout;
     private android.app.FragmentManager fragmentManager;
-    private Handler handlerReceiveNewsClipData = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == WHAT_RECEIVE_NEWS_CLIP_DATA) {
-                arrNewsClipItem.clear();
-                arrNewsClipItem.addAll((Collection<? extends NewsClipItem>) msg.obj);
-                newsClipHomeAdapter.notifyDataSetChanged();
-                if (contentLoadingProgressBar.isShown()) {
-                    contentLoadingProgressBar.hide();
-                }
-            }
-        }
-    };
 
-    public ReviewsFragment(android.app.FragmentManager fragmentManager, Context context) {
-        this.context = context;
+
+    public ReviewsFragment(android.app.FragmentManager fragmentManager) {
         this.fragmentManager = fragmentManager;
     }
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        inflater = LayoutInflater.from(context);
+        inflater = LayoutInflater.from(getContext());
 
         View view = inflater.inflate(R.layout.fragment_reviews, container, false);
         initViews(view);
@@ -85,7 +71,18 @@ public class ReviewsFragment extends Fragment {
     }
 
     private void getDataFromWeb() {
-        NewsClipParser newsClipParser = new NewsClipParser(context, handlerReceiveNewsClipData);
+        NewsClipParser newsClipParser = new NewsClipParser(getContext());
+        newsClipParser.setOnReciveData(new NewsClipParser.OnReciveData() {
+            @Override
+            public void onReceive(ArrayList<NewsClipItem> arrNewsClipItem) {
+                arrNewsClipItem.clear();
+                arrNewsClipItem.addAll(arrNewsClipItem);
+                newsClipHomeAdapter.notifyDataSetChanged();
+                if (contentLoadingProgressBar != null && contentLoadingProgressBar.isShown()) {
+                    contentLoadingProgressBar.hide();
+                }
+            }
+        });
         newsClipParser.execute(LINK_CHANEL);
 
     }
@@ -107,13 +104,15 @@ public class ReviewsFragment extends Fragment {
         contentLoadingProgressBar = (ContentLoadingProgressBar) view.findViewById(R.id.contentNewsLoading);
 
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
-        newsClipHomeAdapter = new NewsClipHomeAdapter(context, arrNewsClipItem);
+//        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        newsClipHomeAdapter = new NewsClipHomeAdapter(getContext(), arrNewsClipItem);
         recyclerView.setAdapter(newsClipHomeAdapter);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         newsClipHomeAdapter.setOnItemClickListener(new NewsClipHomeAdapter.OnItemClickListener() {
             @Override
             public void onClick(View itemView, final int position) {
-                Intent intent = new Intent(context, YoutubePlayerActivity.class);
+                Intent intent = new Intent(getContext(), YoutubePlayerActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putParcelableArrayList(ARR_CLIPS_DATA, arrNewsClipItem);
                 bundle.putString(YOUTUBE_ID, arrNewsClipItem.get(position).getClipLink());

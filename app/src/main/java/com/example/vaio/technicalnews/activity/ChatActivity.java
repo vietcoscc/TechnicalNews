@@ -18,6 +18,7 @@ import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.adapter.ChatAdapter;
 import com.example.vaio.technicalnews.fragment.ChatRoomFragment;
 import com.example.vaio.technicalnews.model.AccountManager;
+import com.example.vaio.technicalnews.model.FireBaseReference;
 import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.ItemChat;
 import com.example.vaio.technicalnews.model.MyCalendar;
@@ -32,6 +33,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+
+import static com.example.vaio.technicalnews.model.FireBaseReference.ROOM_CHAT;
 
 public class ChatActivity extends AppCompatActivity implements View.OnClickListener {
     public static final String CHAT_ROOM = "Chat room";
@@ -67,13 +70,14 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
 
         Intent intent = getIntent();
-        roomChat = (RoomChat) intent.getExtras().getSerializable(ChatRoomFragment.ROOM_CHAT);
+        roomChat = (RoomChat) intent.getExtras().getSerializable(ROOM_CHAT);
         position = intent.getExtras().getInt(ChatRoomFragment.POSITION);
         key = intent.getExtras().getString(ChatRoomFragment.KEY);
 
         Log.e(TAG, roomChat.getArea());
         arrChat.clear();
-        databaseReference.child(ChatRoomFragment.ROOM_CHAT).child(key).child(ChatRoomFragment.ARR_CHAT).addChildEventListener(new ChildEventListener() {
+        FireBaseReference.getArrChatRef(key).keepSynced(true);
+        FireBaseReference.getArrChatRef(key).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 ItemChat chat = dataSnapshot.getValue(ItemChat.class);
@@ -143,16 +147,13 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.ibSend:
                 final String chat = edtComment.getText().toString();
                 if (!chat.isEmpty()) {
-
 //                    Log.e(TAG, chat);
-
-
-                    String date = MyCalendar.getDay() + " / " + MyCalendar.getMonth() + " / " + MyCalendar.getYear();
-                    String timeStamp = MyCalendar.getHour() + " : " + MyCalendar.getMinute() + " : " + MyCalendar.getSecond();
+                    String date = MyCalendar.getDate();
+                    String timeStamp = MyCalendar.getTimeStamp();
                     arrChat.add(new ItemChat(accountManager.getCurrentUser().getDisplayName(), chat,
                             date, timeStamp, accountManager.getCurrentUser().getUid(), accountManager.getPathPhoto()));
                     chatAdapter.notifyDataSetChanged();
-                    databaseReference.child(ChatRoomFragment.ROOM_CHAT).child(key).child(ChatRoomFragment.ARR_CHAT).setValue(arrChat);
+                    FireBaseReference.getArrChatRef(key).setValue(arrChat);
                     recyclerView.scrollToPosition(arrChat.size() - 1);
                     arrChat.remove(arrChat.size() - 1);
                     edtComment.setText("");

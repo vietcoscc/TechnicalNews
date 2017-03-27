@@ -3,6 +3,7 @@ package com.example.vaio.technicalnews.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -25,6 +26,7 @@ import com.example.vaio.technicalnews.adapter.GroupForumExpandableListViewAdapte
 import com.example.vaio.technicalnews.adapter.TopicsForumAdapter;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.ChildForumItem;
+import com.example.vaio.technicalnews.model.FireBaseReference;
 import com.example.vaio.technicalnews.model.GroupForumItem;
 import com.example.vaio.technicalnews.model.Topic;
 import com.google.firebase.database.ChildEventListener;
@@ -36,31 +38,31 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-import static com.example.vaio.technicalnews.activity.MainActivity.TYPE_1;
+import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by vaio on 12/22/2016.
  */
 
 public class ForumFragment extends Fragment {
-
+    public static final int RC_POST = 0;
     public static final String TAG = "ForumFragment";
-    private static final String FORUM = "Forum";
+
     public static final String GROUP_FORUM_ITEM = "Group forum item";
     public static final String CHILD_FORUM_ITEM = "Child forum item";
-    private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+    public static final String GROUP_FORUM_KEY = "Group forum key";
 
+    public static final String ARR_CHILD_FORUM_ITEM = "arrChildForumItem";
+    public static final String CHILD_FORUM_POSITION = "Child forum posiiton";
+
+    private SwipeRefreshLayout swipeRefreshLayout;
     private ExpandableListView expandableListView;
     private GroupForumExpandableListViewAdapter adapter;
     private ContentLoadingProgressBar contentLoadingProgressBar;
     private AccountManager accountManager;
     private ArrayList<GroupForumItem> arrGroupForumItem = new ArrayList<>();
-    private ArrayList<String> arrGroupForumItemKey = new ArrayList<>();
 
     public ForumFragment(AccountManager accountManager) {
-//        arrTopicKey = new ArrayList<>();
-//        arrTopic = new ArrayList<>();
-//        receiveData();
         this.accountManager = accountManager;
     }
 
@@ -69,7 +71,6 @@ public class ForumFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         View view = layoutInflater.inflate(R.layout.fragment_forum, container, false);
-//        initComponent(view);
 
         receiveData();
         initViews(view);
@@ -77,107 +78,84 @@ public class ForumFragment extends Fragment {
     }
 
     private void initViews(final View view) {
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                receiveData();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                }, 1000);
+            }
+        });
         contentLoadingProgressBar = (ContentLoadingProgressBar) view.findViewById(R.id.contentLoadingProgressBar);
         contentLoadingProgressBar.show();
         expandableListView = (ExpandableListView) view.findViewById(R.id.expandableListView);
-//        ArrayList<GroupForumItem> arrGroupForumItem = new ArrayList<>();
-//        ArrayList<ChildForumItem> arrChildForumItem = new ArrayList<>();
-//        arrChildForumItem.add(new ChildForumItem("Thông tin công nghệ", "0", "0"));
-//        arrChildForumItem.add(new ChildForumItem("Thương mại điện tử", "0", "0"));
-//        arrChildForumItem.add(new ChildForumItem("Đám mây, Dịch vụ trực tuyến", "0", "0"));
-//        arrChildForumItem.add(new ChildForumItem("Thăm dò công nghệ", "0", "0"));
-//        arrChildForumItem.add(new ChildForumItem("Quảng cáo - Khuyến mãi", "0", "0"));
-//        arrChildForumItem.add(new ChildForumItem("App", "0", "0"));
-//        GroupForumItem groupForumItem = new GroupForumItem("Thông tin - Sự kiện", arrChildForumItem);
-//        arrGroupForumItem.add(groupForumItem);
-//
-//        ArrayList<ChildForumItem> arrChildForumItem2 = new ArrayList<>();
-//        arrChildForumItem2.add(new ChildForumItem("Windows", "0", "0"));
-//        arrChildForumItem2.add(new ChildForumItem("Apple - Mac OS X", "0", "0"));
-//        arrChildForumItem2.add(new ChildForumItem("Linux", "0", "0"));
-//        arrChildForumItem2.add(new ChildForumItem("Chrome OS", "0", "0"));
-//        arrChildForumItem2.add(new ChildForumItem("Tư vấn chọn mua Máy tính", "0", "0"));
-//        GroupForumItem groupForumItem2 = new GroupForumItem("Máy tính", arrChildForumItem2);
-//        arrGroupForumItem.add(groupForumItem2);
-//
-//        ArrayList<ChildForumItem> arrChildForumItem3 = new ArrayList<>();
-//        arrChildForumItem3.add(new ChildForumItem("iOS", "0", "0"));
-//        arrChildForumItem3.add(new ChildForumItem("Android", "0", "0"));
-//        arrChildForumItem3.add(new ChildForumItem("Windows Phone", "0", "0"));
-//        arrChildForumItem3.add(new ChildForumItem("BlackBerry", "0", "0"));
-//        arrChildForumItem3.add(new ChildForumItem("Symbian", "0", "0"));
-//        arrChildForumItem3.add(new ChildForumItem("Mạng di động", "0", "0"));
-//        GroupForumItem groupForumItem3 = new GroupForumItem("Điện thoại", arrChildForumItem3);
-//        arrGroupForumItem.add(groupForumItem3);
-//        for (int i = 0; i < arrGroupForumItem.size(); i++) {
-//            databaseReference.child(FORUM).push().setValue(arrGroupForumItem.get(i));
-//        }
         adapter = new GroupForumExpandableListViewAdapter(getContext(), arrGroupForumItem);
         expandableListView.setAdapter(adapter);
         expandableListView.setGroupIndicator(null);
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                Log.e(TAG, groupPosition + " : " + childPosition);
+                if (accountManager.getCurrentUser() == null) {
+                    MainActivity mainActivity = (MainActivity) getContext();
+                    mainActivity.showLoginSnackBar();
+                    return false;
+                }
+
                 Intent intent = new Intent(getContext(), TopicActivity.class);
                 GroupForumItem groupForumItem = arrGroupForumItem.get(groupPosition);
                 ChildForumItem childForumItem = groupForumItem.getArrChildForumItem().get(childPosition);
                 intent.putExtra(GROUP_FORUM_ITEM, groupForumItem);
                 intent.putExtra(CHILD_FORUM_ITEM, childForumItem);
-                startActivity(intent);
+
+                Log.e(TAG, groupPosition + " : " + childForumItem.getPosition());
+                startActivityForResult(intent, RC_POST);
                 return true;
             }
         });
-//        for (int i = 0; i < arrGroupForumItem.size(); i++) {
-//            Log.e(TAG, i + "");
-//            expandableListView.expandGroup(i);
-//            GroupForumItem groupForumItem_ = arrGroupForumItem.get(i);
-//            FirebaseDatabase.getInstance().getReference().child(FORUM).push().setValue(groupForumItem_);
-//            for (int j = 0; j < groupForumItem_.getArrChildForumItem().size(); j++) {
-//                ChildForumItem childForumItem = arrChildForumItem.get(j);
-//                FirebaseDatabase.getInstance().getReference().
-//                        child(FORUM).
-//                        child(groupForumItem_.getName()).
-//                        child(childForumItem.getName()).setValue(childForumItem);
-//            }
-//
-//
-//        }
     }
 
     private void receiveData() {
         arrGroupForumItem.clear();
-        databaseReference.child(FORUM).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                GroupForumItem groupForumItem = dataSnapshot.getValue(GroupForumItem.class);
-                arrGroupForumItem.add(groupForumItem);
-                arrGroupForumItemKey.add(dataSnapshot.getKey());
-                adapter.notifyDataSetChanged();
-                expandableListView.expandGroup(arrGroupForumItem.size() - 1);
-            }
+        FireBaseReference.getForumRef().keepSynced(true);
+        FireBaseReference.getForumRef().
+                addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        GroupForumItem groupForumItem = dataSnapshot.getValue(GroupForumItem.class);
+                        groupForumItem.setKey(dataSnapshot.getKey());
+                        arrGroupForumItem.add(groupForumItem);
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                        Log.e(TAG, dataSnapshot.getKey());
+                        adapter.notifyDataSetChanged();
+                        expandableListView.expandGroup(arrGroupForumItem.size() - 1);
+                    }
 
-            }
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    }
 
-            }
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    }
 
-            }
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                    }
 
-            }
-        });
-        databaseReference.child(FORUM).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+        FireBaseReference.getForumRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 contentLoadingProgressBar.hide();
@@ -188,5 +166,15 @@ public class ForumFragment extends Fragment {
 
             }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_POST) {
+            if (resultCode == RESULT_OK) {
+                receiveData();
+            }
+        }
     }
 }

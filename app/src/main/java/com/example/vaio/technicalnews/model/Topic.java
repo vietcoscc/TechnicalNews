@@ -1,12 +1,13 @@
 package com.example.vaio.technicalnews.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by vaio on 12/28/2016.
  */
 
-public class Topic {
+public class Topic implements Serializable {
     private String subject;
     private String content;
     private String date;
@@ -19,13 +20,23 @@ public class Topic {
     private String mail;
     private String name;
 
-    private ArrayList<String> arrComment;
+    private ArrayList<Comment> arrComment;
     private String photoPath;
 
     public Topic() {
     }
 
-    public Topic(String subject, String content, String date, String time, int numberCare, int numberView, int numberReply, String mail, String name, ArrayList<String> arrComment, String photoPath) {
+    public Topic(String subject,
+                 String content,
+                 String date,
+                 String time,
+                 int numberCare,
+                 int numberView,
+                 int numberReply,
+                 String mail,
+                 String name,
+                 ArrayList<Comment> arrComment,
+                 String photoPath) {
         this.subject = subject;
         this.content = content;
         this.date = date;
@@ -111,11 +122,11 @@ public class Topic {
         this.name = name;
     }
 
-    public ArrayList<String> getArrComment() {
+    public ArrayList<Comment> getArrComment() {
         return arrComment;
     }
 
-    public void setArrComment(ArrayList<String> arrComment) {
+    public void setArrComment(ArrayList<Comment> arrComment) {
         this.arrComment = arrComment;
     }
 

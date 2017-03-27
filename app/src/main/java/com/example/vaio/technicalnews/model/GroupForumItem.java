@@ -8,15 +8,25 @@ import java.util.ArrayList;
  */
 
 public class GroupForumItem implements Serializable {
+    private String key;
     private String name;
     private ArrayList<ChildForumItem> arrChildForumItem;
 
     public GroupForumItem() {
     }
 
-    public GroupForumItem(String name, ArrayList<ChildForumItem> arrChildForumItem) {
+    public GroupForumItem(String key, String name, ArrayList<ChildForumItem> arrChildForumItem) {
+        this.key = key;
         this.name = name;
         this.arrChildForumItem = arrChildForumItem;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getName() {

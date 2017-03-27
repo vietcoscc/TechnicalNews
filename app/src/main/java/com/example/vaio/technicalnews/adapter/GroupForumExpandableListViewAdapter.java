@@ -86,8 +86,8 @@ public class GroupForumExpandableListViewAdapter extends BaseExpandableListAdapt
         TextView tvPostNumber = (TextView) convertView.findViewById(R.id.tvPostNumer);
         ChildForumItem childForumItem = arrGroupForumItem.get(groupPosition).getArrChildForumItem().get(childPosition);
         tvName.setText(childForumItem.getName());
-        tvTopicNumber.setText(childForumItem.getTopicNumber());
-        tvPostNumber.setText(childForumItem.getPostNumber());
+        tvTopicNumber.setText(childForumItem.getTopicNumber() + "");
+        tvPostNumber.setText(childForumItem.getPostNumber() + "");
         return convertView;
     }
 

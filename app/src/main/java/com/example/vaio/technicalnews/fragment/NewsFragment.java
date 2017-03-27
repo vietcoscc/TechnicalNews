@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -39,7 +40,7 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
     private static final String TAG = "NewsFragment";
     public static String linkNews = "https://www.cnet.com/news/";
     protected int currentPage = 1;
-    protected Context context;
+
     protected ArrayList<NewsItem> arrNewsItem = new ArrayList<>();
     protected RecyclerView recyclerView;
     protected ContentLoadingProgressBar contentNewsLoading;
@@ -48,11 +49,9 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
     public static final String LINK_CONTENT = "link content";
     private MyDatabase myDatabase;
 
-    public NewsFragment(Context context) {
-
-        this.context = context;
+    public NewsFragment() {
         try {
-            myDatabase = new MyDatabase(context);
+            myDatabase = new MyDatabase(getContext());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -61,7 +60,7 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        inflater = LayoutInflater.from(context);
+        inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.fragment_news, container, false);
 
         try {
@@ -77,7 +76,8 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
         contentNewsLoading = (ContentLoadingProgressBar) view.findViewById(R.id.contentNewsLoading);
         //
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
-        final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+        final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         recyclerView.setLayoutManager(layoutManager);
 
 
@@ -102,9 +102,9 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
         newsHomeAdapter.setClickListener(new NewsHomeAdapter.ClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Toast.makeText(context, position + "", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), position + "", Toast.LENGTH_SHORT).show();
                 //
-                Intent intent = new Intent(context, WebContentActivity.class);
+                Intent intent = new Intent(getContext(), WebContentActivity.class);
                 intent.putExtra(LINK_CONTENT, arrNewsItem.get(position).getContentLink());
                 startActivity(intent);
             }
@@ -117,7 +117,7 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
 
 
     protected void receiveNewsItem(String link, int page) {
-        NewsContentParser newsContentParser = new NewsContentParser(context);
+        NewsContentParser newsContentParser = new NewsContentParser(getContext());
         newsContentParser.setOnReceiveData(this);
         if (page == 1) {
             newsContentParser.execute(link);
@@ -128,8 +128,6 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
     }
 
 
-
-
     public ArrayList<NewsItem> getArrNewsItem() {
         return arrNewsItem;
     }
@@ -138,7 +136,7 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
     public void onReceive(ArrayList<NewsItem> arrNewsItem) {
 
         if (arrNewsItem.isEmpty()) {
-            Toast.makeText(context, "Failed from connection ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Failed from connection ", Toast.LENGTH_SHORT).show();
             swipeRefreshLayout.setRefreshing(false);
             return;
         }

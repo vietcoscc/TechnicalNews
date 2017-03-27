@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 
 public class ChildForumItem implements Serializable {
-
+    private int position;
     private String name;
     private String topicNumber;
     private String postNumber;
@@ -15,10 +15,19 @@ public class ChildForumItem implements Serializable {
     public ChildForumItem() {
     }
 
-    public ChildForumItem(String name, String topicNumber, String postNumber) {
+    public ChildForumItem(int position, String name, String topicNumber, String postNumber) {
+        this.position = position;
         this.name = name;
         this.topicNumber = topicNumber;
         this.postNumber = postNumber;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     public String getName() {

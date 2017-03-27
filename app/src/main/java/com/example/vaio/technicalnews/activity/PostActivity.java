@@ -23,8 +23,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.ChildForumItem;
+import com.example.vaio.technicalnews.model.Comment;
+import com.example.vaio.technicalnews.model.FireBaseReference;
 import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.GroupForumItem;
 import com.example.vaio.technicalnews.model.Topic;
@@ -57,15 +60,17 @@ public class PostActivity extends AppCompatActivity {
     private static final String TAG = "PostActivity";
     private ImageView ivAvatar;
     private TextView tvName;
-    private Spinner spinnerType;
     private EditText edtContent;
     private EditText edtSubject;
+
     private FloatingActionButton fab;
     private Toolbar toolbar;
     private TextView tvPost;
-    private DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+
     private GroupForumItem groupForumItem;
     private ChildForumItem childForumItem;
+    private String groupForumKey;
+    private int childForumPosition;
     private AccountManager accountManager;
 
     @Override
@@ -74,8 +79,12 @@ public class PostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post);
         groupForumItem = (GroupForumItem) getIntent().getExtras().getSerializable(GROUP_FORUM_ITEM);
         childForumItem = (ChildForumItem) getIntent().getExtras().getSerializable(CHILD_FORUM_ITEM);
+//        groupForumKey = getIntent().getExtras().getString(ForumFragment.GROUP_FORUM_KEY);
+//        childForumPosition = getIntent().getExtras().getInt(ForumFragment.CHILD_FORUM_POSITION);
         Log.e(TAG, groupForumItem.getName());
         Log.e(TAG, childForumItem.getName());
+        Log.e(TAG, childForumItem.getPosition() + "");
+//        Log.e(TAG, groupForumKey);
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
         initToolbar();
@@ -133,12 +142,27 @@ public class PostActivity extends AppCompatActivity {
         }
         String email = accountManager.getCurrentUser().getEmail();
         String name = accountManager.getCurrentUser().getDisplayName();
-        ArrayList<String> arrComment = new ArrayList<String>();
-        arrComment.add("NQV");
-        Topic topic = new Topic(subject, content, date, time, 0, 0, 0, email, name, arrComment,accountManager.getPathPhoto());
+        ArrayList<Comment> arrComment = new ArrayList<>();
+        arrComment.add(new Comment(accountManager.getPathPhoto(), accountManager.getCurrentUser().getDisplayName(), "NQV", date, time));
+        Log.e(TAG, accountManager.getPathPhoto());
+        FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
+                addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        long count = dataSnapshot.getChildrenCount();
+                        Log.e(TAG, count + "");
+                        FireBaseReference.getPostNumberRef(groupForumKey, childForumPosition).setValue(count + "");
+                    }
 
-        reference.child(MainActivity.TOPIC).child(groupForumItem.getName()).child(childForumItem.getName()).push().setValue(topic);
-        finish();
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+        Topic topic = new Topic(subject, content, date, time, 0, 0, 0, email, name, arrComment, accountManager.getPathPhoto());
+        FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).push().setValue(topic);
+        onBackPressed();
     }
 
     @Override
@@ -177,5 +201,11 @@ public class PostActivity extends AppCompatActivity {
             }
 
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_OK);
+        super.onBackPressed();
     }
 }

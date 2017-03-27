@@ -24,16 +24,14 @@ import java.util.ArrayList;
 public class NewsClipParser extends AsyncTask<String, Void, ArrayList<NewsClipItem>> {
     public static final String TAG = "NewsClipParser";
     private Context context;
-    private Handler handlerReceiveData;
 
-    public NewsClipParser(Context context, Handler handlerReceiveData) {
-        this.handlerReceiveData = handlerReceiveData;
+    public NewsClipParser(Context context) {
         this.context = context;
     }
 
     @Override
     protected ArrayList<NewsClipItem> doInBackground(String... params) {
-        ArrayList<NewsClipItem> arrNewsClip = new ArrayList<>();
+        ArrayList<NewsClipItem> arrNewsClipItem = new ArrayList<>();
         try {
 
             String link = params[0];
@@ -51,22 +49,30 @@ public class NewsClipParser extends AsyncTask<String, Void, ArrayList<NewsClipIt
                 String timeStamp = elementsLockUpMetaInfo.get(1).text();
                 String clipLink = element.select("a.yt-uix-sessionlink").attr("href").substring(9);
 
-                arrNewsClip.add(new NewsClipItem(imageLink, title, viewNumber, timeStamp, clipLink));
+                arrNewsClipItem.add(new NewsClipItem(imageLink, title, viewNumber, timeStamp, clipLink));
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return arrNewsClip;
+        return arrNewsClipItem;
     }
 
     @Override
-    protected void onPostExecute(ArrayList<NewsClipItem> newsClipItems) {
-        super.onPostExecute(newsClipItems);
-        Message message = new Message();
-        message.what = ReviewsFragment.WHAT_RECEIVE_NEWS_CLIP_DATA;
-        message.obj = newsClipItems;
-        handlerReceiveData.sendMessage(message);
+    protected void onPostExecute(ArrayList<NewsClipItem> arrNewsClipItem) {
+        super.onPostExecute(arrNewsClipItem);
+        if (onReciveData != null) {
+            onReciveData.onReceive(arrNewsClipItem);
+        }
+    }
 
+    public void setOnReciveData(OnReciveData onReciveData) {
+        this.onReciveData = onReciveData;
+    }
+
+    private OnReciveData onReciveData;
+
+    public interface OnReciveData {
+        void onReceive(ArrayList<NewsClipItem> arrNewsClipItem);
     }
 }

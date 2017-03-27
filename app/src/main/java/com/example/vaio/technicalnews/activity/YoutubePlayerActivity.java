@@ -3,6 +3,7 @@ package com.example.vaio.technicalnews.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -39,9 +40,8 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_youtube_player);
         prepairData();
-
-        playClip();
         initViews();
+        playClip();
     }
 
     private void prepairData() {
@@ -70,6 +70,8 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity {
     private void initViews() {
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL));
         NewsClipHomeAdapter newsClipHomeAdapter = new NewsClipHomeAdapter(this, arrNewsClipItem);
         recyclerView.setAdapter(newsClipHomeAdapter);
         newsClipHomeAdapter.setOnItemClickListener(new NewsClipHomeAdapter.OnItemClickListener() {
