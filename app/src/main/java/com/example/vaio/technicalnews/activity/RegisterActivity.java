@@ -15,6 +15,9 @@ import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.GlobalData;
 
+import static com.example.vaio.technicalnews.model.MySharedPreferences.PASSWORD;
+import static com.example.vaio.technicalnews.model.MySharedPreferences.USER_NAME;
+
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener, AccountManager.OnRegisterSuccess, AccountManager.OnRegisterFail {
     private EditText edtYourName;
     private EditText edtUserName;
@@ -88,8 +91,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             progressDialog.hide();
         }
         Intent intent = new Intent();
-        intent.putExtra(LoginActivity.USER_NAME, edtUserName.getText().toString());
-        intent.putExtra(LoginActivity.PASSWORD, edtPassword.getText().toString());
+        intent.putExtra(USER_NAME, edtUserName.getText().toString());
+        intent.putExtra(PASSWORD, edtPassword.getText().toString());
         setResult(RESULT_OK, intent);
         onBackPressed();
     }

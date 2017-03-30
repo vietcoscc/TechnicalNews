@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.ItemChat;
 import com.squareup.picasso.Picasso;
 
@@ -26,10 +27,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private static final String TAG = "ChatAdapter";
     private ArrayList<ItemChat> arrChat;
     private Context context;
+    private AccountManager accountManager;
 
-    public ChatAdapter(ArrayList<ItemChat> arrChat, Context context) {
+    public ChatAdapter(ArrayList<ItemChat> arrChat, Context context, AccountManager accountManager) {
         this.arrChat = arrChat;
         this.context = context;
+        this.accountManager = accountManager;
     }
 
     @Override
@@ -45,13 +48,19 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         holder.tvChat.setText(itemChat.getChat());
         holder.tvName.setText(itemChat.getName());
 
-        holder.tvDate.setText(itemChat.getDate());
+//        holder.tvDate.setText(itemChat.getDate());
+//
+//        holder.tvTimeStamp.setText(itemChat.getTime());
+        if (itemChat.getUid().equals(accountManager.getCurrentUser().getUid())) {
+            Picasso.with(context).
+                    load(accountManager.getCurrentUser().getPhotoUrl()).
+                    into(holder.circleImageView);
+        } else {
+            Picasso.with(context).
+                    load(itemChat.getUri()).
+                    into(holder.circleImageView);
+        }
 
-        holder.tvTimeStamp.setText(itemChat.getTime());
-
-        Picasso.with(context).
-                load(arrChat.get(position).getUri()).
-                into(holder.circleImageView);
     }
 
     @Override

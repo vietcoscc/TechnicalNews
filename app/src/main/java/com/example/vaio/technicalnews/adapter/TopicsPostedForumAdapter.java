@@ -30,14 +30,14 @@ import java.util.ArrayList;
  * Created by vaio on 1/2/2017.
  */
 
-public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.ViewHolder> implements View.OnClickListener {
+public class TopicsPostedForumAdapter extends RecyclerView.Adapter<TopicsPostedForumAdapter.ViewHolder> implements View.OnClickListener {
     private static final String TAG = "TopicsForumAdapter";
     private ArrayList<Topic> arrTopic;
     private AccountManager accountManager;
     private ClickListener clickListener;
     private Context context;
 
-    public TopicsForumAdapter(ArrayList<Topic> arrTopic, AccountManager accountManager) {
+    public TopicsPostedForumAdapter(ArrayList<Topic> arrTopic, AccountManager accountManager) {
         this.arrTopic = arrTopic;
         this.accountManager = accountManager;
     }
@@ -65,7 +65,7 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
         holder.tvSubject.setText(topic.getSubject().toString());
         holder.tvDate.setText(topic.getDate().toString());
         holder.tvTime.setText(topic.getTime().toString());
-        holder.ivMore.setVisibility(View.INVISIBLE);
+
         if (position >= arrTopic.size() - 1) {
             if (onCompleteLoading != null) {
                 onCompleteLoading.onComplete();
@@ -85,7 +85,7 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
 
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView ivAvatar;
         TextView tvEmail;
         TextView tvSubject;
@@ -101,9 +101,34 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
             tvDate = (TextView) itemView.findViewById(R.id.tvDate);
             tvTime = (TextView) itemView.findViewById(R.id.tvTimeStamp);
             ivMore = (ImageView) itemView.findViewById(R.id.ivMore);
-
+            ivMore.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final Topic topic = arrTopic.get(arrTopic.size() - getPosition() - 1);
+                    PopupMenu popupMenu = new PopupMenu(context, v);
+                    popupMenu.getMenuInflater().inflate(R.menu.menu_topic_more_2, popupMenu.getMenu());
+                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            switch (item.getItemId()) {
+                                case R.id.action_delete:
+                                    FireBaseReference.getTopicKeyRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).removeValue(new DatabaseReference.CompletionListener() {
+                                        @Override
+                                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                            if (onDeletePost != null) {
+                                                onDeletePost.onDelete();
+                                            }
+                                        }
+                                    });
+                                    break;
+                            }
+                            return false;
+                        }
+                    });
+                    popupMenu.show();
+                }
+            });
             itemView.setOnClickListener(this);
-            itemView.setOnLongClickListener(this);
         }
 
         @Override
@@ -111,15 +136,6 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
             if (clickListener != null) {
                 clickListener.onItemClick(itemView, getPosition());
             }
-        }
-
-        @Override
-        public boolean onLongClick(View v) {
-            Log.e(TAG,accountManager.getCurrentUser().getDisplayName());
-            if (onItemLongClick != null && accountManager.isAdmin()) {
-                onItemLongClick.onLongLick(v, getPosition());
-            }
-            return true;
         }
     }
 
@@ -142,13 +158,13 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
         void onComplete();
     }
 
-    public void setOnItemLongClick(OnItemLongClick onItemLongClick) {
-        this.onItemLongClick = onItemLongClick;
+    public void setOnDeletePost(OnDeletePost onDeletePost) {
+        this.onDeletePost = onDeletePost;
     }
 
-    private OnItemLongClick onItemLongClick;
+    private OnDeletePost onDeletePost;
 
-    public interface OnItemLongClick {
-        void onLongLick(View view, int position);
+    public interface OnDeletePost {
+        void onDelete();
     }
 }

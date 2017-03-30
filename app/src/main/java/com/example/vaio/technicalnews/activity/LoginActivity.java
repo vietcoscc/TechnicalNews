@@ -39,15 +39,20 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.storage.FirebaseStorage;
 
+import java.util.ArrayList;
+
+import static com.example.vaio.technicalnews.model.MySharedPreferences.PASSWORD;
+import static com.example.vaio.technicalnews.model.MySharedPreferences.USER_NAME;
+
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
-    public static final String USER_NAME = "User name";
-    public static final String PASSWORD = "Password";
+
     public static final int REQUEST_REGISTER = 1;
-    public static final String SHARED_PREF = "shared preferences";
+
     private static final int RC_SIGN_IN = 1;
     private static final String TAG = "LoginActivity";
     private static final int RC_REGISTER = 2;
     private AccountManager accountManager;
+    private ArrayList<String> arrAdmin;
     private EditText edtUserName;
     private EditText edtPassword;
     private Button btnLogin;
@@ -64,6 +69,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
+        arrAdmin = globalData.getArrAdmin();
         try {
             initGoogleLogin();
             initViews();
@@ -135,7 +141,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             }
                         } else {
 
-                            UploadAvatarFromStream uploadAvatarFromStream = new UploadAvatarFromStream();
+                            UploadAvatarFromStream uploadAvatarFromStream = new UploadAvatarFromStream(LoginActivity.this);
                             uploadAvatarFromStream.setOnUploadComplete(new UploadAvatarFromRegister.OnUploadComplete() {
                                 @Override
                                 public void onComplete() {
@@ -160,16 +166,29 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                             }).addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
+                                            Toast.makeText(LoginActivity.this, "Authentication failed !",
+                                                    Toast.LENGTH_SHORT).show();
                                             if (progressDialog != null && progressDialog.isShowing()) {
                                                 progressDialog.dismiss();
+                                                onBackPressed();
                                             }
                                         }
                                     });
                                 }
                             });
+                            uploadAvatarFromStream.setOnUploadFailure(new UploadAvatarFromStream.OnUploadFailure() {
+                                @Override
+                                public void onFailure() {
+                                    Toast.makeText(LoginActivity.this, "Authentication failed !",
+                                            Toast.LENGTH_SHORT).show();
+                                    if (progressDialog != null && progressDialog.isShowing()) {
+                                        progressDialog.dismiss();
+                                        onBackPressed();
+                                    }
+                                }
+                            });
                             uploadAvatarFromStream.execute(accountManager.getCurrentUser().getPhotoUrl().toString(),
                                     accountManager.getCurrentUser().getUid());
-
                         }
 
                     }
@@ -211,13 +230,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     if (userName.isEmpty() || password.isEmpty()) {
                         btnLogin.setClickable(true);
                         Toast.makeText(this, "The feilds must not empty", Toast.LENGTH_SHORT).show();
-                        progressDialog.hide();
+                        progressDialog.dismiss();
                         return;
                     }
                     accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
                         @Override
                         public void onSuccess() {
-                            progressDialog.hide();
+                            if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
+                                accountManager.setAdmin(true);
+
+                            } else {
+                                accountManager.setAdmin(false);
+
+                            }
+                            progressDialog.dismiss();
                             onBackPressed();
 
                         }
@@ -225,7 +251,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     accountManager.setOnLoginFail(new AccountManager.OnLoginFail() {
                         @Override
                         public void onFail() {
-                            progressDialog.hide();
+                            progressDialog.dismiss();
                         }
                     });
                     accountManager.login(userName, password);
@@ -276,7 +302,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         GoogleSignInAccount account = result.getSignInAccount();
                         firebaseAuthWithGoogle(account);
                     } else {
-
+                        if (progressDialog != null && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
                     }
                 }
             }

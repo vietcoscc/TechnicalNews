@@ -11,6 +11,7 @@ import android.widget.ExpandableListAdapter;
 import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.ChildForumItem;
 import com.example.vaio.technicalnews.model.GroupForumItem;
 
@@ -25,10 +26,11 @@ public class GroupForumExpandableListViewAdapter extends BaseExpandableListAdapt
     private AnimationSet animationSetExpand;
     private AnimationSet animationSetCollapse;
     private Context context;
-
-    public GroupForumExpandableListViewAdapter(Context context, ArrayList<GroupForumItem> arrGroupForumItem) {
+    private AccountManager accountManager;
+    public GroupForumExpandableListViewAdapter(Context context, ArrayList<GroupForumItem> arrGroupForumItem, AccountManager accountManager) {
         this.arrGroupForumItem = arrGroupForumItem;
         this.context = context;
+        this.accountManager = accountManager;
         animationSetCollapse = (AnimationSet) AnimationUtils.loadAnimation(context, R.anim.anim_collapse_list);
         animationSetExpand = (AnimationSet) AnimationUtils.loadAnimation(context, R.anim.anim_expand_list);
     }
@@ -86,7 +88,7 @@ public class GroupForumExpandableListViewAdapter extends BaseExpandableListAdapt
         TextView tvPostNumber = (TextView) convertView.findViewById(R.id.tvPostNumer);
         ChildForumItem childForumItem = arrGroupForumItem.get(groupPosition).getArrChildForumItem().get(childPosition);
         tvName.setText(childForumItem.getName());
-        tvTopicNumber.setText(childForumItem.getTopicNumber() + "");
+        tvTopicNumber.setText(childForumItem.getPostNumber() + "");
         tvPostNumber.setText(childForumItem.getPostNumber() + "");
         return convertView;
     }

@@ -27,6 +27,7 @@ import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.ChildForumItem;
 import com.example.vaio.technicalnews.model.Comment;
+import com.example.vaio.technicalnews.model.Emoji;
 import com.example.vaio.technicalnews.model.FireBaseReference;
 import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.GroupForumItem;
@@ -69,8 +70,8 @@ public class PostActivity extends AppCompatActivity {
 
     private GroupForumItem groupForumItem;
     private ChildForumItem childForumItem;
-    private String groupForumKey;
-    private int childForumPosition;
+    //    private String groupForumKey;
+//    private int childForumPosition;
     private AccountManager accountManager;
 
     @Override
@@ -126,8 +127,8 @@ public class PostActivity extends AppCompatActivity {
 
     private void actionPost() {
 
-        String content = edtContent.getText().toString();
-        String subject = edtSubject.getText().toString();
+        String content = Emoji.replaceInText(edtContent.getText().toString()).trim();
+        String subject = Emoji.replaceInText(edtSubject.getText().toString()).trim();
         if (content.isEmpty() || subject.isEmpty()) {
             return;
         }
@@ -142,8 +143,8 @@ public class PostActivity extends AppCompatActivity {
         }
         String email = accountManager.getCurrentUser().getEmail();
         String name = accountManager.getCurrentUser().getDisplayName();
-        ArrayList<Comment> arrComment = new ArrayList<>();
-        arrComment.add(new Comment(accountManager.getPathPhoto(), accountManager.getCurrentUser().getDisplayName(), "NQV", date, time));
+//        ArrayList<Comment> arrComment = new ArrayList<>();
+//        arrComment.add(new Comment(accountManager.getPathPhoto(), accountManager.getCurrentUser().getDisplayName(), "NQV", date, time));
         Log.e(TAG, accountManager.getPathPhoto());
         FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
                 addValueEventListener(new ValueEventListener() {
@@ -151,7 +152,7 @@ public class PostActivity extends AppCompatActivity {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         long count = dataSnapshot.getChildrenCount();
                         Log.e(TAG, count + "");
-                        FireBaseReference.getPostNumberRef(groupForumKey, childForumPosition).setValue(count + "");
+                        FireBaseReference.getPostNumberRef(groupForumItem.getKey(), childForumItem.getPosition()).setValue(count + "");
                     }
 
                     @Override
@@ -159,8 +160,8 @@ public class PostActivity extends AppCompatActivity {
 
                     }
                 });
-
-        Topic topic = new Topic(subject, content, date, time, 0, 0, 0, email, name, arrComment, accountManager.getPathPhoto());
+        ArrayList<Comment> arrComment = new ArrayList<>();
+        Topic topic = new Topic("", "", "", subject, content, date, time, 0, 0, 0, email, name, arrComment, accountManager.getPathPhoto());
         FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).push().setValue(topic);
         onBackPressed();
     }
@@ -184,23 +185,28 @@ public class PostActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (REQUEST_CODE == requestCode) {
+        try {
+            if (REQUEST_CODE == requestCode) {
 
-            ClipData clipData = data.getClipData();
-            if (clipData != null) {
-                Log.e(TAG, clipData.getItemCount() + "");
-                for (int i = 0; i < clipData.getItemCount(); i++) {
-                    ClipData.Item item = clipData.getItemAt(i);
-                    Uri uri = item.getUri();
+                ClipData clipData = data.getClipData();
+                if (clipData != null) {
+                    Log.e(TAG, clipData.getItemCount() + "");
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        ClipData.Item item = clipData.getItemAt(i);
+                        Uri uri = item.getUri();
+                        Toast.makeText(this, uri.toString(), Toast.LENGTH_SHORT).show();
+
+                    }
+                } else {
+                    Uri uri = data.getData();
                     Toast.makeText(this, uri.toString(), Toast.LENGTH_SHORT).show();
-
                 }
-            } else {
-                Uri uri = data.getData();
-                Toast.makeText(this, uri.toString(), Toast.LENGTH_SHORT).show();
-            }
 
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
     @Override

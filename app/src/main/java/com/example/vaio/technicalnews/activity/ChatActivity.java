@@ -2,6 +2,7 @@ package com.example.vaio.technicalnews.activity;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +19,7 @@ import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.adapter.ChatAdapter;
 import com.example.vaio.technicalnews.fragment.ChatRoomFragment;
 import com.example.vaio.technicalnews.model.AccountManager;
+import com.example.vaio.technicalnews.model.Emoji;
 import com.example.vaio.technicalnews.model.FireBaseReference;
 import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.ItemChat;
@@ -35,40 +37,74 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 
 import static com.example.vaio.technicalnews.model.FireBaseReference.ROOM_CHAT;
+import static com.example.vaio.technicalnews.model.FireBaseReference.getBanRef;
 
 public class ChatActivity extends AppCompatActivity implements View.OnClickListener {
-    public static final String CHAT_ROOM = "Chat room";
     private static final String TAG = "ChatActivity";
     private EditText edtComment;
     private ImageButton ibSend;
     private RecyclerView recyclerView;
-    private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     private RoomChat roomChat;
     private int position;
     private String key;
     private ArrayList<ItemChat> arrChat = new ArrayList<>();
+    private ArrayList<String> arrBan;
     private ChatAdapter chatAdapter;
     private AccountManager accountManager;
-    private Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        initAccountManager();
-        initToolbar();
-        initData();
-        initComponent();
+        try {
+            initAccountManager();
+            initToolbar();
+            initData();
+            initComponent();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private void initAccountManager() {
+    private void initAccountManager() throws Exception {
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
+        arrBan = globalData.getArrBan();
+        FireBaseReference.getBanRef().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String mail = dataSnapshot.getValue(String.class);
+                if (!(arrBan.indexOf(mail) > -1)) {
+                    arrBan.add(mail);
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                String mail = dataSnapshot.getValue(String.class);
+                arrBan.remove(arrBan.indexOf(mail));
+                Log.e(TAG, mail);
+                Log.e(TAG, "REmoved");
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
-    private void initData() {
-
-
+    private void initData() throws Exception {
         Intent intent = getIntent();
         roomChat = (RoomChat) intent.getExtras().getSerializable(ROOM_CHAT);
         position = intent.getExtras().getInt(ChatRoomFragment.POSITION);
@@ -108,17 +144,18 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private void initToolbar() {
+    private void initToolbar() throws Exception {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        toolbar.setTitle(roomChat.getArea());
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
     }
 
-    private void initComponent() {
+    private void initComponent() throws Exception {
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        chatAdapter = new ChatAdapter(arrChat, this);
+        chatAdapter = new ChatAdapter(arrChat, this,accountManager);
         recyclerView.setAdapter(chatAdapter);
         edtComment = (EditText) findViewById(R.id.edtComment);
         ibSend = (ImageButton) findViewById(R.id.ibSend);
@@ -145,7 +182,11 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ibSend:
-                final String chat = edtComment.getText().toString();
+                if (arrBan.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
+                    Snackbar.make(v, "You have been banned ! ", 1000).show();
+                    return;
+                }
+                final String chat = Emoji.replaceInText(edtComment.getText().toString()).trim();
                 if (!chat.isEmpty()) {
 //                    Log.e(TAG, chat);
                     String date = MyCalendar.getDate();

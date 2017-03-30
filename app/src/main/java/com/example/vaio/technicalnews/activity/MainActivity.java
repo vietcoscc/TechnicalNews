@@ -46,6 +46,7 @@ import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.fragment.HomeFragment;
 import com.example.vaio.technicalnews.model.GlobalData;
+import com.example.vaio.technicalnews.model.MySharedPreferences;
 import com.example.vaio.technicalnews.model.Topic;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -65,12 +66,17 @@ import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static com.example.vaio.technicalnews.model.MySharedPreferences.PASSWORD;
+import static com.example.vaio.technicalnews.model.MySharedPreferences.SHARED_PREF;
+import static com.example.vaio.technicalnews.model.MySharedPreferences.USER_NAME;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MenuItem.OnMenuItemClickListener, View.OnClickListener {
     public static final String TAG = "MainActivity";
     public static final String HOME_TAG = "home";
     public static final String FORUM_TAG = "forum";
     public static final String CHAT_ROOM_TAG = "chat room";
     public static final int RC_LOGIN = 1;
+    private static final int RC_PROFILE = 2;
     // component
     private Toolbar toolbar; // toolbar main activity
     //    private FloatingActionButton floatingActionButton;
@@ -82,8 +88,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ForumFragment forumFragment;
     private ChatRoomFragment chatRoomFragment;
 
-
-    private FrameLayout signInSignOutLayout;
     private ArrayList<Topic> arrTopic;
     private ArrayList<String> arrTopicKey;
     //
@@ -93,9 +97,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int menuRes = R.menu.menu_home;
 
     private AccountManager accountManager;
-
+    private ArrayList<String> arrAdmin;
     private ProgressDialog progressDialog;
+
     private Boolean onMenuItemForumSelected = false;
+    private MenuItem listView;
+    private MenuItem gridView;
+    private MenuItem signIn;
+    private MenuItem signUp;
+    private MenuItem signOut;
+    private MenuItem profile;
+    private MenuItem manager;
 
     public static boolean isNetWorkAvailable(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
@@ -108,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         try {
-            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
             initAccountManager();
             if (isNetWorkAvailable(this)) {
                 checkLogin();
@@ -127,10 +139,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void checkLogin() throws Exception {
         progressDialog.show();
+        String userName = MySharedPreferences.getString(this, USER_NAME);
+        String password = MySharedPreferences.getString(this, PASSWORD);
 
-        SharedPreferences sharedPreferences = getSharedPreferences(LoginActivity.SHARED_PREF, MODE_PRIVATE);
-        String userName = sharedPreferences.getString(LoginActivity.USER_NAME, "");
-        String password = sharedPreferences.getString(LoginActivity.PASSWORD, "");
         if (userName.isEmpty() || password.isEmpty()) {
             progressDialog.hide();
             return;
@@ -138,8 +149,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
             @Override
             public void onSuccess() {
+                if (accountManager.getCurrentUser() != null) {
+                    if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
+                        accountManager.setAdmin(true);
+                        manager.setVisible(true);
+                    } else {
+                        accountManager.setAdmin(false);
+                        manager.setVisible(false);
+                    }
+                }
                 updateUI();
-                progressDialog.hide();
+                progressDialog.dismiss();
             }
         });
         accountManager.setOnLoginFail(new AccountManager.OnLoginFail() {
@@ -159,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //
         accountManager = new AccountManager(this);
         GlobalData globalData = (GlobalData) getApplication();
-        globalData.setAccountManager(accountManager);
+        accountManager = globalData.getAccountManager();
         accountManager.setOnLogout(new AccountManager.OnLogout() {
             @Override
             public void logout() {
@@ -175,6 +195,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }, 2000);
             }
         });
+        arrAdmin = globalData.getArrAdmin();
+        if (accountManager.getCurrentUser() != null) {
+            if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
+                accountManager.setAdmin(true);
+            } else {
+                accountManager.setAdmin(false);
+            }
+        }
     }
 
     private void updateUI() {
@@ -212,15 +240,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_LOGIN) {
-            if (resultCode == RESULT_OK) {
-                updateUI();
+        try {
+            if (requestCode == RC_LOGIN) {
+                if (resultCode == RESULT_OK) {
+                    if (!(arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1)) {
+
+                        if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
+                            accountManager.setAdmin(true);
+                            manager.setVisible(true);
+                        } else {
+                            accountManager.setAdmin(false);
+                            manager.setVisible(false);
+                        }
+                    }
+                    updateUI();
+                }
             }
+            if (requestCode == RC_PROFILE) {
+                if (resultCode == RESULT_OK) {
+                    showLoginSnackBar();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     private void initOthers() throws Exception {
-        signInSignOutLayout = (FrameLayout) findViewById(R.id.login_register_content_main);
         tvDisplayName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tvDisplayName);
         tvEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tvEmail);
         ivAvatar = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.ivAvatar);
@@ -234,8 +280,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initFragment() throws Exception {
-        arrTopic = new ArrayList<>();
-        arrTopicKey = new ArrayList<>();
         forumFragment = new ForumFragment(accountManager);
         homeFragment = new HomeFragment(this, getFragmentManager());
         chatRoomFragment = new ChatRoomFragment(accountManager);
@@ -356,6 +400,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     showActivityLogin();
                 }
             }).show();
+
         }
     }
 
@@ -368,22 +413,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         this.menu = menu;
-        getMenuInflater().inflate(menuRes, menu);
+
         switch (menuRes) {
-            case R.menu.menu_home:
-                MenuItem listView = menu.findItem(R.id.action_list);
-                MenuItem gridView = menu.findItem(R.id.action_grid);
-                listView.setOnMenuItemClickListener(this);
-                gridView.setOnMenuItemClickListener(this);
-                break;
+//            case R.menu.menu_home:
+//                listView = menu.findItem(R.id.action_list);
+//                gridView = menu.findItem(R.id.action_grid);
+//                listView.setOnMenuItemClickListener(this);
+//                gridView.setOnMenuItemClickListener(this);
+//                break;
             case R.menu.menu_forum:
-                MenuItem signIn = menu.findItem(R.id.action_sign_in);
-                MenuItem signUp = menu.findItem(R.id.action_sign_up);
-                MenuItem signOut = menu.findItem(R.id.action_sign_out);
+                getMenuInflater().inflate(menuRes, menu);
+                signIn = menu.findItem(R.id.action_sign_in);
+                signUp = menu.findItem(R.id.action_sign_up);
+                signOut = menu.findItem(R.id.action_sign_out);
+                profile = menu.findItem(R.id.action_view_profile);
+                manager = menu.findItem(R.id.action_mangage);
+                manager.setOnMenuItemClickListener(this);
                 signUp.setOnMenuItemClickListener(this);
                 signIn.setOnMenuItemClickListener(this);
                 signOut.setOnMenuItemClickListener(this);
+                profile.setOnMenuItemClickListener(this);
+                if (accountManager.getCurrentUser() == null) {
+                    manager.setVisible(false);
+                } else {
+                    if (!(arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1)) {
 
+                        if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
+                            manager.setVisible(true);
+                        } else {
+                            manager.setVisible(false);
+                        }
+                    }
+                }
                 break;
 
         }
@@ -399,6 +460,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 break;
             case R.id.action_grid:
+
                 break;
             case R.id.action_sign_in:
                 showActivityLogin();
@@ -409,13 +471,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.action_sign_out:
                 progressDialog.setMessage("Singing out ...");
                 progressDialog.show();
-                SharedPreferences sharedPreferences = getSharedPreferences(LoginActivity.SHARED_PREF, MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.clear();
-                editor.commit();
-
                 accountManager.logout();
                 accountManager.setSignedIn(false);
+                manager.setVisible(false);
+                break;
+            case R.id.action_view_profile:
+                if (accountManager.getCurrentUser() == null) {
+                    showLoginSnackBar();
+                } else {
+                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    startActivityForResult(intent, RC_PROFILE);
+                }
+
+                break;
+            case R.id.action_mangage:
+
                 break;
         }
         return false;
@@ -447,6 +517,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
+                    setResult(RESULT_OK);
                     finish();
                 }
             });

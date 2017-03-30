@@ -4,6 +4,8 @@ import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
+
 /**
  * Created by vaio on 27/03/2017.
  */
@@ -12,11 +14,12 @@ public class FireBaseReference {
 
     //
     public static final String FORUM = "Forum";
-    public static final String NAME = "name";
+
     public static final String POSITION = "position";
     public static final String ARR_COMMENT = "arrComment";
     public static final String POST_NUMBER = "postNumber";
     public static final String TOPIC_NUMBER = "topicNumber";
+    public static final String ARR_CHILD_FORUM_ITEM = "arrChildForumItem";
     //
     public static final String ROOM_CHAT = "Room chat";
     public static final String AREA = "area";
@@ -24,7 +27,20 @@ public class FireBaseReference {
     public static final String ONLINE_NUMBER = "onlineNumber";
     //
     public static final String TOPIC = "Topic";
+    public static final String SUBJECT = "subject";
+    public static final String CONTENT = "content";
+    public static final String DATE = "date";
+    public static final String TIME = "time";
+    public static final int NUMBER_CARE = 0;
+    public static final int NUMBER_VIEW = 0;
+    public static final int NUMBER_REPLY = 0;
+    public static final String MAIL = "mail";
+    public static final String NAME = "name";
+    public static final String PHOTO_PATH = "photoPath";
+
     public static final String TOPIC_KEY = "Topic key";
+    private static final String ADMIN = "Admin";
+    private static final String BAN = "Ban";
     private static DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
     public static DatabaseReference getArrChatRef(String key) {
@@ -52,7 +68,13 @@ public class FireBaseReference {
     }
 
     public static DatabaseReference getPostNumberRef(String groupForumItemKey, int childForumPosition) {
-        return getForumRef().child(groupForumItemKey).child(ForumFragment.ARR_CHILD_FORUM_ITEM).child(childForumPosition + "").child(POST_NUMBER);
+        return getForumRef().child(groupForumItemKey).child(ARR_CHILD_FORUM_ITEM).child(childForumPosition + "").child(POST_NUMBER);
     }
 
+    public static DatabaseReference getAdminRef() {
+        return databaseReference.child(ADMIN);
+    }
+    public static DatabaseReference getBanRef(){
+        return databaseReference.child(BAN);
+    }
 }

@@ -38,6 +38,9 @@
     <string name="search_hint">....</string>
     <string name="action_sign_in_facebook">Sign in with facebook</string>
     <string name="action_google_sign_in">Sign in with google</string>
+    <string name="action_view_profile">Profile</string>
+    <string name="action_manage">Manager</string>
+    <string name="action_delete">Delete</string>
     <string-array name="listentries">
         <item>List item 1</item>
         <item>List item 2</item>

@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.RoomChat;
 
 import java.util.ArrayList;
@@ -17,9 +18,10 @@ import java.util.ArrayList;
 
 public class RoomChatAdapter extends RecyclerView.Adapter<RoomChatAdapter.ViewHolder> {
     private ArrayList<RoomChat> arrRoomChat;
-
-    public RoomChatAdapter(ArrayList<RoomChat> arrRoomChat) {
+    private AccountManager accountManager;
+    public RoomChatAdapter(ArrayList<RoomChat> arrRoomChat, AccountManager accountManager) {
         this.arrRoomChat = arrRoomChat;
+        this.accountManager = accountManager;
     }
 
     @Override
@@ -37,7 +39,7 @@ public class RoomChatAdapter extends RecyclerView.Adapter<RoomChatAdapter.ViewHo
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.tvArea.setText(arrRoomChat.get(position).getArea());
-        holder.tvOnlineNumber.setText(arrRoomChat.get(position).getOnlineNumber() + "");
+//        holder.tvOnlineNumber.setText(arrRoomChat.get(position).getOnlineNumber() + "");
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

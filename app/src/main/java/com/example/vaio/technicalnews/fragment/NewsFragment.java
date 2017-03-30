@@ -85,7 +85,7 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                arrNewsItem.clear();
+//                arrNewsItem.clear();
                 receiveNewsItem(linkNews, 1);
                 newsHomeAdapter.notifyDataSetChanged();
             }
@@ -152,4 +152,6 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
             }
         }, 1000);
     }
+
+
 }

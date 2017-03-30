@@ -16,25 +16,30 @@ import java.util.ArrayList;
  */
 
 public class ViewPagerHomeAdapter extends FragmentStatePagerAdapter {
-    private Context context;
     private int tabCount;
     private NewsFragment newsFragment;
     private ReviewsFragment reviewsFragment;
 
-    public ViewPagerHomeAdapter(FragmentManager fm, android.app.FragmentManager fm2, Context context, int tabCount) {
+    public ViewPagerHomeAdapter(FragmentManager fm, int tabCount) {
         super(fm);
-        this.context = context;
         this.tabCount = tabCount;
         newsFragment = new NewsFragment();
-        reviewsFragment = new ReviewsFragment(fm2);
+        reviewsFragment = new ReviewsFragment();
     }
+
 
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
+                if (onTabClick != null) {
+                    onTabClick.onClick(position);
+                }
                 return newsFragment;
             case 1:
+                if (onTabClick != null) {
+                    onTabClick.onClick(position);
+                }
                 return reviewsFragment;
             default:
                 return null;
@@ -49,5 +54,15 @@ public class ViewPagerHomeAdapter extends FragmentStatePagerAdapter {
 
     public ArrayList<NewsItem> getArrNewsItem() {
         return newsFragment.getArrNewsItem();
+    }
+
+    public void setOnTabClick(OnTabClick onTabClick) {
+        this.onTabClick = onTabClick;
+    }
+
+    private OnTabClick onTabClick;
+
+    public interface OnTabClick {
+        void onClick(int position);
     }
 }

@@ -8,6 +8,10 @@ import java.util.ArrayList;
  */
 
 public class Topic implements Serializable {
+    private String key;
+    private String groupName;
+    private String childName;
+
     private String subject;
     private String content;
     private String date;
@@ -26,17 +30,10 @@ public class Topic implements Serializable {
     public Topic() {
     }
 
-    public Topic(String subject,
-                 String content,
-                 String date,
-                 String time,
-                 int numberCare,
-                 int numberView,
-                 int numberReply,
-                 String mail,
-                 String name,
-                 ArrayList<Comment> arrComment,
-                 String photoPath) {
+    public Topic(String key, String groupName, String childName, String subject, String content, String date, String time, int numberCare, int numberView, int numberReply, String mail, String name, ArrayList<Comment> arrComment, String photoPath) {
+        this.key = key;
+        this.groupName = groupName;
+        this.childName = childName;
         this.subject = subject;
         this.content = content;
         this.date = date;
@@ -48,6 +45,30 @@ public class Topic implements Serializable {
         this.name = name;
         this.arrComment = arrComment;
         this.photoPath = photoPath;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public String getChildName() {
+        return childName;
+    }
+
+    public void setChildName(String childName) {
+        this.childName = childName;
     }
 
     public String getSubject() {

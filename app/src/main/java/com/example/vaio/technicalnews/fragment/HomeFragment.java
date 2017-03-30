@@ -1,20 +1,16 @@
 package com.example.vaio.technicalnews.fragment;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.adapter.ViewPagerHomeAdapter;
-import com.example.vaio.technicalnews.database.MyDatabase;
 import com.example.vaio.technicalnews.model.NewsItem;
 
 import java.util.ArrayList;
@@ -53,12 +49,11 @@ public class HomeFragment extends android.support.v4.app.Fragment {
         viewPagerHome = (ViewPager) view.findViewById(R.id.viewPagerHome);
         tabLayoutHome = (TabLayout) view.findViewById(R.id.tabLayoutHome);
         tabLayoutHome.setupWithViewPager(viewPagerHome);
-        viewPagerHomeAdapter = new ViewPagerHomeAdapter(getFragmentManager(), fragmentManager, context, tabLayoutHome.getTabCount());
+        viewPagerHomeAdapter = new ViewPagerHomeAdapter(getFragmentManager(), tabLayoutHome.getTabCount());
         viewPagerHome.setAdapter(viewPagerHomeAdapter);
         viewPagerHome.setOffscreenPageLimit(2);
         tabLayoutHome.getTabAt(0).setIcon(R.drawable.news);
         tabLayoutHome.getTabAt(1).setIcon(R.drawable.reviews);
-
     }
 
     public ArrayList<NewsItem> getArrNewsItem() {

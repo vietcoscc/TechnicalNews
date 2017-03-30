@@ -26,6 +26,8 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.Serializable;
 
+import static com.example.vaio.technicalnews.model.MySharedPreferences.SHARED_PREF;
+
 /**
  * Created by vaio on 12/25/2016.
  */
@@ -34,9 +36,18 @@ public class AccountManager implements Serializable {
     private static final String TAG = "AccountManager";
     private Context context;
     private FirebaseAuth mAuth;
-    private StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+
     private boolean signedIn = false;
     private String pathPhoto;
+    private boolean isAdmin = false;
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
+    }
 
     public AccountManager(Context context) {
         mAuth = FirebaseAuth.getInstance();
@@ -121,8 +132,7 @@ public class AccountManager implements Serializable {
 
     public void logout() {
         signedIn = false;
-        SharedPreferences sharedPreferences = context.getSharedPreferences(LoginActivity.SHARED_PREF, Context.MODE_PRIVATE);
-        sharedPreferences.edit().clear().commit();
+        MySharedPreferences.clearSharedPref(context);
         mAuth.signOut();
         if (onLogout != null) {
             onLogout.logout();
@@ -146,8 +156,8 @@ public class AccountManager implements Serializable {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isComplete()) {
                             final Uri uri = getUriToDrawable(context, R.drawable.boss);
-                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().setDisplayName(yourName).setPhotoUri(uri).
-                                    build();
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().
+                                    setDisplayName(yourName).setPhotoUri(uri).build();
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null) {
                                 user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {

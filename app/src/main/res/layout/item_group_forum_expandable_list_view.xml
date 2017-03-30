@@ -5,13 +5,11 @@
     android:orientation="vertical">
 
     <TextView
-        android:padding="@dimen/activity_horizontal_margin"
         android:id="@+id/tvName"
         style="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:gravity="center"
+        android:padding="@dimen/activity_horizontal_margin"
         android:text="@string/app_name"
-        android:textColor="@color/md_white_1000" />
+        android:textColor="@color/colorPrimary" />
 </LinearLayout>

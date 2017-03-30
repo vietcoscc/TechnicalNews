@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.ChildForumItem;
 import com.example.vaio.technicalnews.model.GroupForumItem;
 import com.example.vaio.technicalnews.model.Topic;
@@ -25,14 +26,13 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public static final int VIEW_TYPE_HEADER = 0;
     public static final int VIEW_TYPE_COMMENT = 1;
     private static final String TAG = "CommentAdapter";
-    private GroupForumItem groupForumItem;
-    private ChildForumItem childForumItem;
+
     private Topic topic;
     private Context context;
+    private AccountManager accountManager;
 
-    public CommentAdapter(GroupForumItem groupForumItem, ChildForumItem childForumItem, Topic topic) {
-        this.groupForumItem = groupForumItem;
-        this.childForumItem = childForumItem;
+    public CommentAdapter(Topic topic, AccountManager accountManager) {
+        this.accountManager = accountManager;
         this.topic = topic;
     }
 
@@ -53,13 +53,25 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (holder instanceof HeaderViewHolder) {
             HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
             Log.e(TAG, topic.getPhotoPath());
-            Picasso.with(context).load(topic.getPhotoPath()).into(headerViewHolder.ivAvatar);
+            if (topic.getMail().equals(accountManager.getCurrentUser().getEmail())) {
+                Picasso.with(context).load(accountManager.getCurrentUser().getPhotoUrl()).into(headerViewHolder.ivAvatar);
+            } else {
+                Picasso.with(context).load(topic.getPhotoPath()).into(headerViewHolder.ivAvatar);
+            }
+
             headerViewHolder.tvContent.setText(topic.getContent());
             headerViewHolder.tvSubject.setText(topic.getSubject());
             headerViewHolder.tvName.setText(topic.getName());
+            headerViewHolder.tvTimeStamp.setText(topic.getTime());
+            headerViewHolder.tvDate.setText(topic.getDate());
         } else {
             CommentViewHolder commentViewHolder = (CommentViewHolder) holder;
-            Picasso.with(context).load(topic.getArrComment().get(position-1).getPhotoPath()).into(commentViewHolder.ivAvatar);
+            if (topic.getMail().equals(accountManager.getCurrentUser().getEmail())) {
+                Picasso.with(context).load(accountManager.getCurrentUser().getPhotoUrl()).into(commentViewHolder.ivAvatar);
+            } else {
+                Picasso.with(context).load(topic.getArrComment().get(position - 1).getPhotoPath()).into(commentViewHolder.ivAvatar);
+            }
+
             commentViewHolder.tvComment.setText(topic.getArrComment().get(position - 1).getComment());
             commentViewHolder.tvName.setText(topic.getArrComment().get(position - 1).getName());
             commentViewHolder.tvDate.setText(topic.getArrComment().get(position - 1).getDate());
@@ -78,7 +90,11 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemCount() {
-        return topic.getArrComment().size() + 1;
+        if (topic.getArrComment() == null) {
+            return 1;
+        } else {
+            return topic.getArrComment().size() + 1;
+        }
     }
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
@@ -86,7 +102,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         TextView tvName;
         TextView tvSubject;
         TextView tvContent;
-
+        TextView tvTimeStamp;
+        TextView tvDate;
 
         public HeaderViewHolder(View itemView) {
             super(itemView);
@@ -94,6 +111,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             tvName = (TextView) itemView.findViewById(R.id.tvName);
             tvSubject = (TextView) itemView.findViewById(R.id.tvSubject);
             tvContent = (TextView) itemView.findViewById(R.id.tvContent);
+            tvTimeStamp = (TextView) itemView.findViewById(R.id.tvTimeStamp);
+            tvDate = (TextView) itemView.findViewById(R.id.tvDate);
         }
     }
 

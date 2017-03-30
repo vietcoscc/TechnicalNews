@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -16,9 +17,12 @@ import java.io.InputStream;
  */
 
 public class Database {
+    private static final String TAG = "Database";
+
     public static SQLiteDatabase initDatabase(Activity activity, String databaseName) {
         try {
             String PATH = activity.getApplicationInfo().dataDir + "/databases/" + databaseName;
+            Log.e(TAG,PATH);
             File file = new File(PATH);
             if (!file.exists()) {
 

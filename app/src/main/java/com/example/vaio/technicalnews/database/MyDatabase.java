@@ -38,7 +38,7 @@ public class MyDatabase {
 
     public static final String PATH = Environment.getDataDirectory() + "/data/com.example.vaio.technicalnews/databases/" + DB_NAME;
     private Context context;
-    private SQLiteDatabase database;  
+    private SQLiteDatabase database;
 
     public MyDatabase(Context context) throws Exception {
         this.context = context;
@@ -56,24 +56,17 @@ public class MyDatabase {
         openDatabase();
         ArrayList<NewsItem> arrNewsItem = new ArrayList<>();
         Cursor cursor = database.query(TB_NAME_NEWS, null, null, null, null, null, null);
-        int idIndex = cursor.getColumnIndex(ID);
-        int nameIndex = cursor.getColumnIndex(NAME);
-        int contentPreviewIndex = cursor.getColumnIndex(CONTENT_PREVIEW);
-        int timeStampIndex = cursor.getColumnIndex(TIME_STAMP);
-        int contentLinkIndex = cursor.getColumnIndex(CONTENT_LINK);
-        int imageLinkWrapperIndex = cursor.getColumnIndex(IMAGE_LINK_WRAPPER);
-        int topicNameIndex = cursor.getColumnIndex(TOPIC_NAME);
-        int authorIndex = cursor.getColumnIndex(AUTHOR);
+
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            String id = cursor.getString(idIndex);
-            String contentPreview = cursor.getString(contentPreviewIndex);
-            String name = cursor.getString(nameIndex);
-            String timeStamp = cursor.getString(timeStampIndex);
-            String contentLink = cursor.getString(contentLinkIndex);
-            String imageLinkWrapper = cursor.getString(imageLinkWrapperIndex);
-            String topicName = cursor.getString(topicNameIndex);
-            String author = cursor.getString(authorIndex);
+            String id = cursor.getString(cursor.getColumnIndex(ID));
+            String contentPreview = cursor.getString(cursor.getColumnIndex(CONTENT_PREVIEW));
+            String name = cursor.getString(cursor.getColumnIndex(NAME));
+            String timeStamp = cursor.getString(cursor.getColumnIndex(TIME_STAMP));
+            String contentLink = cursor.getString(cursor.getColumnIndex(CONTENT_LINK));
+            String imageLinkWrapper = cursor.getString(cursor.getColumnIndex(IMAGE_LINK_WRAPPER));
+            String topicName = cursor.getString(cursor.getColumnIndex(TOPIC_NAME));
+            String author = cursor.getString(cursor.getColumnIndex(AUTHOR));
 
             NewsItem newsItem = new NewsItem(name, contentPreview, timeStamp, contentLink, imageLinkWrapper, topicName, author);
             arrNewsItem.add(newsItem);

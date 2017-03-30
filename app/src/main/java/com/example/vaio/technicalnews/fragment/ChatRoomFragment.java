@@ -78,7 +78,7 @@ public class ChatRoomFragment extends Fragment {
 
     private void getData() {
         arrRoomChat.clear();
-        adapter = new RoomChatAdapter(arrRoomChat);
+        adapter = new RoomChatAdapter(arrRoomChat,accountManager);
         FireBaseReference.getRoomChatRef().keepSynced(true);
         FireBaseReference.getRoomChatRef().addChildEventListener(new ChildEventListener() {
             @Override

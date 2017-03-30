@@ -16,6 +16,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,16 +50,17 @@ public class ReviewsFragment extends Fragment {
     public static final String LINK_CHANEL = "https://www.youtube.com/user/CNETTV/videos?shelf_id=0&view=0&sort=dd";
     public static final String YOUTUBE_ID = "youtubeId";
     public static final String ARR_CLIPS_DATA = "arrClipsData";
+    private static final String TAG = "ReviewsFragment";
     private RecyclerView recyclerView;
     private NewsClipHomeAdapter newsClipHomeAdapter;
     private ArrayList<NewsClipItem> arrNewsClipItem = new ArrayList<>();
     private ContentLoadingProgressBar contentLoadingProgressBar;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private android.app.FragmentManager fragmentManager;
 
 
-    public ReviewsFragment(android.app.FragmentManager fragmentManager) {
-        this.fragmentManager = fragmentManager;
+
+    public ReviewsFragment() {
+
     }
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -75,8 +77,9 @@ public class ReviewsFragment extends Fragment {
         newsClipParser.setOnReciveData(new NewsClipParser.OnReciveData() {
             @Override
             public void onReceive(ArrayList<NewsClipItem> arrNewsClipItem) {
-                arrNewsClipItem.clear();
-                arrNewsClipItem.addAll(arrNewsClipItem);
+                Log.e(TAG, arrNewsClipItem.size()+"");
+                ReviewsFragment.this.arrNewsClipItem.clear();
+                ReviewsFragment.this.arrNewsClipItem.addAll(arrNewsClipItem);
                 newsClipHomeAdapter.notifyDataSetChanged();
                 if (contentLoadingProgressBar != null && contentLoadingProgressBar.isShown()) {
                     contentLoadingProgressBar.hide();
@@ -104,11 +107,13 @@ public class ReviewsFragment extends Fragment {
         contentLoadingProgressBar = (ContentLoadingProgressBar) view.findViewById(R.id.contentNewsLoading);
 
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
-//        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
+//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         newsClipHomeAdapter = new NewsClipHomeAdapter(getContext(), arrNewsClipItem);
         recyclerView.setAdapter(newsClipHomeAdapter);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+//        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         newsClipHomeAdapter.setOnItemClickListener(new NewsClipHomeAdapter.OnItemClickListener() {
             @Override
             public void onClick(View itemView, final int position) {

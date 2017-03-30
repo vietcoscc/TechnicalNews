@@ -39,6 +39,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
+import static com.example.vaio.technicalnews.model.FireBaseReference.MAIL;
 
 /**
  * Created by vaio on 12/22/2016.
@@ -52,8 +53,9 @@ public class ForumFragment extends Fragment {
     public static final String CHILD_FORUM_ITEM = "Child forum item";
     public static final String GROUP_FORUM_KEY = "Group forum key";
 
-    public static final String ARR_CHILD_FORUM_ITEM = "arrChildForumItem";
+
     public static final String CHILD_FORUM_POSITION = "Child forum posiiton";
+    public static final String RC = "code";
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private ExpandableListView expandableListView;
@@ -94,7 +96,7 @@ public class ForumFragment extends Fragment {
         contentLoadingProgressBar = (ContentLoadingProgressBar) view.findViewById(R.id.contentLoadingProgressBar);
         contentLoadingProgressBar.show();
         expandableListView = (ExpandableListView) view.findViewById(R.id.expandableListView);
-        adapter = new GroupForumExpandableListViewAdapter(getContext(), arrGroupForumItem);
+        adapter = new GroupForumExpandableListViewAdapter(getContext(), arrGroupForumItem,accountManager);
         expandableListView.setAdapter(adapter);
         expandableListView.setGroupIndicator(null);
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -109,9 +111,10 @@ public class ForumFragment extends Fragment {
                 Intent intent = new Intent(getContext(), TopicActivity.class);
                 GroupForumItem groupForumItem = arrGroupForumItem.get(groupPosition);
                 ChildForumItem childForumItem = groupForumItem.getArrChildForumItem().get(childPosition);
+                intent.putExtra(RC, TAG);
                 intent.putExtra(GROUP_FORUM_ITEM, groupForumItem);
                 intent.putExtra(CHILD_FORUM_ITEM, childForumItem);
-
+                intent.putExtra(MAIL, "");
                 Log.e(TAG, groupPosition + " : " + childForumItem.getPosition());
                 startActivityForResult(intent, RC_POST);
                 return true;
@@ -120,6 +123,7 @@ public class ForumFragment extends Fragment {
     }
 
     private void receiveData() {
+
         arrGroupForumItem.clear();
         FireBaseReference.getForumRef().keepSynced(true);
         FireBaseReference.getForumRef().
