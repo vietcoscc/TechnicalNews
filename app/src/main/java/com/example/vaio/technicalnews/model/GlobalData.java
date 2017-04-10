@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class GlobalData extends Application {
     private AccountManager accountManager;
     private ArrayList<String> arrAdmin;
-    private ArrayList<String> arrBan;
+
 
     public ArrayList<String> getArrAdmin() {
         return arrAdmin;
@@ -29,11 +29,4 @@ public class GlobalData extends Application {
         this.accountManager = accountManager;
     }
 
-    public ArrayList<String> getArrBan() {
-        return arrBan;
-    }
-
-    public void setArrBan(ArrayList<String> arrBan) {
-        this.arrBan = arrBan;
-    }
 }

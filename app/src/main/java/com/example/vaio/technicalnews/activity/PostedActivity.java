@@ -46,7 +46,7 @@ import static com.example.vaio.technicalnews.model.FireBaseReference.TOPIC_KEY;
 
 public class PostedActivity extends AppCompatActivity {
     private static final String TAG = "PostedActivity";
-    private static final int RC_COMMENT = 0;
+    public static final int RC_COMMENT = 0;
     private ArrayList<Topic> arrTopic = new ArrayList<>();
     private ArrayList<GroupForumItem> arrGroupForumItem = new ArrayList<>();
     private ArrayList<Topic> arrTopicTmp = new ArrayList<>();
@@ -105,7 +105,8 @@ public class PostedActivity extends AppCompatActivity {
         });
         adapter.setOnDeletePost(new TopicsPostedForumAdapter.OnDeletePost() {
             @Override
-            public void onDelete() {
+            public void onDelete(int position) {
+                FireBaseReference.getDeletedRef().child(accountManager.getCurrentUser().getUid()).push().setValue(arrTopic.get(position));
                 receiveData();
             }
         });

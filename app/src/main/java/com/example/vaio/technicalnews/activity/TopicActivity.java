@@ -85,7 +85,7 @@ public class TopicActivity extends AppCompatActivity {
         arrTopicTmp.clear();
         final GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
-        globalData.setArrBan(arrBan);
+//        globalData.setArrBan(arrBan);
         FireBaseReference.getBanRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -151,8 +151,6 @@ public class TopicActivity extends AppCompatActivity {
                 intent.putExtra(CHILD_FORUM_ITEM, childForumItem.getName());
                 intent.putExtra(TOPIC, arrTopic.get(arrTopic.size() - position - 1));
                 startActivityForResult(intent, RC_COMMENT);
-
-
             }
         });
         adapter.setOnItemLongClick(new TopicsForumAdapter.OnItemLongClick() {
@@ -167,9 +165,11 @@ public class TopicActivity extends AppCompatActivity {
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.action_delete:
+
                                 FireBaseReference.getTopicKeyRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).removeValue(new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                        FireBaseReference.getDeletedRef().child(accountManager.getCurrentUser().getUid()).push().setValue(topic);
                                         receiveData();
                                     }
                                 });
@@ -224,8 +224,8 @@ public class TopicActivity extends AppCompatActivity {
         arrTopic.clear();
         arrTopicTmp.clear();
         arrTopicKey.clear();
-        FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
-                keepSynced(true);
+//        FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
+//                keepSynced(true);
         FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
                 addChildEventListener(new ChildEventListener() {
                     @Override
@@ -329,7 +329,8 @@ public class TopicActivity extends AppCompatActivity {
         try {
             if (RC_COMMENT == requestCode) {
                 if (resultCode == RESULT_OK) {
-                    receiveData();
+//                    receiveData();
+                    adapter.notifyDataSetChanged();
                 }
             }
         } catch (Exception e) {

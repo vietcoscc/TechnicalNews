@@ -1,8 +1,10 @@
 package com.example.vaio.technicalnews.activity;
 
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -48,6 +50,8 @@ import com.example.vaio.technicalnews.fragment.HomeFragment;
 import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.MySharedPreferences;
 import com.example.vaio.technicalnews.model.Topic;
+import com.example.vaio.technicalnews.service.NewsService;
+import com.example.vaio.technicalnews.service.NotificationService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -77,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final String CHAT_ROOM_TAG = "chat room";
     public static final int RC_LOGIN = 1;
     private static final int RC_PROFILE = 2;
+    private static final java.lang.String EMAIL = "vietcoscc@gmail.com";
     // component
     private Toolbar toolbar; // toolbar main activity
     //    private FloatingActionButton floatingActionButton;
@@ -101,8 +106,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ProgressDialog progressDialog;
 
     private Boolean onMenuItemForumSelected = false;
-    private MenuItem listView;
-    private MenuItem gridView;
+
     private MenuItem signIn;
     private MenuItem signUp;
     private MenuItem signOut;
@@ -120,10 +124,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         try {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
 
+                }
+            });
+            thread.start();
             initAccountManager();
             if (isNetWorkAvailable(this)) {
-                checkLogin();
+//                checkLogin();
             }
             initToolbar();
             initDrawerLayout();
@@ -131,52 +141,74 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             loadContentFragment(HOME_TAG);
             initOthers();
             updateUI();
+            if(!isMyServiceRunning(NewsService.class)){
+                Intent intentService = new Intent(MainActivity.this, NewsService.class);
+                startService(intentService);
+            }
+            if(!isMyServiceRunning(NotificationService.class)){
+                MySharedPreferences.putString(MainActivity.this, USER_NAME, accountManager.getCurrentUser().getEmail());
+                Intent intent = new Intent(MainActivity.this, NotificationService.class);
+                intent.putExtra(USER_NAME, accountManager.getCurrentUser().getEmail());
+                startService(intent);
+            }
+
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    private void checkLogin() throws Exception {
-        progressDialog.show();
-        String userName = MySharedPreferences.getString(this, USER_NAME);
-        String password = MySharedPreferences.getString(this, PASSWORD);
-
-        if (userName.isEmpty() || password.isEmpty()) {
-            progressDialog.hide();
-            return;
+    //    private void checkLogin() throws Exception {
+//        progressDialog.show();
+//        String userName = MySharedPreferences.getString(this, USER_NAME);
+//        String password = MySharedPreferences.getString(this, PASSWORD);
+//
+//        if (userName.isEmpty() || password.isEmpty()) {
+//            progressDialog.dismiss();
+//            return;
+//        }
+//        accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
+//            @Override
+//            public void onSuccess() {
+//                if (accountManager.getCurrentUser() != null) {
+//                    if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
+//                        accountManager.setAdmin(true);
+//                        manager.setVisible(true);
+//                    } else {
+//                        accountManager.setAdmin(false);
+//                        manager.setVisible(false);
+//                    }
+//                }
+//                updateUI();
+//                progressDialog.dismiss();
+//            }
+//        });
+//        accountManager.setOnLoginFail(new AccountManager.OnLoginFail() {
+//            @Override
+//            public void onFail() {
+//                progressDialog.hide();
+//            }
+//        });
+//        accountManager.login(userName, password);
+//    }
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
         }
-        accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
-            @Override
-            public void onSuccess() {
-                if (accountManager.getCurrentUser() != null) {
-                    if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
-                        accountManager.setAdmin(true);
-                        manager.setVisible(true);
-                    } else {
-                        accountManager.setAdmin(false);
-                        manager.setVisible(false);
-                    }
-                }
-                updateUI();
-                progressDialog.dismiss();
-            }
-        });
-        accountManager.setOnLoginFail(new AccountManager.OnLoginFail() {
-            @Override
-            public void onFail() {
-                progressDialog.hide();
-            }
-        });
-        accountManager.login(userName, password);
+        return false;
     }
 
     private void initAccountManager() throws Exception {
         //
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Signing up ... ");
-        progressDialog.setCancelable(false);
-        //
+//        progressDialog = new ProgressDialog(this);
+//        progressDialog.setMessage("Signing up ... ");
+//        progressDialog.setCancelable(false);
+//        //
         accountManager = new AccountManager(this);
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
@@ -192,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             progressDialog.hide();
                         }
                     }
-                }, 2000);
+                }, 1000);
             }
         });
         arrAdmin = globalData.getArrAdmin();
@@ -216,17 +248,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 return;
             }
             ivAvatar.setVisibility(View.VISIBLE);
-            Uri uri = accountManager.getCurrentUser().getPhotoUrl();
-
-            Log.e(TAG, uri + "");
-            if (uri != null) {
-                Picasso.with(this).load(uri).error(R.drawable.warning).placeholder(R.drawable.loading).into(ivAvatar);
+            if (accountManager.getCurrentUser().getPhotoUrl() != null) {
+                Picasso.with(this).load(accountManager.getCurrentUser().getPhotoUrl()).error(R.drawable.warning).placeholder(R.drawable.loading).into(ivAvatar);
             }
-
             String displayName = accountManager.getCurrentUser().getDisplayName();
-            Log.e(TAG, displayName);
             String email = accountManager.getCurrentUser().getEmail();
-
             tvDisplayName.setText(displayName);
             tvEmail.setText(email);
             accountManager.setSignedIn(true);
@@ -243,15 +269,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         try {
             if (requestCode == RC_LOGIN) {
                 if (resultCode == RESULT_OK) {
-                    if (!(arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1)) {
-
-                        if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
-                            accountManager.setAdmin(true);
-                            manager.setVisible(true);
-                        } else {
-                            accountManager.setAdmin(false);
-                            manager.setVisible(false);
-                        }
+                    if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
+                        accountManager.setAdmin(true);
+                        manager.setVisible(true);
+                    } else {
+                        accountManager.setAdmin(false);
+                        manager.setVisible(false);
                     }
                     updateUI();
                 }
@@ -270,6 +293,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tvDisplayName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tvDisplayName);
         tvEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tvEmail);
         ivAvatar = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.ivAvatar);
+        progressDialog = new ProgressDialog(this);
     }
 
     private void initToolbar() throws Exception {
@@ -378,9 +402,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 drawerLayout.closeDrawer(GravityCompat.START);
 
                 break;
-            case R.id.setting:
-                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
-                startActivity(intent);
+
+            case R.id.share:
+                Intent share = new Intent(Intent.ACTION_SEND);
+                share.setType("text/plain");
+                share.putExtra(Intent.EXTRA_TEXT, "_Time_stone_app_");
+                startActivity(Intent.createChooser(share, "Share on ..."));
+                break;
+            case R.id.rate:
+                Uri uri = Uri.parse("market://details?id=" + getPackageName());
+                Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+                // To count with Play market backstack, After pressing back button,
+                // to taken back to our application, we need to add following flags to intent.
+                goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                        Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                        Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                try {
+                    startActivity(goToMarket);
+                } catch (ActivityNotFoundException e) {
+                    startActivity(new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("http://play.google.com/store/apps/details?id=" + getPackageName())));
+                }
+                break;
+            case R.id.feedBack:
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO,
+                        Uri.parse("mailto:" + Uri.encode(EMAIL)));
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
+                emailIntent.putExtra(Intent.EXTRA_TEXT, "");
+                startActivity(Intent.createChooser(emailIntent, "Send feed back via..."));
+                break;
+            case R.id.exit:
+                setResult(RESULT_OK);
+                finish();
                 break;
         }
         return true;
@@ -485,7 +538,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 break;
             case R.id.action_mangage:
-
+                Intent intent = new Intent(MainActivity.this, ManagerActivity.class);
+                startActivity(intent);
                 break;
         }
         return false;
@@ -544,11 +598,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onDestroy() {
         super.onDestroy();
         try {
-            if (MainActivity.isNetWorkAvailable(this) && !homeFragment.getArrNewsItem().isEmpty()) {
-                MyDatabase myDatabase = new MyDatabase(MainActivity.this);
-                myDatabase.clearTable(MyDatabase.TB_NAME_NEWS);
-                myDatabase.addArrNewsItem(homeFragment.getArrNewsItem());
-            }
+//            if (MainActivity.isNetWorkAvailable(this) && !homeFragment.getArrNewsItem().isEmpty()) {
+//                MyDatabase myDatabase = new MyDatabase(MainActivity.this);
+//                myDatabase.clearTable(MyDatabase.TB_NAME_NEWS);
+//                myDatabase.addArrNewsItem(homeFragment.getArrNewsItem());
+//            }
+//            Intent intent = new Intent(MainActivity.this, NotificationService.class);
+//            intent.putExtra(USER_NAME, accountManager.getCurrentUser().getEmail());
+//            MySharedPreferences.putString(MainActivity.this, USER_NAME, accountManager.getCurrentUser().getEmail());
+//            stopService(intent);
         } catch (Exception e) {
             e.printStackTrace();
         }

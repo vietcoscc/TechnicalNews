@@ -24,6 +24,8 @@ import com.example.vaio.technicalnews.asyntask.UploadAvatarFromRegister;
 import com.example.vaio.technicalnews.asyntask.UploadAvatarFromStream;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.GlobalData;
+import com.example.vaio.technicalnews.model.MySharedPreferences;
+import com.example.vaio.technicalnews.service.NotificationService;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -140,7 +142,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                 progressDialog.dismiss();
                             }
                         } else {
-
+                            MySharedPreferences.putString(LoginActivity.this, USER_NAME, accountManager.getCurrentUser().getEmail());
+                            MySharedPreferences.putString(LoginActivity.this, PASSWORD, edtPassword.getText().toString());
                             UploadAvatarFromStream uploadAvatarFromStream = new UploadAvatarFromStream(LoginActivity.this);
                             uploadAvatarFromStream.setOnUploadComplete(new UploadAvatarFromRegister.OnUploadComplete() {
                                 @Override
@@ -154,12 +157,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                             addOnSuccessListener(new OnSuccessListener<Uri>() {
                                                 @Override
                                                 public void onSuccess(Uri uri) {
-                                                    Log.e(TAG, uri.toString());
                                                     accountManager.setPathPhoto(uri.toString());
                                                     if (progressDialog != null && progressDialog.isShowing()) {
-                                                        progressDialog.dismiss();
                                                         Toast.makeText(LoginActivity.this, "Authentication successful !",
                                                                 Toast.LENGTH_SHORT).show();
+                                                        progressDialog.dismiss();
                                                         onBackPressed();
                                                     }
                                                 }

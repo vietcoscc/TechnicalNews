@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvBanned"
+        style="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/view_click_selector"
+        android:padding="@dimen/default_margin"
+        android:text="Banned list"
+        android:textColor="@color/md_black_1000" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/md_blue_grey_600" />
+
+    <TextView
+        android:id="@+id/tvDeleted"
+        style="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/view_click_selector"
+        android:padding="@dimen/default_margin"
+        android:text="Deleted post"
+        android:textColor="@color/md_black_1000" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/md_blue_grey_600" />
+</LinearLayout>

@@ -48,12 +48,9 @@ import static com.example.vaio.technicalnews.model.FireBaseReference.MAIL;
 public class ForumFragment extends Fragment {
     public static final int RC_POST = 0;
     public static final String TAG = "ForumFragment";
-
     public static final String GROUP_FORUM_ITEM = "Group forum item";
     public static final String CHILD_FORUM_ITEM = "Child forum item";
     public static final String GROUP_FORUM_KEY = "Group forum key";
-
-
     public static final String CHILD_FORUM_POSITION = "Child forum posiiton";
     public static final String RC = "code";
 
@@ -123,9 +120,8 @@ public class ForumFragment extends Fragment {
     }
 
     private void receiveData() {
-
         arrGroupForumItem.clear();
-        FireBaseReference.getForumRef().keepSynced(true);
+//        FireBaseReference.getForumRef().keepSynced(true);
         FireBaseReference.getForumRef().
                 addChildEventListener(new ChildEventListener() {
                     @Override

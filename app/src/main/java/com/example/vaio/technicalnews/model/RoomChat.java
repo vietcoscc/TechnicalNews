@@ -8,6 +8,7 @@ import java.util.ArrayList;
  */
 
 public class RoomChat implements Serializable {
+    private String key;
     private String area;
     private int onlineNumber;
     private ArrayList<ItemChat> arrChat;
@@ -19,6 +20,14 @@ public class RoomChat implements Serializable {
         this.area = area;
         this.onlineNumber = onlineNumber;
         this.arrChat = arrChat;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getArea() {

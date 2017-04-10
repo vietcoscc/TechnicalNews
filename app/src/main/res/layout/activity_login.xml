@@ -96,6 +96,7 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:layout_marginTop="@dimen/activity_vertical_margin"
             android:orientation="horizontal"
             android:id="@+id/googleSignIn"
             android:layout_width="match_parent"
@@ -120,6 +121,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:visibility="gone"
             android:id="@+id/facebookSignIn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

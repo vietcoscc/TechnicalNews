@@ -7,7 +7,9 @@ import java.io.Serializable;
  */
 
 public class ItemChat implements Serializable {
+    private String key;
     private String name;
+    private String email;
     private String chat;
     private String date;
     private String time;
@@ -17,8 +19,17 @@ public class ItemChat implements Serializable {
     public ItemChat() {
     }
 
-    public ItemChat(String name, String chat, String date, String time, String uid, String uri) {
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public ItemChat(String name, String email, String chat, String date, String time, String uid, String uri) {
         this.name = name;
+        this.email = email;
         this.chat = chat;
         this.date = date;
         this.time = time;
@@ -32,6 +43,14 @@ public class ItemChat implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getChat() {

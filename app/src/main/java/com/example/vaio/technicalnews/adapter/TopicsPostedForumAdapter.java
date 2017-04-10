@@ -116,7 +116,7 @@ public class TopicsPostedForumAdapter extends RecyclerView.Adapter<TopicsPostedF
                                         @Override
                                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                                             if (onDeletePost != null) {
-                                                onDeletePost.onDelete();
+                                                onDeletePost.onDelete(getPosition());
                                             }
                                         }
                                     });
@@ -165,6 +165,6 @@ public class TopicsPostedForumAdapter extends RecyclerView.Adapter<TopicsPostedF
     private OnDeletePost onDeletePost;
 
     public interface OnDeletePost {
-        void onDelete();
+        void onDelete(int position);
     }
 }

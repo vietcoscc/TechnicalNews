@@ -22,13 +22,16 @@ import com.example.vaio.technicalnews.model.Emoji;
 import com.example.vaio.technicalnews.model.FireBaseReference;
 import com.example.vaio.technicalnews.model.GlobalData;
 import com.example.vaio.technicalnews.model.MyCalendar;
+import com.example.vaio.technicalnews.model.MyNotification;
 import com.example.vaio.technicalnews.model.Topic;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.Calendar;
+
 import static com.example.vaio.technicalnews.model.FireBaseReference.TOPIC;
 
 public class CommentActivity extends AppCompatActivity implements View.OnClickListener {
@@ -144,7 +147,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        commentAdapter = new CommentAdapter(topic,accountManager);
+        commentAdapter = new CommentAdapter(topic, accountManager);
         recyclerView.setAdapter(commentAdapter);
         recyclerView.scrollToPosition(topic.getArrComment().size());
     }
@@ -199,6 +202,10 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                 Comment cmt = new Comment(accountManager.getPathPhoto(), accountManager.getCurrentUser().getDisplayName(), comment, date, time);
 
                 FireBaseReference.getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).child(arrComment.size() + "").setValue(cmt);
+                if (!topic.getMail().equals(accountManager.getCurrentUser().getEmail())) {
+                    MyNotification myNotification = new MyNotification("", 0, accountManager.getCurrentUser().getDisplayName(), topic.getSubject(), cmt.getComment(), accountManager.getCurrentUser().getEmail(), topic.getMail());
+                    FireBaseReference.getNotifocationRef().push().setValue(myNotification);
+                }
 
                 try {
 //                    getTopicAfter();

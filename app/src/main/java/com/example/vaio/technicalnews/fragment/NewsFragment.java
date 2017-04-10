@@ -102,7 +102,7 @@ public class NewsFragment extends Fragment implements NewsContentParser.OnReceiv
         newsHomeAdapter.setClickListener(new NewsHomeAdapter.ClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Toast.makeText(getContext(), position + "", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), position + "", Toast.LENGTH_SHORT).show();
                 //
                 Intent intent = new Intent(getContext(), WebContentActivity.class);
                 intent.putExtra(LINK_CONTENT, arrNewsItem.get(position).getContentLink());

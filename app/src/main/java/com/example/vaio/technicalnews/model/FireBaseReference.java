@@ -1,5 +1,7 @@
 package com.example.vaio.technicalnews.model;
 
+import android.provider.ContactsContract;
+
 import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -41,6 +43,8 @@ public class FireBaseReference {
     public static final String TOPIC_KEY = "Topic key";
     private static final String ADMIN = "Admin";
     private static final String BAN = "Ban";
+    public static final String DELETED = "Deleted";
+    public static final String NOTIFICATION = "Notificaition";
     private static DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
     public static DatabaseReference getArrChatRef(String key) {
@@ -74,7 +78,16 @@ public class FireBaseReference {
     public static DatabaseReference getAdminRef() {
         return databaseReference.child(ADMIN);
     }
-    public static DatabaseReference getBanRef(){
+
+    public static DatabaseReference getBanRef() {
         return databaseReference.child(BAN);
+    }
+
+    public static DatabaseReference getDeletedRef() {
+        return databaseReference.child(DELETED);
+    }
+
+    public static DatabaseReference getNotifocationRef() {
+        return databaseReference.child(NOTIFICATION);
     }
 }

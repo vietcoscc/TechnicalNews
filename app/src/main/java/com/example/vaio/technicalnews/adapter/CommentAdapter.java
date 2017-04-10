@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.model.AccountManager;
 import com.example.vaio.technicalnews.model.ChildForumItem;
+import com.example.vaio.technicalnews.model.Emoji;
 import com.example.vaio.technicalnews.model.GroupForumItem;
 import com.example.vaio.technicalnews.model.Topic;
 import com.squareup.picasso.Picasso;
@@ -59,19 +60,14 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 Picasso.with(context).load(topic.getPhotoPath()).into(headerViewHolder.ivAvatar);
             }
 
-            headerViewHolder.tvContent.setText(topic.getContent());
-            headerViewHolder.tvSubject.setText(topic.getSubject());
+            headerViewHolder.tvContent.setText(Emoji.replaceInText(topic.getContent()));
+            headerViewHolder.tvSubject.setText(Emoji.replaceInText(topic.getSubject()));
             headerViewHolder.tvName.setText(topic.getName());
             headerViewHolder.tvTimeStamp.setText(topic.getTime());
             headerViewHolder.tvDate.setText(topic.getDate());
         } else {
             CommentViewHolder commentViewHolder = (CommentViewHolder) holder;
-            if (topic.getMail().equals(accountManager.getCurrentUser().getEmail())) {
-                Picasso.with(context).load(accountManager.getCurrentUser().getPhotoUrl()).into(commentViewHolder.ivAvatar);
-            } else {
-                Picasso.with(context).load(topic.getArrComment().get(position - 1).getPhotoPath()).into(commentViewHolder.ivAvatar);
-            }
-
+            Picasso.with(context).load(topic.getArrComment().get(position - 1).getPhotoPath()).into(commentViewHolder.ivAvatar);
             commentViewHolder.tvComment.setText(topic.getArrComment().get(position - 1).getComment());
             commentViewHolder.tvName.setText(topic.getArrComment().get(position - 1).getName());
             commentViewHolder.tvDate.setText(topic.getArrComment().get(position - 1).getDate());
@@ -116,7 +112,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    public class CommentViewHolder extends RecyclerView.ViewHolder {
+    public class CommentViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
         TextView tvComment;
         ImageView ivAvatar;
         TextView tvDate;
@@ -130,7 +126,25 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             tvDate = (TextView) itemView.findViewById(R.id.tvDate);
             tvTimeStamp = (TextView) itemView.findViewById(R.id.tvTimeStamp);
             ivAvatar = (ImageView) itemView.findViewById(R.id.ivAvatar);
-
+            itemView.setOnLongClickListener(this);
         }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if (onItemLongClick != null) {
+                onItemLongClick.onLongClick(v, getPosition());
+            }
+            return true;
+        }
+    }
+
+    public void setOnItemLongClick(OnItemLongClick onItemLongClick) {
+        this.onItemLongClick = onItemLongClick;
+    }
+
+    private OnItemLongClick onItemLongClick;
+
+    public interface OnItemLongClick {
+        void onLongClick(View view, int position);
     }
 }

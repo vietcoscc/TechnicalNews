@@ -15,15 +15,14 @@
         android:allowBackup="true"
         android:label="@string/app_name"
         android:largeHeap="true"
+        android:icon="@drawable/news"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".activity.MainActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|adjustPan">
-
-        </activity>
+            android:windowSoftInputMode="adjustResize|adjustPan"></activity>
         <activity
             android:name=".activity.SplashScreenActivity"
             android:screenOrientation="portrait">
@@ -54,7 +53,11 @@
             android:windowSoftInputMode="adjustResize|adjustUnspecified" />
         <activity android:name=".activity.TopicActivity" />
         <activity android:name=".activity.ProfileActivity" />
-        <activity android:name=".activity.PostedActivity"></activity>
+        <activity android:name=".activity.PostedActivity" />
+        <activity android:name=".activity.ManagerActivity"></activity>
+
+        <service android:name=".service.NotificationService" />
+        <service android:name=".service.NewsService" />
     </application>
 
 </manifest>

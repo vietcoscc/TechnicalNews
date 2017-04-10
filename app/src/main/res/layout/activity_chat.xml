@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.example.vaio.technicalnews.activity.ChatActivity">
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -24,33 +25,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@color/colorPrimary"
             android:orientation="horizontal"
             android:weightSum="5">
 
-            <FrameLayout
+
+            <EditText
+                android:id="@+id/edtComment"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginLeft="@dimen/default_margin"
-                android:layout_weight="4"
-                android:background="@color/md_white_1000">
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_weight="4" />
 
-                <EditText
-                    android:id="@+id/edtComment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="4" />
-            </FrameLayout>
-
-            <ImageButton
+            <ImageView
+                android:padding="@dimen/activity_vertical_margin"
                 android:id="@+id/ibSend"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:src="@android:drawable/ic_menu_send" />
+                android:src="@drawable/ic_send_black_24dp"
+                android:tint="@color/colorPrimary" />
         </LinearLayout>
 
         <android.support.v7.widget.RecyclerView
@@ -59,6 +54,11 @@
             android:layout_height="wrap_content"
             android:layout_above="@id/layoutComment"
             android:foregroundGravity="bottom" />
+        <TextView
+            android:layout_above="@id/layoutComment"
+            android:background="@color/md_black_1000"
+            android:layout_width="match_parent"
+            android:layout_height="1px" />
     </RelativeLayout>
 
 </RelativeLayout>

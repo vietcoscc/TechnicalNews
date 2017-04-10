@@ -60,7 +60,7 @@
         </LinearLayout>
         <TextView
             android:layout_above="@id/layoutComment"
-            android:background="@color/md_blue_grey_600"
+            android:background="@color/md_black_1000"
             android:layout_width="match_parent"
             android:layout_height="1px" />
         <android.support.v7.widget.RecyclerView

@@ -68,7 +68,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         return arrChat.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
         TextView tvName;
         TextView tvChat;
         TextView tvDate;
@@ -82,6 +82,25 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             tvDate = (TextView) itemView.findViewById(R.id.tvDate);
             tvTimeStamp = (TextView) itemView.findViewById(R.id.tvTimeStamp);
             circleImageView = (CircleImageView) itemView.findViewById(R.id.ivAvatar);
+            itemView.setOnLongClickListener(this);
         }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if (onItemLongClick != null) {
+                onItemLongClick.onLongLick(v, getPosition());
+            }
+            return true;
+        }
+    }
+
+    public void setOnItemLongClick(OnItemLongClick onItemLongClick) {
+        this.onItemLongClick = onItemLongClick;
+    }
+
+    private OnItemLongClick onItemLongClick;
+
+    public interface OnItemLongClick {
+        void onLongLick(View view, int position);
     }
 }

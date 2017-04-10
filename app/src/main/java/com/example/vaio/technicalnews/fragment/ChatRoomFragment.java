@@ -78,12 +78,13 @@ public class ChatRoomFragment extends Fragment {
 
     private void getData() {
         arrRoomChat.clear();
-        adapter = new RoomChatAdapter(arrRoomChat,accountManager);
-        FireBaseReference.getRoomChatRef().keepSynced(true);
+        adapter = new RoomChatAdapter(arrRoomChat, accountManager);
+//        FireBaseReference.getRoomChatRef().keepSynced(true);
         FireBaseReference.getRoomChatRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 final RoomChat roomChat = dataSnapshot.getValue(RoomChat.class);
+                roomChat.setKey(dataSnapshot.getKey());
                 arrRoomChat.add(roomChat);
                 String key = dataSnapshot.getKey();
                 arrKeyRoomChat.add(key);
