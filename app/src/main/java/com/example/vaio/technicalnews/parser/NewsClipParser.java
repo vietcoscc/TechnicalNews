@@ -2,13 +2,9 @@ package com.example.vaio.technicalnews.parser;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 
 import com.example.vaio.technicalnews.activity.MainActivity;
-import com.example.vaio.technicalnews.fragment.ReviewsFragment;
-import com.example.vaio.technicalnews.model.NewsClipItem;
+import com.example.vaio.technicalnews.model.news.NewsClipItem;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

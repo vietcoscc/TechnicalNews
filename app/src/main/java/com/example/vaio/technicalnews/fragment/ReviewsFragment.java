@@ -1,43 +1,28 @@
 package com.example.vaio.technicalnews.fragment;
 
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.PopupWindow;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.activity.YoutubePlayerActivity;
-import com.example.vaio.technicalnews.adapter.NewsClipHomeAdapter;
-import com.example.vaio.technicalnews.database.MyDatabase;
-import com.example.vaio.technicalnews.model.NewsClipItem;
+import com.example.vaio.technicalnews.adapter.news.NewsClipHomeAdapter;
+import com.example.vaio.technicalnews.model.news.NewsClipItem;
 import com.example.vaio.technicalnews.parser.NewsClipParser;
-import com.google.android.youtube.player.YouTubeInitializationResult;
-import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayerFragment;
-import com.google.android.youtube.player.YouTubePlayerSupportFragment;
-import com.google.android.youtube.player.YouTubePlayerView;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * Created by vaio on 2/5/2017.

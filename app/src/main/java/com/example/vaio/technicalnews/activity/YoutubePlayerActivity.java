@@ -1,23 +1,19 @@
 package com.example.vaio.technicalnews.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.adapter.NewsClipHomeAdapter;
+import com.example.vaio.technicalnews.adapter.news.NewsClipHomeAdapter;
 import com.example.vaio.technicalnews.fragment.ReviewsFragment;
-import com.example.vaio.technicalnews.model.NewsClipItem;
+import com.example.vaio.technicalnews.model.news.NewsClipItem;
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import com.google.android.youtube.player.YouTubePlayerView;
 
 import java.util.ArrayList;

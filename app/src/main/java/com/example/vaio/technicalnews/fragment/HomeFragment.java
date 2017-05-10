@@ -10,8 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.adapter.ViewPagerHomeAdapter;
-import com.example.vaio.technicalnews.model.NewsItem;
+import com.example.vaio.technicalnews.adapter.news.ViewPagerHomeAdapter;
+import com.example.vaio.technicalnews.model.news.NewsItem;
 
 import java.util.ArrayList;
 

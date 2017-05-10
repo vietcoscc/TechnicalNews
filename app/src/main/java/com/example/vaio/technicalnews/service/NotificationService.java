@@ -1,6 +1,5 @@
 package com.example.vaio.technicalnews.service;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -8,26 +7,20 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
-import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.activity.CommentActivity;
 import com.example.vaio.technicalnews.activity.SplashScreenActivity;
-import com.example.vaio.technicalnews.model.ChildForumItem;
-import com.example.vaio.technicalnews.model.FireBaseReference;
-import com.example.vaio.technicalnews.model.GroupForumItem;
-import com.example.vaio.technicalnews.model.MyNotification;
-import com.example.vaio.technicalnews.model.MySharedPreferences;
-import com.example.vaio.technicalnews.model.Topic;
+import com.example.vaio.technicalnews.model.application.FireBaseReference;
+import com.example.vaio.technicalnews.model.application.MyNotification;
+import com.example.vaio.technicalnews.model.application.MySharedPreferences;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-import static com.example.vaio.technicalnews.model.MySharedPreferences.USER_NAME;
+import static com.example.vaio.technicalnews.model.application.MySharedPreferences.USER_NAME;
 
 /**
  * Created by vaio on 30/03/2017.

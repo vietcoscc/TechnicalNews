@@ -13,11 +13,10 @@ import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.activity.CommentActivity;
-import com.example.vaio.technicalnews.activity.PostedActivity;
-import com.example.vaio.technicalnews.adapter.TopicsPostedForumAdapter;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.FireBaseReference;
-import com.example.vaio.technicalnews.model.Topic;
+import com.example.vaio.technicalnews.adapter.forum.TopicsPostedForumAdapter;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.application.FireBaseReference;
+import com.example.vaio.technicalnews.model.forum.Topic;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,7 +27,7 @@ import java.util.ArrayList;
 import static com.example.vaio.technicalnews.activity.PostedActivity.RC_COMMENT;
 import static com.example.vaio.technicalnews.fragment.ForumFragment.CHILD_FORUM_ITEM;
 import static com.example.vaio.technicalnews.fragment.ForumFragment.GROUP_FORUM_ITEM;
-import static com.example.vaio.technicalnews.model.FireBaseReference.TOPIC;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.TOPIC;
 
 /**
  * Created by vaio on 30/03/2017.

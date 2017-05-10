@@ -3,7 +3,6 @@ package com.example.vaio.technicalnews.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,7 @@ import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.activity.ManagerActivity;
-import com.example.vaio.technicalnews.model.AccountManager;
+import com.example.vaio.technicalnews.model.application.AccountManager;
 
 /**
  * Created by vaio on 30/03/2017.

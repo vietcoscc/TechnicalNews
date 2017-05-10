@@ -2,18 +2,9 @@ package com.example.vaio.technicalnews.parser;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
-import android.speech.tts.Voice;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.example.vaio.technicalnews.activity.MainActivity;
-import com.example.vaio.technicalnews.database.MyDatabase;
-import com.example.vaio.technicalnews.fragment.HomeFragment;
-import com.example.vaio.technicalnews.fragment.NewsFragment;
-import com.example.vaio.technicalnews.model.NewsItem;
-import com.example.vaio.technicalnews.model.Topic;
+import com.example.vaio.technicalnews.model.news.NewsItem;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

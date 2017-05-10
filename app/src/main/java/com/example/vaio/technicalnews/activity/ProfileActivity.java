@@ -3,8 +3,6 @@ package com.example.vaio.technicalnews.activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -12,7 +10,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,8 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.GlobalData;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.application.GlobalData;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
@@ -34,7 +31,7 @@ import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static com.example.vaio.technicalnews.model.FireBaseReference.MAIL;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.MAIL;
 
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
     public static final String TAG = "ProfileActivity";

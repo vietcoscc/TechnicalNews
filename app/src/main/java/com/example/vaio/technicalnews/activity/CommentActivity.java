@@ -1,6 +1,5 @@
 package com.example.vaio.technicalnews.activity;
 
-import android.media.Image;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,20 +9,19 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.adapter.CommentAdapter;
+import com.example.vaio.technicalnews.adapter.forum.CommentAdapter;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.Comment;
-import com.example.vaio.technicalnews.model.Emoji;
-import com.example.vaio.technicalnews.model.FireBaseReference;
-import com.example.vaio.technicalnews.model.GlobalData;
-import com.example.vaio.technicalnews.model.MyCalendar;
-import com.example.vaio.technicalnews.model.MyNotification;
-import com.example.vaio.technicalnews.model.Topic;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.forum.Comment;
+import com.example.vaio.technicalnews.model.application.Emoji;
+import com.example.vaio.technicalnews.model.application.FireBaseReference;
+import com.example.vaio.technicalnews.model.application.GlobalData;
+import com.example.vaio.technicalnews.model.application.MyCalendar;
+import com.example.vaio.technicalnews.model.application.MyNotification;
+import com.example.vaio.technicalnews.model.forum.Topic;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,7 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import static com.example.vaio.technicalnews.model.FireBaseReference.TOPIC;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.TOPIC;
 
 public class CommentActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "CommentActivity";
@@ -87,9 +85,9 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Comment comment = dataSnapshot.getValue(Comment.class);
                 arrComment.add(comment);
-                commentAdapter.notifyDataSetChanged();
+                commentAdapter.notifyItemInserted(arrComment.size()+1);
                 if (!begin) {
-                    recyclerView.scrollToPosition(arrComment.size() - 1);
+                    recyclerView.scrollToPosition(arrComment.size());
                 }
                 Log.e(TAG, dataSnapshot.getKey());
             }
@@ -199,13 +197,13 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                 String comment = Emoji.replaceInText(edtComment.getText().toString()).trim();
 
                 edtComment.setText("");
-                Comment cmt = new Comment(accountManager.getPathPhoto(), accountManager.getCurrentUser().getDisplayName(), comment, date, time);
+                Comment cmt = new Comment(accountManager.getCurrentUser().getUid(), comment, date, time);
 
                 FireBaseReference.getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).child(arrComment.size() + "").setValue(cmt);
-                if (!topic.getMail().equals(accountManager.getCurrentUser().getEmail())) {
-                    MyNotification myNotification = new MyNotification("", 0, accountManager.getCurrentUser().getDisplayName(), topic.getSubject(), cmt.getComment(), accountManager.getCurrentUser().getEmail(), topic.getMail());
-                    FireBaseReference.getNotifocationRef().push().setValue(myNotification);
-                }
+//                if (!topic.getMail().equals(accountManager.getCurrentUser().getEmail())) {
+//                    MyNotification myNotification = new MyNotification("", 0, accountManager.getCurrentUser().getDisplayName(), topic.getSubject(), cmt.getComment(), accountManager.getCurrentUser().getEmail(), topic.getMail());
+//                    FireBaseReference.getNotifocationRef().push().setValue(myNotification);
+//                }
 
                 try {
 //                    getTopicAfter();

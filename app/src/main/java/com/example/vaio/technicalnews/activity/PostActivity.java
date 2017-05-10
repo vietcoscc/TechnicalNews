@@ -3,10 +3,9 @@ package com.example.vaio.technicalnews.activity;
 import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,36 +13,24 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.fragment.ForumFragment;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.ChildForumItem;
-import com.example.vaio.technicalnews.model.Comment;
-import com.example.vaio.technicalnews.model.Emoji;
-import com.example.vaio.technicalnews.model.FireBaseReference;
-import com.example.vaio.technicalnews.model.GlobalData;
-import com.example.vaio.technicalnews.model.GroupForumItem;
-import com.example.vaio.technicalnews.model.Topic;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.ChildEventListener;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.forum.ChildForumItem;
+import com.example.vaio.technicalnews.model.forum.Comment;
+import com.example.vaio.technicalnews.model.application.Emoji;
+import com.example.vaio.technicalnews.model.application.FireBaseReference;
+import com.example.vaio.technicalnews.model.application.GlobalData;
+import com.example.vaio.technicalnews.model.forum.GroupForumItem;
+import com.example.vaio.technicalnews.model.forum.Topic;
+import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -103,7 +90,8 @@ public class PostActivity extends AppCompatActivity {
 
         ivAvatar = (ImageView) findViewById(R.id.ivAvatar);
         tvName = (TextView) findViewById(R.id.tvName);
-        Picasso.with(this).load(accountManager.getPathPhoto()).into(ivAvatar);
+
+//        Picasso.with(this).load(accountManager.getPathPhoto()).into(ivAvatar);
         tvName.setText(accountManager.getCurrentUser().getDisplayName());
 
         edtContent = (EditText) findViewById(R.id.edtContent);
@@ -143,9 +131,7 @@ public class PostActivity extends AppCompatActivity {
         }
         String email = accountManager.getCurrentUser().getEmail();
         String name = accountManager.getCurrentUser().getDisplayName();
-//        ArrayList<Comment> arrComment = new ArrayList<>();
-//        arrComment.add(new Comment(accountManager.getPathPhoto(), accountManager.getCurrentUser().getDisplayName(), "NQV", date, time));
-        Log.e(TAG, accountManager.getPathPhoto());
+
         FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
                 addValueEventListener(new ValueEventListener() {
                     @Override
@@ -161,7 +147,7 @@ public class PostActivity extends AppCompatActivity {
                     }
                 });
         ArrayList<Comment> arrComment = new ArrayList<>();
-        Topic topic = new Topic("", "", "", subject, content, date, time, 0, 0, 0, email, name, arrComment, accountManager.getPathPhoto());
+        Topic topic = new Topic(accountManager.getCurrentUser().getUid(), subject, content, date, time, 0, 0, 0, arrComment);
         FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).push().setValue(topic);
         onBackPressed();
     }

@@ -19,23 +19,20 @@ import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.activity.ChatActivity;
 import com.example.vaio.technicalnews.activity.LoginActivity;
 import com.example.vaio.technicalnews.activity.MainActivity;
-import com.example.vaio.technicalnews.adapter.RoomChatAdapter;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.FireBaseReference;
-import com.example.vaio.technicalnews.model.GlobalData;
-import com.example.vaio.technicalnews.model.ItemChat;
-import com.example.vaio.technicalnews.model.RoomChat;
+import com.example.vaio.technicalnews.adapter.chat.RoomChatAdapter;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.application.FireBaseReference;
+import com.example.vaio.technicalnews.model.chat.ChatRoom;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
-import static com.example.vaio.technicalnews.model.FireBaseReference.ROOM_CHAT;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.ROOM_CHAT;
 
 /**
  * Created by vaio on 15/03/2017.
@@ -50,10 +47,7 @@ public class ChatRoomFragment extends Fragment {
 
 
     private RecyclerView recyclerView;
-    private String[] area = {"Hà Nội", "Hải Phòng", "TP Hồ Chí Minh"};
-    private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-    private ArrayList<RoomChat> arrRoomChat = new ArrayList<>();
-    private ArrayList<String> arrKeyRoomChat = new ArrayList<>();
+    private ArrayList<ChatRoom> arrRoomChat = new ArrayList<>();
     private RoomChatAdapter adapter;
     private AccountManager accountManager;
     private ContentLoadingProgressBar contentLoadingProgressBar;
@@ -69,26 +63,23 @@ public class ChatRoomFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.fragment_chat_room, container, false);
-        getData();
+        getChatRoom();
         initViews(view);
         this.view = view;
         Log.e(TAG, "");
         return view;
     }
 
-    private void getData() {
+    private void getChatRoom() {
         arrRoomChat.clear();
         adapter = new RoomChatAdapter(arrRoomChat, accountManager);
 //        FireBaseReference.getRoomChatRef().keepSynced(true);
-        FireBaseReference.getRoomChatRef().addChildEventListener(new ChildEventListener() {
+        FireBaseReference.getChatRoomRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                final RoomChat roomChat = dataSnapshot.getValue(RoomChat.class);
-                roomChat.setKey(dataSnapshot.getKey());
-                arrRoomChat.add(roomChat);
-                String key = dataSnapshot.getKey();
-                arrKeyRoomChat.add(key);
-                Log.e(TAG, arrRoomChat.size() + "");
+                final ChatRoom chatRoom = dataSnapshot.getValue(ChatRoom.class);
+                chatRoom.setKey(dataSnapshot.getKey());
+                arrRoomChat.add(chatRoom);
                 adapter.notifyDataSetChanged();
             }
 
@@ -112,17 +103,17 @@ public class ChatRoomFragment extends Fragment {
 
             }
         });
-        FireBaseReference.getRoomChatRef().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                contentLoadingProgressBar.hide();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+//        FireBaseReference.getRoomChatRef().addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                contentLoadingProgressBar.hide();
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
     }
 
     private void initViews(View view) {
@@ -137,7 +128,7 @@ public class ChatRoomFragment extends Fragment {
         adapter.setOnItemClick(new RoomChatAdapter.OnItemClick() {
             @Override
             public void onClick(View view, int position) {
-                if (!accountManager.isSignedIn()) {
+                if (accountManager.getCurrentUser() == null) {
                     Snackbar.make(view, "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -152,10 +143,7 @@ public class ChatRoomFragment extends Fragment {
                 }
 
                 Intent intent = new Intent(getContext(), ChatActivity.class);
-                intent.putExtra(ROOM_CHAT, arrRoomChat.get(position));
-                intent.putExtra(POSITION, position);
-                intent.putExtra(KEY, arrKeyRoomChat.get(position));
-
+                intent.putExtra(FireBaseReference.CHAT_ROOM, arrRoomChat.get(position));
                 startActivityForResult(intent, REQUEST_CODE);
             }
         });

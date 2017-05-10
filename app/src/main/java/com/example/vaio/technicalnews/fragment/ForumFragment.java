@@ -3,43 +3,32 @@ package com.example.vaio.technicalnews.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
 import android.widget.ExpandableListView;
-import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.activity.CommentActivity;
 import com.example.vaio.technicalnews.activity.MainActivity;
 import com.example.vaio.technicalnews.activity.TopicActivity;
-import com.example.vaio.technicalnews.adapter.GroupForumExpandableListViewAdapter;
-import com.example.vaio.technicalnews.adapter.TopicsForumAdapter;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.ChildForumItem;
-import com.example.vaio.technicalnews.model.FireBaseReference;
-import com.example.vaio.technicalnews.model.GroupForumItem;
-import com.example.vaio.technicalnews.model.Topic;
+import com.example.vaio.technicalnews.adapter.forum.GroupForumExpandableListViewAdapter;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.forum.ChildForumItem;
+import com.example.vaio.technicalnews.model.application.FireBaseReference;
+import com.example.vaio.technicalnews.model.forum.GroupForumItem;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
-import static com.example.vaio.technicalnews.model.FireBaseReference.MAIL;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.MAIL;
 
 /**
  * Created by vaio on 12/22/2016.
@@ -129,8 +118,6 @@ public class ForumFragment extends Fragment {
                         GroupForumItem groupForumItem = dataSnapshot.getValue(GroupForumItem.class);
                         groupForumItem.setKey(dataSnapshot.getKey());
                         arrGroupForumItem.add(groupForumItem);
-
-                        Log.e(TAG, dataSnapshot.getKey());
                         adapter.notifyDataSetChanged();
                         expandableListView.expandGroup(arrGroupForumItem.size() - 1);
                     }

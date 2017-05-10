@@ -1,11 +1,9 @@
 package com.example.vaio.technicalnews.fragment;
 
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.ContentLoadingProgressBar;
@@ -13,7 +11,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,13 +18,12 @@ import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.activity.WebContentActivity;
-import com.example.vaio.technicalnews.adapter.NewsHomeAdapter;
+import com.example.vaio.technicalnews.adapter.news.NewsHomeAdapter;
 import com.example.vaio.technicalnews.database.MyDatabase;
-import com.example.vaio.technicalnews.model.NewsItem;
+import com.example.vaio.technicalnews.model.news.NewsItem;
 import com.example.vaio.technicalnews.parser.NewsContentParser;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * Created by vaio on 2/5/2017.

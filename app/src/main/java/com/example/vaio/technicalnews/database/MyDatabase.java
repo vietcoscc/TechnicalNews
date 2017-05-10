@@ -1,23 +1,14 @@
 package com.example.vaio.technicalnews.database;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
-import android.os.Handler;
-import android.util.Log;
-import android.widget.Toast;
 
-import com.example.vaio.technicalnews.model.NewsItem;
+import com.example.vaio.technicalnews.model.news.NewsItem;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 
 /**

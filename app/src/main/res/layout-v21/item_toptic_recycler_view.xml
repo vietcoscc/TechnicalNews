@@ -16,7 +16,7 @@
         android:orientation="horizontal"
         android:weightSum="10">
 
-        <com.example.vaio.technicalnews.model.SquareImageView
+        <com.example.vaio.technicalnews.custom_view.SquareImageView
             android:id="@+id/ivAvatar"
             android:layout_width="0dp"
             android:layout_height="48dp"

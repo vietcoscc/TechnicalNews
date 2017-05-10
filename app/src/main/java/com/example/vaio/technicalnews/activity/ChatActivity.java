@@ -1,10 +1,9 @@
 package com.example.vaio.technicalnews.activity;
 
 import android.content.Intent;
-import android.net.Uri;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -14,44 +13,37 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.adapter.ChatAdapter;
+import com.example.vaio.technicalnews.adapter.chat.ChatAdapter;
 import com.example.vaio.technicalnews.fragment.ChatRoomFragment;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.Emoji;
-import com.example.vaio.technicalnews.model.FireBaseReference;
-import com.example.vaio.technicalnews.model.GlobalData;
-import com.example.vaio.technicalnews.model.ItemChat;
-import com.example.vaio.technicalnews.model.MyCalendar;
-import com.example.vaio.technicalnews.model.RoomChat;
-import com.example.vaio.technicalnews.model.Topic;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.application.Emoji;
+import com.example.vaio.technicalnews.model.application.FireBaseReference;
+import com.example.vaio.technicalnews.model.application.GlobalData;
+import com.example.vaio.technicalnews.model.application.MyCalendar;
+import com.example.vaio.technicalnews.model.chat.ChatRoom;
+import com.example.vaio.technicalnews.model.chat.ItemChat;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 
-import static com.example.vaio.technicalnews.model.FireBaseReference.ROOM_CHAT;
-import static com.example.vaio.technicalnews.model.FireBaseReference.getArrChatRef;
-import static com.example.vaio.technicalnews.model.FireBaseReference.getBanRef;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.CHAT_ROOM;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.getRoomChatRef;
 
 public class ChatActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "ChatActivity";
     private EditText edtComment;
     private ImageView ibSend;
     private RecyclerView recyclerView;
-    private RoomChat roomChat;
     private int position;
     private String key;
+    private ChatRoom chatRoom;
     private ArrayList<ItemChat> arrChat = new ArrayList<>();
     private ArrayList<String> arrBan = new ArrayList<>();
     private ChatAdapter chatAdapter;
@@ -79,11 +71,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initData() throws Exception {
-        Intent intent = getIntent();
-        roomChat = (RoomChat) intent.getExtras().getSerializable(ROOM_CHAT);
-        position = intent.getExtras().getInt(ChatRoomFragment.POSITION);
-        key = intent.getExtras().getString(ChatRoomFragment.KEY);
-        Log.e(TAG, roomChat.getArea());
+        chatRoom = (ChatRoom) getIntent().getExtras().getSerializable(CHAT_ROOM);
+        Toast.makeText(this, chatRoom.getName(), Toast.LENGTH_SHORT).show();
         receiveData();
     }
 
@@ -125,14 +114,13 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     private void receiveData() {
         arrChat.clear();
-        FireBaseReference.getArrChatRef(key).keepSynced(true);
-        FireBaseReference.getArrChatRef(key).addChildEventListener(new ChildEventListener() {
+        FireBaseReference.getRoomChatRef(chatRoom.getName()).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                ItemChat chat = dataSnapshot.getValue(ItemChat.class);
-                chat.setKey(dataSnapshot.getKey());
-                arrChat.add(chat);
-                chatAdapter.notifyDataSetChanged();
+                ItemChat itemChat = dataSnapshot.getValue(ItemChat.class);
+                itemChat.setKey(dataSnapshot.getKey());
+                arrChat.add(itemChat);
+                chatAdapter.notifyItemInserted(arrChat.size() - 1);
                 recyclerView.scrollToPosition(arrChat.size() - 1);
             }
 
@@ -160,7 +148,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initToolbar() throws Exception {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        toolbar.setTitle(roomChat.getArea());
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -173,10 +160,10 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         chatAdapter.setOnItemLongClick(new ChatAdapter.OnItemLongClick() {
             @Override
             public void onLongLick(View view, final int position) {
-                if (!accountManager.isAdmin()) {
+                Log.e(TAG, position + "");
+                if (accountManager.getCurrentUser() == null || !accountManager.getCurrentUser().getUid().equals(arrChat.get(position).getUid())) {
                     return;
                 }
-                Log.e(TAG, position + "");
                 final ItemChat chat = arrChat.get(position);
                 PopupMenu popupMenu = new PopupMenu(ChatActivity.this, view);
                 popupMenu.getMenuInflater().inflate(R.menu.menu_topic_more, popupMenu.getMenu());
@@ -185,18 +172,13 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.action_delete:
-                                getArrChatRef(roomChat.getKey()).child(chat.getKey()).removeValue(new DatabaseReference.CompletionListener() {
+                                getRoomChatRef(chatRoom.getName()).child(chat.getKey()).removeValue(new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                        Toast.makeText(ChatActivity.this, "Deleted ", Toast.LENGTH_SHORT).show();
-                                        receiveData();
+                                        arrChat.remove(position);
+                                        chatAdapter.notifyItemRemoved(position);
                                     }
                                 });
-                                break;
-                            case R.id.action_ban:
-                                if (!(arrBan.indexOf(chat.getEmail()) > -1)) {
-                                    getBanRef().push().setValue(chat.getEmail());
-                                }
                                 break;
                         }
                         return false;
@@ -238,16 +220,10 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 final String chat = Emoji.replaceInText(edtComment.getText().toString()).trim();
                 if (!chat.isEmpty()) {
-//                    Log.e(TAG, chat);
                     String date = MyCalendar.getDate();
-                    String timeStamp = MyCalendar.getTimeStamp();
-
-                    arrChat.add(new ItemChat(accountManager.getCurrentUser().getDisplayName(), accountManager.getCurrentUser().getEmail(), chat,
-                            date, timeStamp, accountManager.getCurrentUser().getUid(), accountManager.getPathPhoto()));
-                    chatAdapter.notifyDataSetChanged();
-                    FireBaseReference.getArrChatRef(key).setValue(arrChat);
-                    recyclerView.scrollToPosition(arrChat.size() - 1);
-                    arrChat.remove(arrChat.size() - 1);
+                    String time = MyCalendar.getTimeStamp();
+                    ItemChat itemChat = new ItemChat(accountManager.getCurrentUser().getUid(), chat, date, time);
+                    FireBaseReference.getRoomChatRef(chatRoom.getName()).push().setValue(itemChat);
                     edtComment.setText("");
                 }
                 break;
@@ -256,9 +232,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent();
-        intent.putExtra(ChatRoomFragment.POSITION, position);
-        setResult(RESULT_OK, intent);
         finish();
     }
 }

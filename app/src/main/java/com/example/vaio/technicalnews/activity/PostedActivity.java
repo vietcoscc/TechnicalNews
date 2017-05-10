@@ -2,7 +2,6 @@ package com.example.vaio.technicalnews.activity;
 
 import android.content.Intent;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -17,18 +16,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.adapter.TopicsForumAdapter;
-import com.example.vaio.technicalnews.adapter.TopicsPostedForumAdapter;
-import com.example.vaio.technicalnews.fragment.ForumFragment;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.ChildForumItem;
-import com.example.vaio.technicalnews.model.FireBaseReference;
-import com.example.vaio.technicalnews.model.GlobalData;
-import com.example.vaio.technicalnews.model.GroupForumItem;
-import com.example.vaio.technicalnews.model.Topic;
+import com.example.vaio.technicalnews.adapter.forum.TopicsPostedForumAdapter;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.forum.ChildForumItem;
+import com.example.vaio.technicalnews.model.application.FireBaseReference;
+import com.example.vaio.technicalnews.model.application.GlobalData;
+import com.example.vaio.technicalnews.model.forum.GroupForumItem;
+import com.example.vaio.technicalnews.model.forum.Topic;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -38,11 +34,8 @@ import java.util.ArrayList;
 
 import static com.example.vaio.technicalnews.fragment.ForumFragment.CHILD_FORUM_ITEM;
 import static com.example.vaio.technicalnews.fragment.ForumFragment.GROUP_FORUM_ITEM;
-import static com.example.vaio.technicalnews.fragment.ForumFragment.RC;
-import static com.example.vaio.technicalnews.fragment.ForumFragment.TAG;
-import static com.example.vaio.technicalnews.model.FireBaseReference.MAIL;
-import static com.example.vaio.technicalnews.model.FireBaseReference.TOPIC;
-import static com.example.vaio.technicalnews.model.FireBaseReference.TOPIC_KEY;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.MAIL;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.TOPIC;
 
 public class PostedActivity extends AppCompatActivity {
     private static final String TAG = "PostedActivity";
@@ -186,7 +179,7 @@ public class PostedActivity extends AppCompatActivity {
                                     @Override
                                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                                         Topic topic = dataSnapshot.getValue(Topic.class);
-                                        if (topic.getMail().trim().equals(accountManager.getCurrentUser().getEmail().trim())) {
+                                        if (topic.getUid().equals(accountManager.getCurrentUser().getUid())) {
                                             //
                                             topic.setGroupName(groupForumItem.getName());
                                             topic.setChildName(childForumItem.getName());
@@ -249,12 +242,12 @@ public class PostedActivity extends AppCompatActivity {
                 arrTopic.clear();
                 for (int i = 0; i < arrTopicTmp.size(); i++) {
                     Topic topic = arrTopicTmp.get(i);
-                    String s = topic.getName() + "_" + topic.getSubject() + "_" + topic.getDate() + "+" + topic.getTime();
-
-                    if (s.toLowerCase().contains(newText.toLowerCase())) {
-                        Log.e(TAG, s);
-                        arrTopic.add(topic);
-                    }
+//                    String s = topic.getName() + "_" + topic.getSubject() + "_" + topic.getDate() + "+" + topic.getTime();
+//
+//                    if (s.toLowerCase().contains(newText.toLowerCase())) {
+//                        Log.e(TAG, s);
+//                        arrTopic.add(topic);
+//                    }
                 }
                 adapter.notifyDataSetChanged();
                 return true;

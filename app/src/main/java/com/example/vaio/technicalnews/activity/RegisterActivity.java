@@ -12,11 +12,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.GlobalData;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.application.GlobalData;
 
-import static com.example.vaio.technicalnews.model.MySharedPreferences.PASSWORD;
-import static com.example.vaio.technicalnews.model.MySharedPreferences.USER_NAME;
+import static com.example.vaio.technicalnews.model.application.MySharedPreferences.PASSWORD;
+import static com.example.vaio.technicalnews.model.application.MySharedPreferences.USER_NAME;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener, AccountManager.OnRegisterSuccess, AccountManager.OnRegisterFail {
     private EditText edtYourName;

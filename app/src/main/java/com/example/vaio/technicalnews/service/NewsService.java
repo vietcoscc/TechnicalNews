@@ -7,18 +7,11 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.activity.SplashScreenActivity;
-import com.example.vaio.technicalnews.model.FireBaseReference;
-import com.example.vaio.technicalnews.model.MyCalendar;
-import com.example.vaio.technicalnews.model.NewsItem;
-import com.example.vaio.technicalnews.parser.NewsContentParser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
+import com.example.vaio.technicalnews.model.application.MyCalendar;
+import com.example.vaio.technicalnews.model.news.NewsItem;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -57,37 +50,7 @@ public class NewsService extends Service {
         public void run() {
             try {
                 while (isRunning) {
-//                    Log.e(TAG, MyCalendar.getSecond() + "");
-//                NewsContentParser newsContentParser = new NewsContentParser(NewsService.this);
-//                newsContentParser.setOnReceiveData(new NewsContentParser.OnReceiveData() {
-//                    @Override
-//                    public void onReceive(ArrayList<NewsItem> arrNewsItem) {
-//                        arrNewsItem1.clear();
-//                        arrNewsItem1.addAll(arrNewsItem);
-//                        if (arrNewsItem1.isEmpty() || arrNewsItem2.isEmpty()) {
-//                            arrNewsItem2.addAll(arrNewsItem);
-//                            return;
-//                        } else {
-//                            NewsItem newsItem1 = arrNewsItem1.get(0);
-//                            NewsItem newsItem2 = arrNewsItem2.get(0);
-//                            if (!newsItem1.getContentLink().equals(newsItem2.getContentLink())) {
-//
-//                                Intent intent = new Intent(NewsService.this, SplashScreenActivity.class);
-//                                PendingIntent pending = PendingIntent.getActivity(NewsService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-//                                NotificationCompat.Builder build = (NotificationCompat.Builder) new NotificationCompat.Builder(NewsService.this).
-//                                        setSmallIcon(R.drawable.news).
-//                                        setContentTitle(newsItem1.getName()).
-//                                        setContentText(newsItem1.getContentPreview()).
-//                                        setContentIntent(pending);
-//
-//                                NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//                                manager.notify(MyCalendar.getSecond(), build.build());
-//                                arrNewsItem2.clear();
-//                                arrNewsItem2.addAll(arrNewsItem1);
-//                            }
-//                        }
-//                    }
-//                });
+
                     Document doc = Jsoup.connect("https://www.cnet.com/news/")
                             .userAgent("Mozilla")
                             .timeout(5000)

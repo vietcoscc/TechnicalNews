@@ -19,17 +19,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.adapter.TopicsForumAdapter;
-import com.example.vaio.technicalnews.fragment.ForumFragment;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.ChildForumItem;
-import com.example.vaio.technicalnews.model.FireBaseReference;
-import com.example.vaio.technicalnews.model.GlobalData;
-import com.example.vaio.technicalnews.model.GroupForumItem;
-import com.example.vaio.technicalnews.model.Topic;
+import com.example.vaio.technicalnews.adapter.forum.TopicsForumAdapter;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.forum.ChildForumItem;
+import com.example.vaio.technicalnews.model.application.FireBaseReference;
+import com.example.vaio.technicalnews.model.application.GlobalData;
+import com.example.vaio.technicalnews.model.forum.GroupForumItem;
+import com.example.vaio.technicalnews.model.forum.Topic;
+import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -41,19 +40,18 @@ import java.util.ArrayList;
 import static com.example.vaio.technicalnews.fragment.ForumFragment.CHILD_FORUM_ITEM;
 import static com.example.vaio.technicalnews.fragment.ForumFragment.GROUP_FORUM_ITEM;
 import static com.example.vaio.technicalnews.fragment.ForumFragment.RC;
-import static com.example.vaio.technicalnews.model.FireBaseReference.MAIL;
-import static com.example.vaio.technicalnews.model.FireBaseReference.TOPIC;
-import static com.example.vaio.technicalnews.model.FireBaseReference.TOPIC_KEY;
-import static com.example.vaio.technicalnews.model.FireBaseReference.getBanRef;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.MAIL;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.TOPIC;
 
 public class TopicActivity extends AppCompatActivity {
     private static final String TAG = "TopicActivity";
-
-
     private static final int RC_COMMENT = 0;
+
     private ArrayList<Topic> arrTopic = new ArrayList<>();
     private ArrayList<Topic> arrTopicTmp = new ArrayList<>();
-    private ArrayList<String> arrTopicKey = new ArrayList<>();
+    private ArrayList<UserInfo> arrUserInfo = new ArrayList<>();
+    private ArrayList<UserInfo> arrUserInfoTmp = new ArrayList<>();
+
     private TopicsForumAdapter adapter;
     private ArrayList<String> arrBan = new ArrayList<>();
     private RecyclerView recyclerView;
@@ -62,13 +60,16 @@ public class TopicActivity extends AppCompatActivity {
     private FloatingActionButton floatingActionButton;
     private SearchView searchView;
     //intent data
-    private String tag;
     private GroupForumItem groupForumItem;
     private ChildForumItem childForumItem;
-    private String email;
+
     //intent data
     private AccountManager accountManager;
     private TextView tvEmpty;
+    private String s[] = {"Information and technology", "Ecommerce", "Cloud", "Technology exploration",
+            "Advertising - Promotions", "App", "Information - Events", "Windows", "Apple - Mac OS X",
+            "Linux", "Chrome OS", "Computer Consulting", "Computer", "iOS", "Android", "Windows Phone",
+            "BlackBerry", "Symbian", "Mobile network", "Phone"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,46 +81,11 @@ public class TopicActivity extends AppCompatActivity {
     }
 
     private void initData() {
-        arrBan.clear();
-        arrTopic.clear();
-        arrTopicTmp.clear();
         final GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
-//        globalData.setArrBan(arrBan);
-        FireBaseReference.getBanRef().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String mail = dataSnapshot.getValue(String.class);
-                if (!(arrBan.indexOf(mail) > -1)) {
-                    arrBan.add(mail);
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                initData();
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        tag = getIntent().getExtras().getString(RC);
         groupForumItem = (GroupForumItem) getIntent().getExtras().getSerializable(GROUP_FORUM_ITEM);
         childForumItem = (ChildForumItem) getIntent().getExtras().getSerializable(CHILD_FORUM_ITEM);
-        email = getIntent().getExtras().getString(MAIL);
+        getBanList();
         receiveData();
     }
 
@@ -155,10 +121,14 @@ public class TopicActivity extends AppCompatActivity {
         });
         adapter.setOnItemLongClick(new TopicsForumAdapter.OnItemLongClick() {
             @Override
-            public void onLongLick(View view, int position) {
+            public void onLongLick(View view, final int position) {
                 Log.e(TAG, position + "");
+
                 final Topic topic = arrTopic.get(arrTopic.size() - position - 1);
-                PopupMenu popupMenu = new PopupMenu(TopicActivity.this, view);
+                if (accountManager.getCurrentUser() == null || !accountManager.getCurrentUser().getUid().equals(topic.getUid())) {
+                    return;
+                }
+                final PopupMenu popupMenu = new PopupMenu(TopicActivity.this, view);
                 popupMenu.getMenuInflater().inflate(R.menu.menu_topic_more, popupMenu.getMenu());
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
@@ -169,15 +139,12 @@ public class TopicActivity extends AppCompatActivity {
                                 FireBaseReference.getTopicKeyRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).removeValue(new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                        arrTopic.remove(arrTopic.size() - position - 1);
+                                        adapter.notifyItemRemoved(position);
                                         FireBaseReference.getDeletedRef().child(accountManager.getCurrentUser().getUid()).push().setValue(topic);
-                                        receiveData();
+//                                        receiveData();
                                     }
                                 });
-                                break;
-                            case R.id.action_ban:
-                                if (!(arrBan.indexOf(topic.getMail()) > -1)) {
-                                    FireBaseReference.getBanRef().push().setValue(topic.getMail());
-                                }
                                 break;
                         }
                         return false;
@@ -193,7 +160,7 @@ public class TopicActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                receiveData();
+//                receiveData();
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -219,25 +186,64 @@ public class TopicActivity extends AppCompatActivity {
         });
     }
 
+    public void getBanList() {
+        arrBan.clear();
+
+//        globalData.setArrBan(arrBan);
+        FireBaseReference.getBanRef().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String mail = dataSnapshot.getValue(String.class);
+                if (!(arrBan.indexOf(mail) > -1)) {
+                    arrBan.add(mail);
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                initData();
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     public void receiveData() {
         Log.e(TAG, arrTopic.size() + "");
+
         arrTopic.clear();
         arrTopicTmp.clear();
-        arrTopicKey.clear();
+        arrUserInfo.clear();
+        arrUserInfoTmp.clear();
+
 //        FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
 //                keepSynced(true);
         FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
                 addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        Topic topic = dataSnapshot.getValue(Topic.class);
+                        final Topic topic = dataSnapshot.getValue(Topic.class);
                         topic.setKey(dataSnapshot.getKey());
                         topic.setGroupName(groupForumItem.getName());
                         topic.setChildName(childForumItem.getName());
+
                         arrTopic.add(topic);
                         arrTopicTmp.add(topic);
-                        adapter.notifyDataSetChanged();
-
+                        adapter.notifyItemInserted(0);
+//                        recyclerView.scrollToPosition(0);
                     }
 
                     @Override
@@ -264,14 +270,15 @@ public class TopicActivity extends AppCompatActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+
                         contentLoadingProgressBar.hide();
                         if (arrTopic.isEmpty()) {
                             tvEmpty.setText("< No post >");
                             tvEmpty.setVisibility(View.VISIBLE);
                         } else {
-
+                            tvEmpty.setVisibility(View.INVISIBLE);
                         }
-//                        Toast.makeText(TopicActivity.this, "Complete !", Toast.LENGTH_SHORT).show();
+
                     }
 
                     @Override
@@ -296,17 +303,17 @@ public class TopicActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 Log.e(TAG, newText);
-                arrTopic.clear();
+//                arrTopic.clear();
                 for (int i = 0; i < arrTopicTmp.size(); i++) {
-                    Topic topic = arrTopicTmp.get(i);
-                    String s = topic.getName() + "_" + topic.getSubject() + "_" + topic.getDate() + "+" + topic.getTime();
-
-                    if (s.toLowerCase().trim().contains(newText.toLowerCase().trim())) {
-                        Log.e(TAG, s);
-                        arrTopic.add(topic);
-                    }
+//                    Topic topic = arrTopicTmp.get(i);
+//                    String s = topic.getName() + "_" + topic.getSubject() + "_" + topic.getDate() + "+" + topic.getTime();
+//
+//                    if (s.toLowerCase().trim().contains(newText.toLowerCase().trim())) {
+//                        Log.e(TAG, s);
+//                        arrTopic.add(topic);
+//                    }
                 }
-                adapter.notifyDataSetChanged();
+//                adapter.notifyDataSetChanged();
                 return true;
             }
         });
@@ -330,7 +337,9 @@ public class TopicActivity extends AppCompatActivity {
             if (RC_COMMENT == requestCode) {
                 if (resultCode == RESULT_OK) {
 //                    receiveData();
-                    adapter.notifyDataSetChanged();
+                    if (arrTopic.size() - 1 >= 0) {
+                        adapter.notifyItemInserted(arrTopic.size() - 1);
+                    }
                 }
             }
         } catch (Exception e) {

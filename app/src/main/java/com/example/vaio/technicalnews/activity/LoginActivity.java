@@ -2,10 +2,8 @@ package com.example.vaio.technicalnews.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
@@ -22,10 +20,9 @@ import android.widget.Toast;
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.asyntask.UploadAvatarFromRegister;
 import com.example.vaio.technicalnews.asyntask.UploadAvatarFromStream;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.GlobalData;
-import com.example.vaio.technicalnews.model.MySharedPreferences;
-import com.example.vaio.technicalnews.service.NotificationService;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.application.GlobalData;
+import com.example.vaio.technicalnews.model.application.MySharedPreferences;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -43,8 +40,8 @@ import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 
-import static com.example.vaio.technicalnews.model.MySharedPreferences.PASSWORD;
-import static com.example.vaio.technicalnews.model.MySharedPreferences.USER_NAME;
+import static com.example.vaio.technicalnews.model.application.MySharedPreferences.PASSWORD;
+import static com.example.vaio.technicalnews.model.application.MySharedPreferences.USER_NAME;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -144,53 +141,53 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         } else {
                             MySharedPreferences.putString(LoginActivity.this, USER_NAME, accountManager.getCurrentUser().getEmail());
                             MySharedPreferences.putString(LoginActivity.this, PASSWORD, edtPassword.getText().toString());
-                            UploadAvatarFromStream uploadAvatarFromStream = new UploadAvatarFromStream(LoginActivity.this);
-                            uploadAvatarFromStream.setOnUploadComplete(new UploadAvatarFromRegister.OnUploadComplete() {
-                                @Override
-                                public void onComplete() {
-
-                                    Toast.makeText(LoginActivity.this, "Authentication successful !",
-                                            Toast.LENGTH_SHORT).show();
-                                    FirebaseStorage.getInstance().getReference().
-                                            child("Auth/" + accountManager.getCurrentUser().getUid()).
-                                            getDownloadUrl().
-                                            addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                                @Override
-                                                public void onSuccess(Uri uri) {
-                                                    accountManager.setPathPhoto(uri.toString());
-                                                    if (progressDialog != null && progressDialog.isShowing()) {
-                                                        Toast.makeText(LoginActivity.this, "Authentication successful !",
-                                                                Toast.LENGTH_SHORT).show();
-                                                        progressDialog.dismiss();
-                                                        onBackPressed();
-                                                    }
-                                                }
-                                            }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Toast.makeText(LoginActivity.this, "Authentication failed !",
-                                                    Toast.LENGTH_SHORT).show();
-                                            if (progressDialog != null && progressDialog.isShowing()) {
-                                                progressDialog.dismiss();
-                                                onBackPressed();
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                            uploadAvatarFromStream.setOnUploadFailure(new UploadAvatarFromStream.OnUploadFailure() {
-                                @Override
-                                public void onFailure() {
-                                    Toast.makeText(LoginActivity.this, "Authentication failed !",
-                                            Toast.LENGTH_SHORT).show();
-                                    if (progressDialog != null && progressDialog.isShowing()) {
-                                        progressDialog.dismiss();
-                                        onBackPressed();
-                                    }
-                                }
-                            });
-                            uploadAvatarFromStream.execute(accountManager.getCurrentUser().getPhotoUrl().toString(),
-                                    accountManager.getCurrentUser().getUid());
+//                            UploadAvatarFromStream uploadAvatarFromStream = new UploadAvatarFromStream(LoginActivity.this);
+//                            uploadAvatarFromStream.setOnUploadComplete(new UploadAvatarFromRegister.OnUploadComplete() {
+//                                @Override
+//                                public void onComplete() {
+//
+//                                    Toast.makeText(LoginActivity.this, "Authentication successful !",
+//                                            Toast.LENGTH_SHORT).show();
+//                                    FirebaseStorage.getInstance().getReference().
+//                                            child("Auth/" + accountManager.getCurrentUser().getUid()).
+//                                            getDownloadUrl().
+//                                            addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                                                @Override
+//                                                public void onSuccess(Uri uri) {
+//                                                    accountManager.setPathPhoto(uri.toString());
+//                                                    if (progressDialog != null && progressDialog.isShowing()) {
+//                                                        Toast.makeText(LoginActivity.this, "Authentication successful !",
+//                                                                Toast.LENGTH_SHORT).show();
+//                                                        progressDialog.dismiss();
+//                                                        onBackPressed();
+//                                                    }
+//                                                }
+//                                            }).addOnFailureListener(new OnFailureListener() {
+//                                        @Override
+//                                        public void onFailure(@NonNull Exception e) {
+//                                            Toast.makeText(LoginActivity.this, "Authentication failed !",
+//                                                    Toast.LENGTH_SHORT).show();
+//                                            if (progressDialog != null && progressDialog.isShowing()) {
+//                                                progressDialog.dismiss();
+//                                                onBackPressed();
+//                                            }
+//                                        }
+//                                    });
+//                                }
+//                            });
+//                            uploadAvatarFromStream.setOnUploadFailure(new UploadAvatarFromStream.OnUploadFailure() {
+//                                @Override
+//                                public void onFailure() {
+//                                    Toast.makeText(LoginActivity.this, "Authentication failed !",
+//                                            Toast.LENGTH_SHORT).show();
+//                                    if (progressDialog != null && progressDialog.isShowing()) {
+//                                        progressDialog.dismiss();
+//                                        onBackPressed();
+//                                    }
+//                                }
+//                            });
+//                            uploadAvatarFromStream.execute(accountManager.getCurrentUser().getPhotoUrl().toString(),
+//                                    accountManager.getCurrentUser().getUid());
                         }
 
                     }
@@ -211,19 +208,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             setClickableViews(false);
             switch (view.getId()) {
                 case R.id.btnLogin:
-
-                    final ProgressDialog progressDialog = new ProgressDialog(this);
-                    progressDialog.setMessage("Signing in ... ");
-                    progressDialog.setCancelable(false);
-                    progressDialog.show();
                     if (!MainActivity.isNetWorkAvailable(this)) {
                         Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
-                        progressDialog.hide();
-                        return;
-                    }
-                    if (!MainActivity.isNetWorkAvailable(this)) {
-                        Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
-                        progressDialog.hide();
                         return;
                     }
 
@@ -232,22 +218,26 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     if (userName.isEmpty() || password.isEmpty()) {
                         btnLogin.setClickable(true);
                         Toast.makeText(this, "The feilds must not empty", Toast.LENGTH_SHORT).show();
-                        progressDialog.dismiss();
                         return;
                     }
+
+                    final ProgressDialog progressDialog = new ProgressDialog(this);
+                    progressDialog.setMessage("Signing in ... ");
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
+
                     accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
                         @Override
                         public void onSuccess() {
-                            if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
-                                accountManager.setAdmin(true);
-
-                            } else {
-                                accountManager.setAdmin(false);
-
-                            }
+//                            if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
+//                                accountManager.setAdmin(true);
+//
+//                            } else {
+//                                accountManager.setAdmin(false);
+//
+//                            }
                             progressDialog.dismiss();
                             onBackPressed();
-
                         }
                     });
                     accountManager.setOnLoginFail(new AccountManager.OnLoginFail() {

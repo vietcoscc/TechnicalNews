@@ -12,8 +12,8 @@ import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.fragment.BannedFragment;
 import com.example.vaio.technicalnews.fragment.DeletedFragment;
 import com.example.vaio.technicalnews.fragment.ManagerFragment;
-import com.example.vaio.technicalnews.model.AccountManager;
-import com.example.vaio.technicalnews.model.GlobalData;
+import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.application.GlobalData;
 
 public class ManagerActivity extends AppCompatActivity {
     private ManagerFragment managerFragment;
