@@ -14,12 +14,14 @@ import android.widget.ExpandableListView;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.activity.MainActivity;
+import com.example.vaio.technicalnews.activity.SplashScreenActivity;
 import com.example.vaio.technicalnews.activity.TopicActivity;
 import com.example.vaio.technicalnews.adapter.forum.GroupForumExpandableListViewAdapter;
 import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.model.forum.ChildForumItem;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;
 import com.example.vaio.technicalnews.model.forum.GroupForumItem;
+import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -49,6 +51,8 @@ public class ForumFragment extends Fragment {
     private ContentLoadingProgressBar contentLoadingProgressBar;
     private AccountManager accountManager;
     private ArrayList<GroupForumItem> arrGroupForumItem = new ArrayList<>();
+    private ArrayList<String> arrAdmin = new ArrayList<>();
+    private ArrayList<String> arrBan = new ArrayList<>();
 
     public ForumFragment(AccountManager accountManager) {
         this.accountManager = accountManager;
@@ -59,7 +63,8 @@ public class ForumFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         View view = layoutInflater.inflate(R.layout.fragment_forum, container, false);
-
+//        receiveBanList();
+//        receiveAdmin();
         receiveData();
         initViews(view);
         return view;
@@ -82,7 +87,7 @@ public class ForumFragment extends Fragment {
         contentLoadingProgressBar = (ContentLoadingProgressBar) view.findViewById(R.id.contentLoadingProgressBar);
         contentLoadingProgressBar.show();
         expandableListView = (ExpandableListView) view.findViewById(R.id.expandableListView);
-        adapter = new GroupForumExpandableListViewAdapter(getContext(), arrGroupForumItem,accountManager);
+        adapter = new GroupForumExpandableListViewAdapter(getContext(), arrGroupForumItem, accountManager);
         expandableListView.setAdapter(adapter);
         expandableListView.setGroupIndicator(null);
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -108,9 +113,89 @@ public class ForumFragment extends Fragment {
         });
     }
 
+    public void receiveBanList() {
+        arrBan.clear();
+        FireBaseReference.getBanRef().keepSynced(true);
+        FireBaseReference.getBanRef().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String mail = dataSnapshot.getValue(String.class);
+                Log.e(TAG, mail);
+                if (!(arrBan.indexOf(mail) > -1)) {
+                    arrBan.add(mail);
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void receiveAdmin() {
+        arrAdmin.clear();
+        FireBaseReference.getAdminRef().keepSynced(true);
+        FireBaseReference.getAdminRef().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String admin = dataSnapshot.getValue(String.class);
+                arrAdmin.add(admin);
+                Log.e(TAG, admin);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+//        FireBaseReference.getAdminRef().addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+    }
+
     private void receiveData() {
+
         arrGroupForumItem.clear();
-//        FireBaseReference.getForumRef().keepSynced(true);
+        FireBaseReference.getForumRef().keepSynced(true);
         FireBaseReference.getForumRef().
                 addChildEventListener(new ChildEventListener() {
                     @Override

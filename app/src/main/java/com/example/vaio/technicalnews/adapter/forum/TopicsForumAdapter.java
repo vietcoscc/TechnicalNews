@@ -49,7 +49,7 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
 //
-        final Topic topic = arrTopic.get(arrTopic.size() - position - 1);
+        final Topic topic = arrTopic.get(position);
         if (topic != null) {
             holder.tvSubject.setText(topic.getSubject().toString());
             holder.tvDate.setText(topic.getDate().toString());

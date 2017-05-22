@@ -36,7 +36,7 @@
             android:layout_alignParentRight="true"
             android:layout_gravity="center"
             android:background="@drawable/view_click_selector"
-            android:src="@mipmap/ic_launcher"
+            android:src="@drawable/boss"
             android:text="@string/app_name" />
 
     </RelativeLayout>
@@ -115,11 +115,39 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Joined date"
+            android:text="Joined date : "
             android:textColor="@color/md_black_1000" />
 
         <TextView
             android:id="@+id/tvJoinedDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/app_name" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/md_black_1000" />
+
+    <LinearLayout
+        android:id="@+id/layoutAdmin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/view_click_selector"
+        android:orientation="horizontal"
+        android:padding="@dimen/default_margin">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Admin : "
+            android:textColor="@color/md_black_1000" />
+
+        <TextView
+            android:id="@+id/tvAdmin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -151,4 +179,5 @@
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:background="@color/md_black_1000" />
+
 </LinearLayout>

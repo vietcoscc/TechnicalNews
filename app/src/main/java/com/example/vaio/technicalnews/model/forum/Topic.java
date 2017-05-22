@@ -11,27 +11,25 @@ public class Topic implements Serializable {
     private String key;
     private String groupName;
     private String childName;
+    private UserInfo userInfo;
 
     private String uid; // user ID
-
     private String subject;
     private String content;
     private String date;
     private String time;
 
-    private int numberCare;
-    private int numberView;
-    private int numberReply;
+    private int numberCare, numberView, numberReply;
 
-    private UserInfo userInfo;
 
     private ArrayList<Comment> arrComment;
+    private ArrayList<String> arrFavorite;
 
     public Topic() {
 
     }
 
-    public Topic(String uid, String subject, String content, String date, String time, int numberCare, int numberView, int numberReply, ArrayList<Comment> arrComment) {
+    public Topic(String uid, String subject, String content, String date, String time, int numberCare, int numberView, int numberReply, ArrayList<Comment> arrComment, ArrayList<String> arrFavorite) {
         this.uid = uid;
         this.subject = subject;
         this.content = content;
@@ -41,6 +39,7 @@ public class Topic implements Serializable {
         this.numberView = numberView;
         this.numberReply = numberReply;
         this.arrComment = arrComment;
+        this.arrFavorite = arrFavorite;
     }
 
     public String getKey() {
@@ -65,6 +64,14 @@ public class Topic implements Serializable {
 
     public void setChildName(String childName) {
         this.childName = childName;
+    }
+
+    public UserInfo getUserInfo() {
+        return userInfo;
+    }
+
+    public void setUserInfo(UserInfo userInfo) {
+        this.userInfo = userInfo;
     }
 
     public String getUid() {
@@ -139,11 +146,16 @@ public class Topic implements Serializable {
         this.arrComment = arrComment;
     }
 
-    public UserInfo getUserInfo() {
-        return userInfo;
+    public ArrayList<String> getArrFavorite() {
+        return arrFavorite;
     }
 
-    public void setUserInfo(UserInfo userInfo) {
-        this.userInfo = userInfo;
+    public void setArrFavorite(ArrayList<String> arrFavorite) {
+        this.arrFavorite = arrFavorite;
+    }
+
+    @Override
+    public String toString() {
+        return subject + " " + content + " " + date + " " + time + " ";
     }
 }

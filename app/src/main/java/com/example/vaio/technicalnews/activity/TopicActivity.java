@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.adapter.forum.TopicsForumAdapter;
+import com.example.vaio.technicalnews.asyntask.TopicSearching;
 import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.model.forum.ChildForumItem;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;
@@ -50,10 +51,10 @@ public class TopicActivity extends AppCompatActivity {
     private ArrayList<Topic> arrTopic = new ArrayList<>();
     private ArrayList<Topic> arrTopicTmp = new ArrayList<>();
     private ArrayList<UserInfo> arrUserInfo = new ArrayList<>();
-    private ArrayList<UserInfo> arrUserInfoTmp = new ArrayList<>();
+//    private ArrayList<UserInfo> arrUserInfoTmp = new ArrayList<>();
 
     private TopicsForumAdapter adapter;
-    private ArrayList<String> arrBan = new ArrayList<>();
+
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ContentLoadingProgressBar contentLoadingProgressBar;
@@ -85,7 +86,7 @@ public class TopicActivity extends AppCompatActivity {
         accountManager = globalData.getAccountManager();
         groupForumItem = (GroupForumItem) getIntent().getExtras().getSerializable(GROUP_FORUM_ITEM);
         childForumItem = (ChildForumItem) getIntent().getExtras().getSerializable(CHILD_FORUM_ITEM);
-        getBanList();
+//        getBanList();
         receiveData();
     }
 
@@ -115,7 +116,7 @@ public class TopicActivity extends AppCompatActivity {
                 Intent intent = new Intent(TopicActivity.this, CommentActivity.class);
                 intent.putExtra(GROUP_FORUM_ITEM, groupForumItem.getName());
                 intent.putExtra(CHILD_FORUM_ITEM, childForumItem.getName());
-                intent.putExtra(TOPIC, arrTopic.get(arrTopic.size() - position - 1));
+                intent.putExtra(TOPIC, arrTopic.get(position));
                 startActivityForResult(intent, RC_COMMENT);
             }
         });
@@ -124,8 +125,8 @@ public class TopicActivity extends AppCompatActivity {
             public void onLongLick(View view, final int position) {
                 Log.e(TAG, position + "");
 
-                final Topic topic = arrTopic.get(arrTopic.size() - position - 1);
-                if (accountManager.getCurrentUser() == null || !accountManager.getCurrentUser().getUid().equals(topic.getUid())) {
+                final Topic topic = arrTopic.get(position);
+                if (accountManager.getCurrentUser() == null || !accountManager.getCurrentUser().getUid().equals(topic.getUid()) && !accountManager.getUserInfo().isAdmin()) {
                     return;
                 }
                 final PopupMenu popupMenu = new PopupMenu(TopicActivity.this, view);
@@ -139,10 +140,7 @@ public class TopicActivity extends AppCompatActivity {
                                 FireBaseReference.getTopicKeyRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).removeValue(new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                        arrTopic.remove(arrTopic.size() - position - 1);
-                                        adapter.notifyItemRemoved(position);
-                                        FireBaseReference.getDeletedRef().child(accountManager.getCurrentUser().getUid()).push().setValue(topic);
-//                                        receiveData();
+//                                        FireBaseReference.getDeletedRef().child(accountManager.getCurrentUser().getUid()).push().setValue(topic);
                                     }
                                 });
                                 break;
@@ -174,10 +172,10 @@ public class TopicActivity extends AppCompatActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (arrBan.indexOf(accountManager.getCurrentUser().getEmail().trim()) > -1) {
-                    Snackbar.make(recyclerView, "You have been banned ! ", 1000).show();
-                    return;
-                }
+//                if (arrBan.indexOf(accountManager.getCurrentUser().getEmail().trim()) > -1) {
+//                    Snackbar.make(recyclerView, "You have been banned ! ", 1000).show();
+//                    return;
+//                }
                 Intent intent = new Intent(TopicActivity.this, PostActivity.class);
                 intent.putExtra(GROUP_FORUM_ITEM, groupForumItem);
                 intent.putExtra(CHILD_FORUM_ITEM, childForumItem);
@@ -186,51 +184,18 @@ public class TopicActivity extends AppCompatActivity {
         });
     }
 
-    public void getBanList() {
-        arrBan.clear();
-
-//        globalData.setArrBan(arrBan);
-        FireBaseReference.getBanRef().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String mail = dataSnapshot.getValue(String.class);
-                if (!(arrBan.indexOf(mail) > -1)) {
-                    arrBan.add(mail);
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                initData();
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
 
     public void receiveData() {
         Log.e(TAG, arrTopic.size() + "");
 
         arrTopic.clear();
-        arrTopicTmp.clear();
+//        arrTopicTmp.clear();
         arrUserInfo.clear();
-        arrUserInfoTmp.clear();
+//        arrUserInfoTmp.clear();
 
-//        FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
-//                keepSynced(true);
+        FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
+                keepSynced(true);
+
         FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
                 addChildEventListener(new ChildEventListener() {
                     @Override
@@ -240,8 +205,8 @@ public class TopicActivity extends AppCompatActivity {
                         topic.setGroupName(groupForumItem.getName());
                         topic.setChildName(childForumItem.getName());
 
-                        arrTopic.add(topic);
-                        arrTopicTmp.add(topic);
+                        arrTopic.add(0, topic);
+                        arrTopicTmp.add(0, topic);
                         adapter.notifyItemInserted(0);
 //                        recyclerView.scrollToPosition(0);
                     }
@@ -253,6 +218,15 @@ public class TopicActivity extends AppCompatActivity {
 
                     @Override
                     public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        Log.e(TAG, dataSnapshot.getKey());
+                        int n = arrTopic.size();
+                        for (int i = 0; i < n; i++) {
+                            if(arrTopic.get(i).getKey().equals(dataSnapshot.getKey())){
+                                arrTopic.remove(i);
+                                adapter.notifyItemRemoved(i);
+                                break;
+                            }
+                        }
 
                     }
 
@@ -304,7 +278,7 @@ public class TopicActivity extends AppCompatActivity {
             public boolean onQueryTextChange(String newText) {
                 Log.e(TAG, newText);
 //                arrTopic.clear();
-                for (int i = 0; i < arrTopicTmp.size(); i++) {
+//                for (int i = 0; i < arrTopicTmp.size(); i++) {
 //                    Topic topic = arrTopicTmp.get(i);
 //                    String s = topic.getName() + "_" + topic.getSubject() + "_" + topic.getDate() + "+" + topic.getTime();
 //
@@ -312,8 +286,29 @@ public class TopicActivity extends AppCompatActivity {
 //                        Log.e(TAG, s);
 //                        arrTopic.add(topic);
 //                    }
-                }
+//                }
 //                adapter.notifyDataSetChanged();
+                if (newText.isEmpty() || searchView.isIconified()) {
+                    arrTopic.clear();
+                    arrTopic.addAll(arrTopicTmp);
+                    adapter.notifyDataSetChanged();
+                    return true;
+                }
+
+
+                contentLoadingProgressBar.show();
+
+                TopicSearching topicSearching = new TopicSearching(newText);
+                topicSearching.setOnSearchingComplete(new TopicSearching.OnSearchingComplete() {
+                    @Override
+                    public void onComplete(ArrayList<Topic> arrTopic) {
+                        TopicActivity.this.arrTopic.clear();
+                        TopicActivity.this.arrTopic.addAll(arrTopic);
+                        adapter.notifyDataSetChanged();
+                        contentLoadingProgressBar.hide();
+                    }
+                });
+                topicSearching.execute(arrTopicTmp);
                 return true;
             }
         });
@@ -337,9 +332,9 @@ public class TopicActivity extends AppCompatActivity {
             if (RC_COMMENT == requestCode) {
                 if (resultCode == RESULT_OK) {
 //                    receiveData();
-                    if (arrTopic.size() - 1 >= 0) {
-                        adapter.notifyItemInserted(arrTopic.size() - 1);
-                    }
+//                    if (arrTopic.size() - 1 >= 0) {
+//                        adapter.notifyItemInserted(arrTopic.size() - 1);
+//                    }
                 }
             }
         } catch (Exception e) {

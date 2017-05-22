@@ -147,7 +147,11 @@ public class PostActivity extends AppCompatActivity {
                     }
                 });
         ArrayList<Comment> arrComment = new ArrayList<>();
-        Topic topic = new Topic(accountManager.getCurrentUser().getUid(), subject, content, date, time, 0, 0, 0, arrComment);
+        Comment comment = new Comment(accountManager.getCurrentUser().getUid(), "Comment !", date, time);
+        arrComment.add(comment);
+        ArrayList<String> arrFavorite = new ArrayList<>();
+        arrFavorite.add(" ");
+        Topic topic = new Topic(accountManager.getCurrentUser().getUid(), subject, content, date, time, 0, 0, 0, arrComment, arrFavorite);
         FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).push().setValue(topic);
         onBackPressed();
     }

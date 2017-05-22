@@ -133,7 +133,7 @@ public class AccountManager implements Serializable {
                                                 onRegisterFail.onFail();
                                             }
                                         } else {
-                                            final UserInfo userInfo = new UserInfo(user.getUid(), yourName, user.getEmail(), "", false);
+                                            final UserInfo userInfo = new UserInfo(user.getUid(), yourName, user.getEmail(), "", MyCalendar.getDate(), false);
                                             FireBaseReference.getUserIdRef(userInfo.getUid()).setValue(userInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
                                                 public void onSuccess(Void aVoid) {
@@ -151,12 +151,16 @@ public class AccountManager implements Serializable {
 
                     }
                 });
-
-
             }
         });
+    }
 
+    public UserInfo getUserInfo() {
+        return userInfo;
+    }
 
+    public void setUserInfo(UserInfo userInfo) {
+        this.userInfo = userInfo;
     }
 
     public FirebaseUser getCurrentUser() {

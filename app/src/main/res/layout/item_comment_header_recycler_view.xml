@@ -87,31 +87,118 @@
             android:textColor="@color/md_black_1000" />
     </LinearLayout>
 
+    <!--<TextView-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="1px"-->
+    <!--android:layout_marginTop="@dimen/activity_horizontal_margin"-->
+    <!--android:background="@color/md_grey_600" />-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="9">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="4"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_weight="0.5"
+                android:src="@drawable/ic_view_number"
+                android:tint="@color/colorPrimary" />
+
+            <TextView
+                android:id="@+id/tvViewNumber"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_weight="1.5"
+                android:text="view" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="4"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_weight="0.5"
+                android:src="@drawable/ic_comment_number"
+                android:tint="@color/colorPrimary" />
+
+            <TextView
+                android:id="@+id/tvCommentNumber"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_weight="1.5"
+                android:text="comment" />
+        </LinearLayout>
+
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btnFavorite"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_weight="1"
+            android:drawableBottom="@drawable/ic_favortite"
+            android:drawablePadding="0dp"
+            android:paddingTop="-5dp"
+            android:textColor="@android:color/white"
+            fbutton:cornerRadius="5dp"
+            fbutton:shadowColor="@color/colorAccent"
+            fbutton:shadowEnabled="true"
+            fbutton:shadowHeight="6dp" />
+    </LinearLayout>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="1px"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:background="@color/md_grey_600" />
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:id="@+id/layoutFavorite"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <!--<info.hoang8f.widget.FButton-->
-            <!--android:id="@+id/f_twitter_button"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:drawableLeft="@drawable/twitter"-->
-            <!--android:drawablePadding="0dp"-->
-            <!--android:minHeight="80dp"-->
-            <!--android:minWidth="250dp"-->
-            <!--android:paddingLeft="30dp"-->
-            <!--android:paddingRight="20dp"-->
-            <!--android:paddingTop="-5dp"-->
-            <!--android:text="Twitter"-->
-            <!--android:textColor="@android:color/white"-->
-            <!--fbutton:cornerRadius="0dp"-->
-            <!--fbutton:shadowEnabled="true"-->
-            <!--fbutton:shadowHeight="6dp" />-->
+        android:layout_height="wrap_content"
+        android:background="@drawable/view_click_selector"
+        android:gravity="right"
+        android:orientation="horizontal"
+        android:padding="@dimen/activity_horizontal_margin">
+
+        <TextView
+            android:id="@+id/tvFavorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" favorited" />
     </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:background="@color/md_grey_600" />
 </LinearLayout>

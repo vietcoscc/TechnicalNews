@@ -130,39 +130,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-    //    private void checkLogin() throws Exception {
-//        progressDialog.show();
-//        String userName = MySharedPreferences.getString(this, USER_NAME);
-//        String password = MySharedPreferences.getString(this, PASSWORD);
-//
-//        if (userName.isEmpty() || password.isEmpty()) {
-//            progressDialog.dismiss();
-//            return;
-//        }
-//        accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
-//            @Override
-//            public void onSuccess() {
-//                if (accountManager.getCurrentUser() != null) {
-//                    if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
-//                        accountManager.setAdmin(true);
-//                        manager.setVisible(true);
-//                    } else {
-//                        accountManager.setAdmin(false);
-//                        manager.setVisible(false);
-//                    }
-//                }
-//                updateUI();
-//                progressDialog.dismiss();
-//            }
-//        });
-//        accountManager.setOnLoginFail(new AccountManager.OnLoginFail() {
-//            @Override
-//            public void onFail() {
-//                progressDialog.hide();
-//            }
-//        });
-//        accountManager.login(userName, password);
-//    }
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -178,6 +145,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         accountManager = new AccountManager(this);
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
+
+
         accountManager.setOnLogout(new AccountManager.OnLogout() {
             @Override
             public void logout() {
@@ -222,6 +191,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             ivAvatar.setVisibility(View.VISIBLE);
+            ivAvatar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    startActivityForResult(intent, RC_PROFILE);
+                }
+            });
             if (accountManager != null && user.getPhotoUrl() != null) {
                 Picasso.with(this).
                         load(user.getPhotoUrl()).
@@ -444,27 +420,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 signUp = menu.findItem(R.id.action_sign_up);
                 signOut = menu.findItem(R.id.action_sign_out);
                 profile = menu.findItem(R.id.action_view_profile);
-                manager = menu.findItem(R.id.action_mangage);
 
-                manager.setOnMenuItemClickListener(this);
+                manager = menu.findItem(R.id.action_mangage);
+                if (!accountManager.getUserInfo().isAdmin()) {
+                    manager.setVisible(false);
+                }else {
+                    manager.setOnMenuItemClickListener(this);
+                }
                 signUp.setOnMenuItemClickListener(this);
                 signIn.setOnMenuItemClickListener(this);
                 signOut.setOnMenuItemClickListener(this);
                 profile.setOnMenuItemClickListener(this);
-                if (accountManager != null && accountManager.getCurrentUser() == null) {
-                    manager.setVisible(false);
-                } else {
-                    if (arrAdmin != null) {
-                        if (!(arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1)) {
 
-                            if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
-                                manager.setVisible(true);
-                            } else {
-                                manager.setVisible(false);
-                            }
-                        }
-                    }
-                }
                 break;
 
         }
@@ -552,22 +519,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

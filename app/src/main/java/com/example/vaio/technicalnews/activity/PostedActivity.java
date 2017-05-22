@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -28,6 +29,7 @@ import com.example.vaio.technicalnews.model.forum.Topic;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -96,11 +98,35 @@ public class PostedActivity extends AppCompatActivity {
                 onClickItem(position);
             }
         });
-        adapter.setOnDeletePost(new TopicsPostedForumAdapter.OnDeletePost() {
+        adapter.setOnItemLongClick(new TopicsPostedForumAdapter.OnItemLongClick() {
             @Override
-            public void onDelete(int position) {
-                FireBaseReference.getDeletedRef().child(accountManager.getCurrentUser().getUid()).push().setValue(arrTopic.get(position));
-                receiveData();
+            public void onLongClick(View v, int position) {
+                Log.e(TAG, position + "");
+
+                final Topic topic = arrTopic.get(position);
+                if (accountManager.getCurrentUser() == null || !accountManager.getCurrentUser().getUid().equals(topic.getUid()) && !accountManager.getUserInfo().isAdmin()) {
+                    return;
+                }
+                final PopupMenu popupMenu = new PopupMenu(PostedActivity.this, v);
+                popupMenu.getMenuInflater().inflate(R.menu.menu_topic_more, popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.action_delete:
+
+                                FireBaseReference.getTopicKeyRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).removeValue(new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+//                                        FireBaseReference.getDeletedRef().child(accountManager.getCurrentUser().getUid()).push().setValue(topic);
+                                    }
+                                });
+                                break;
+                        }
+                        return false;
+                    }
+                });
+                popupMenu.show();
             }
         });
         recyclerView.setAdapter(adapter);
@@ -139,7 +165,7 @@ public class PostedActivity extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 GroupForumItem groupForumItem = dataSnapshot.getValue(GroupForumItem.class);
                 groupForumItem.setKey(dataSnapshot.getKey());
-                Log.e(TAG, groupForumItem.getName());
+//                Log.e(TAG, groupForumItem.getName());
                 arrGroupForumItem.add(groupForumItem);
             }
 
@@ -198,7 +224,15 @@ public class PostedActivity extends AppCompatActivity {
 
                                     @Override
                                     public void onChildRemoved(DataSnapshot dataSnapshot) {
-
+                                        Log.e(TAG, dataSnapshot.getKey());
+                                        int n = arrTopic.size();
+                                        for (int i = 0; i < n; i++) {
+                                            if (arrTopic.get(i).getKey().equals(dataSnapshot.getKey())) {
+                                                arrTopic.remove(i);
+                                                adapter.notifyItemRemoved(i);
+                                                break;
+                                            }
+                                        }
                                     }
 
                                     @Override

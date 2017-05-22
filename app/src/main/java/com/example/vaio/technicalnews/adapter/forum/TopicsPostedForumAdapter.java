@@ -12,11 +12,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.vaio.technicalnews.R;
+import com.example.vaio.technicalnews.activity.MainActivity;
 import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;
 import com.example.vaio.technicalnews.model.forum.Topic;
+import com.example.vaio.technicalnews.model.forum.UserInfo;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -46,14 +50,43 @@ public class TopicsPostedForumAdapter extends RecyclerView.Adapter<TopicsPostedF
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
 
         final Topic topic = arrTopic.get(arrTopic.size() - position - 1);
 
         holder.tvSubject.setText(topic.getSubject().toString());
         holder.tvDate.setText(topic.getDate().toString());
         holder.tvTime.setText(topic.getTime().toString());
+        FireBaseReference.getUserIdRef(topic.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.e(TAG, dataSnapshot.getKey());
+                UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
 
+                if (userInfo != null) {
+                    if (userInfo.getPhotoUrl().isEmpty()) {
+                        Picasso.with(context).
+                                load(MainActivity.getUriToDrawable(context, R.drawable.boss)).
+                                placeholder(R.drawable.loading).
+                                error(R.drawable.warning).
+                                into(holder.ivAvatar);
+
+                    } else {
+                        Picasso.with(context).
+                                load(userInfo.getPhotoUrl()).
+                                placeholder(R.drawable.loading).
+                                error(R.drawable.warning).
+                                into(holder.ivAvatar);
+                    }
+                    holder.tvEmail.setText(userInfo.getDisplayName());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         if (position >= arrTopic.size() - 1) {
             if (onCompleteLoading != null) {
                 onCompleteLoading.onComplete();
@@ -73,7 +106,7 @@ public class TopicsPostedForumAdapter extends RecyclerView.Adapter<TopicsPostedF
 
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         ImageView ivAvatar;
         TextView tvEmail;
         TextView tvSubject;
@@ -117,6 +150,7 @@ public class TopicsPostedForumAdapter extends RecyclerView.Adapter<TopicsPostedF
                 }
             });
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
         @Override
@@ -124,6 +158,14 @@ public class TopicsPostedForumAdapter extends RecyclerView.Adapter<TopicsPostedF
             if (clickListener != null) {
                 clickListener.onItemClick(itemView, getPosition());
             }
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if (onItemLongClick != null) {
+                onItemLongClick.onLongClick(v, getPosition());
+            }
+            return false;
         }
     }
 
@@ -154,5 +196,15 @@ public class TopicsPostedForumAdapter extends RecyclerView.Adapter<TopicsPostedF
 
     public interface OnDeletePost {
         void onDelete(int position);
+    }
+
+    public interface OnItemLongClick {
+        void onLongClick(View v, int position);
+    }
+
+    private OnItemLongClick onItemLongClick;
+
+    public void setOnItemLongClick(OnItemLongClick onItemLongClick) {
+        this.onItemLongClick = onItemLongClick;
     }
 }

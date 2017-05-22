@@ -33,12 +33,13 @@ public class FireBaseReference {
     public static final String CONTENT = "content";
     public static final String DATE = "date";
     public static final String TIME = "time";
-    public static final int NUMBER_CARE = 0;
-    public static final int NUMBER_VIEW = 0;
-    public static final int NUMBER_REPLY = 0;
+    public static final String NUMBER_CARE = "numberCare";
+    public static final String NUMBER_VIEW = "numberView";
+    public static final String NUMBER_REPLY = "numberReply";
     public static final String MAIL = "mail";
     public static final String NAME = "name";
     public static final String PHOTO_PATH = "photoPath";
+    public static final String ARR_FAVORITE = "arrFavorite";
     //
     public static final String TOPIC_KEY = "Topic key";
     private static final String ADMIN = "Admin";
@@ -103,5 +104,9 @@ public class FireBaseReference {
 
     public static DatabaseReference getUserIdRef(String uid) {
         return getAccountRef().child(uid);
+    }
+
+    public static DatabaseReference getArrFavoriteRef(String groupForumName, String childForunName, String key) {
+        return getTopicKeyRef(groupForumName, childForunName, key).child(ARR_FAVORITE);
     }
 }

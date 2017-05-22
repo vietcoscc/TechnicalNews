@@ -25,7 +25,9 @@ import com.example.vaio.technicalnews.model.forum.Topic;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StreamDownloadTask;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,6 +38,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
     private static final String TAG = "CommentActivity";
     //
     private ArrayList<Comment> arrComment = new ArrayList<>();
+    private ArrayList<String> arrFavorite = new ArrayList<>();
     private Toolbar toolbar;
     private RecyclerView recyclerView;
     private EditText edtComment;
@@ -71,10 +74,58 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         childForumItem = getIntent().getExtras().getString(ForumFragment.CHILD_FORUM_ITEM);
         topic = (Topic) getIntent().getExtras().getSerializable(TOPIC);
         topic.setArrComment(arrComment);
-        Log.e(TAG, groupForumItem);
-        Log.e(TAG, childForumItem);
-        Log.e(TAG, topic.getKey());
+        topic.setArrFavorite(arrFavorite);
+
         getArrComment();
+        getArrFavorite();
+
+        FireBaseReference.getTopicKeyRef(groupForumItem, childForumItem, topic.getKey()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                try {
+                    Log.e(TAG, "Data change ");
+                    Topic tp = dataSnapshot.getValue(Topic.class);
+                    if (tp == null) {
+                        finish();
+                    }
+                    if (tp.getArrComment() != null) {
+                        topic.setArrComment(tp.getArrComment());
+                    }
+                    if (tp.getArrFavorite() != null) {
+                        topic.setArrFavorite(tp.getArrFavorite());
+                    }
+                    topic.setNumberCare(tp.getNumberCare());
+                    topic.setNumberReply(tp.getNumberReply());
+                    topic.setNumberView(tp.getNumberView());
+
+                    if (commentAdapter != null) {
+                        commentAdapter.notifyItemChanged(0);
+
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    finish();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        FireBaseReference.getTopicKeyRef(groupForumItem, childForumItem, topic.getKey()).child(FireBaseReference.NUMBER_VIEW).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int count = dataSnapshot.getValue(Integer.class);
+                FireBaseReference.getTopicKeyRef(groupForumItem, childForumItem, topic.getKey()).child(FireBaseReference.NUMBER_VIEW).setValue(count + 1);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
 
@@ -85,11 +136,12 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Comment comment = dataSnapshot.getValue(Comment.class);
                 arrComment.add(comment);
-                commentAdapter.notifyItemInserted(arrComment.size()+1);
+                if (commentAdapter != null && arrComment != null) {
+                    commentAdapter.notifyItemInserted(arrComment.size() + 1);
+                }
                 if (!begin) {
                     recyclerView.scrollToPosition(arrComment.size());
                 }
-                Log.e(TAG, dataSnapshot.getKey());
             }
 
             @Override
@@ -128,6 +180,54 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
 
+    private void getArrFavorite() {
+        arrFavorite.clear();
+        FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).keepSynced(true);
+        FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String string = dataSnapshot.getValue(String.class);
+                arrFavorite.add(0, string);
+                Log.e(TAG, "Added");
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                String string = dataSnapshot.getValue(String.class);
+                arrFavorite.remove(arrFavorite.indexOf(string));
+                commentAdapter.notifyDataSetChanged();
+
+                Log.e(TAG, "removed");
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void initToolbar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(childForumItem);
@@ -148,6 +248,8 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         commentAdapter = new CommentAdapter(topic, accountManager);
         recyclerView.setAdapter(commentAdapter);
         recyclerView.scrollToPosition(topic.getArrComment().size());
+
+
     }
 
     @Override
@@ -178,12 +280,6 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                 if (edtComment.getText().toString().isEmpty()) {
                     return;
                 }
-//                Log.e(TAG, TOPIC);
-//                Log.e(TAG, groupForumItem);
-//                Log.e(TAG, childForumItem);
-//                Log.e(TAG, ARR_COMMENT);
-//
-
                 Calendar calendar = Calendar.getInstance();
 
                 String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + (calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.YEAR) + "";
@@ -200,11 +296,6 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                 Comment cmt = new Comment(accountManager.getCurrentUser().getUid(), comment, date, time);
 
                 FireBaseReference.getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).child(arrComment.size() + "").setValue(cmt);
-//                if (!topic.getMail().equals(accountManager.getCurrentUser().getEmail())) {
-//                    MyNotification myNotification = new MyNotification("", 0, accountManager.getCurrentUser().getDisplayName(), topic.getSubject(), cmt.getComment(), accountManager.getCurrentUser().getEmail(), topic.getMail());
-//                    FireBaseReference.getNotifocationRef().push().setValue(myNotification);
-//                }
-
                 try {
 //                    getTopicAfter();
                 } catch (Exception e) {

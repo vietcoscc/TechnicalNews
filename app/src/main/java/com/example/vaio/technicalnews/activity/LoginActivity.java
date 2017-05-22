@@ -21,8 +21,11 @@ import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.asyntask.UploadAvatarFromRegister;
 import com.example.vaio.technicalnews.asyntask.UploadAvatarFromStream;
 import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.application.FireBaseReference;
 import com.example.vaio.technicalnews.model.application.GlobalData;
+import com.example.vaio.technicalnews.model.application.MyCalendar;
 import com.example.vaio.technicalnews.model.application.MySharedPreferences;
+import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -35,7 +38,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
@@ -139,8 +146,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                 progressDialog.dismiss();
                             }
                         } else {
-                            MySharedPreferences.putString(LoginActivity.this, USER_NAME, accountManager.getCurrentUser().getEmail());
-                            MySharedPreferences.putString(LoginActivity.this, PASSWORD, edtPassword.getText().toString());
+//                            MySharedPreferences.putString(LoginActivity.this, USER_NAME, accountManager.getCurrentUser().getEmail());
+//                            MySharedPreferences.putString(LoginActivity.this, PASSWORD, edtPassword.getText().toString());
 //                            UploadAvatarFromStream uploadAvatarFromStream = new UploadAvatarFromStream(LoginActivity.this);
 //                            uploadAvatarFromStream.setOnUploadComplete(new UploadAvatarFromRegister.OnUploadComplete() {
 //                                @Override
@@ -188,6 +195,28 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //                            });
 //                            uploadAvatarFromStream.execute(accountManager.getCurrentUser().getPhotoUrl().toString(),
 //                                    accountManager.getCurrentUser().getUid());
+
+                            FireBaseReference.getAccountRef().child(accountManager.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
+                                    if (userInfo == null) {
+                                        FirebaseUser user = accountManager.getCurrentUser();
+                                        UserInfo userInfo1 = new UserInfo(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhotoUrl().toString(), MyCalendar.getDate(), true);
+                                        FireBaseReference.getAccountRef().child(accountManager.getCurrentUser().getUid()).setValue(userInfo1);
+                                    }
+                                    if (progressDialog != null && progressDialog.isShowing()) {
+                                        progressDialog.dismiss();
+                                        finish();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
                         }
 
                     }

@@ -9,17 +9,19 @@ public class UserInfo {
     String displayName;
     String email;
     String photoUrl;
+    String joinedDate;
 
     boolean isAdmin;
 
     public UserInfo() {
     }
 
-    public UserInfo(String uid, String displayName, String email, String photoUrl, boolean isAdmin) {
+    public UserInfo(String uid, String displayName, String email, String photoUrl, String joinedDate, boolean isAdmin) {
         this.uid = uid;
         this.displayName = displayName;
         this.email = email;
         this.photoUrl = photoUrl;
+        this.joinedDate = joinedDate;
         this.isAdmin = isAdmin;
     }
 
@@ -61,5 +63,13 @@ public class UserInfo {
 
     public void setAdmin(boolean admin) {
         isAdmin = admin;
+    }
+
+    public String getJoinedDate() {
+        return joinedDate;
+    }
+
+    public void setJoinedDate(String joinedDate) {
+        this.joinedDate = joinedDate;
     }
 }

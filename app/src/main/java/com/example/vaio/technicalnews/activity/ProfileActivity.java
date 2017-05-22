@@ -22,15 +22,21 @@ import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.application.FireBaseReference;
 import com.example.vaio.technicalnews.model.application.GlobalData;
+import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static com.example.vaio.technicalnews.R.drawable.user;
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.MAIL;
 
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
@@ -43,7 +49,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private CircleImageView ivAvatar;
     private TextView tvEmail;
     private TextView tvDisplayName;
-
+    private TextView tvAdmin;
+    private TextView tvJoinedDate;
     private AccountManager accountManager;
     public static final String RC = "code";
 
@@ -81,6 +88,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         ivAvatar = (CircleImageView) findViewById(R.id.ivAvatar);
         tvEmail = (TextView) findViewById(R.id.tvEmail);
         tvDisplayName = (TextView) findViewById(R.id.tvDisplayName);
+        tvAdmin = (TextView) findViewById(R.id.tvAdmin);
+        tvJoinedDate = (TextView) findViewById(R.id.tvJoinedDate);
 
         layoutEmail.setOnClickListener(this);
         layoutDisplayName.setOnClickListener(this);
@@ -89,20 +98,34 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void updateUI() throws Exception {
-        FirebaseUser user = accountManager.getCurrentUser();
-        if (user == null) {
+        if (accountManager.getCurrentUser() == null) {
             return;
         }
-        ivAvatar.setVisibility(View.VISIBLE);
-        Uri uri = user.getPhotoUrl();
-        if (uri != null) {
-            Picasso.with(this).load(uri).error(R.drawable.warning).placeholder(R.drawable.loading).into(ivAvatar);
-        }
+        FireBaseReference.getAccountRef().child(accountManager.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
+                ivAvatar.setVisibility(View.VISIBLE);
+                String uri = userInfo.getPhotoUrl();
+                if (uri != null && !uri.isEmpty()) {
+                    Picasso.with(ProfileActivity.this).load(uri).error(R.drawable.warning).placeholder(R.drawable.loading).into(ivAvatar);
+                }
 
-        String displayName = user.getDisplayName();
-        String email = user.getEmail();
-        tvDisplayName.setText(displayName);
-        tvEmail.setText(email);
+                String displayName = userInfo.getDisplayName();
+                String email = userInfo.getEmail();
+                tvDisplayName.setText(displayName);
+                tvEmail.setText(email);
+                tvJoinedDate.setText(userInfo.getJoinedDate());
+                tvAdmin.setText(userInfo.isAdmin() + "");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
     }
 
     @Override
