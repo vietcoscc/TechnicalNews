@@ -42,7 +42,10 @@ public class SplashScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        globalData = (GlobalData) getApplication();
+        accountManager = new AccountManager(SplashScreenActivity.this);
+        globalData.setAccountManager(accountManager);
         new LongOperation().execute();
 
     }
@@ -52,11 +55,8 @@ public class SplashScreenActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-                globalData = (GlobalData) getApplication();
-                accountManager = new AccountManager(SplashScreenActivity.this);
-                globalData.setAccountManager(accountManager);
-                if (accountManager.getUserInfo() == null) {
+
+                if (accountManager.getCurrentUser() != null) {
                     FireBaseReference.getAccountRef().child(accountManager.getCurrentUser().getUid()).keepSynced(true);
                     FireBaseReference.getAccountRef().child(accountManager.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                         @Override
@@ -73,6 +73,9 @@ public class SplashScreenActivity extends AppCompatActivity {
 
                         }
                     });
+                }else {
+                    Intent intent = new Intent(SplashScreenActivity.this, MainActivity.class);
+                    startActivityForResult(intent, RC_MAIN);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -80,10 +83,6 @@ public class SplashScreenActivity extends AppCompatActivity {
             return null;
         }
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-        }
     }
 
     @Override

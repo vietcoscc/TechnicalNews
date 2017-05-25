@@ -112,16 +112,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             loadContentFragment(HOME_TAG);
             initOthers();
             updateUI();
-            if (!isMyServiceRunning(NewsService.class)) {
-                Intent intentService = new Intent(MainActivity.this, NewsService.class);
-                startService(intentService);
-            }
-            if (!isMyServiceRunning(NotificationService.class)) {
-                MySharedPreferences.putString(MainActivity.this, USER_NAME, accountManager.getCurrentUser().getEmail());
-                Intent intent = new Intent(MainActivity.this, NotificationService.class);
-                intent.putExtra(USER_NAME, accountManager.getCurrentUser().getEmail());
-                startService(intent);
-            }
+//            if (!isMyServiceRunning(NewsService.class)) {
+//                Intent intentService = new Intent(MainActivity.this, NewsService.class);
+//                startService(intentService);
+//            }
+//            if (!isMyServiceRunning(NotificationService.class)) {
+//                MySharedPreferences.putString(MainActivity.this, USER_NAME, accountManager.getCurrentUser().getEmail());
+//                Intent intent = new Intent(MainActivity.this, NotificationService.class);
+//                intent.putExtra(USER_NAME, accountManager.getCurrentUser().getEmail());
+//                startService(intent);
+//            }
 
 
         } catch (Exception e) {
@@ -422,9 +422,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 profile = menu.findItem(R.id.action_view_profile);
 
                 manager = menu.findItem(R.id.action_mangage);
-                if (!accountManager.getUserInfo().isAdmin()) {
+                if (accountManager.getUserInfo() != null && !accountManager.getUserInfo().isAdmin()) {
                     manager.setVisible(false);
-                }else {
+                } else {
                     manager.setOnMenuItemClickListener(this);
                 }
                 signUp.setOnMenuItemClickListener(this);

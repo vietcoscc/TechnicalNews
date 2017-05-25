@@ -147,6 +147,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initToolbar() throws Exception {
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
