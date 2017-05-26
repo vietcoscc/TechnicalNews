@@ -29,6 +29,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -130,12 +131,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-//                        setClickableViews(true);
                         if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                             if (progressDialog != null && progressDialog.isShowing()) {
                                 progressDialog.dismiss();
                             }
@@ -189,7 +186,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //                            });
 //                            uploadAvatarFromStream.execute(accountManager.getCurrentUser().getPhotoUrl().toString(),
 //                                    accountManager.getCurrentUser().getUid());
-
                             FireBaseReference.getAccountRef().child(accountManager.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -201,13 +197,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                     }
                                     if (progressDialog != null && progressDialog.isShowing()) {
                                         progressDialog.dismiss();
-                                        finish();
                                     }
+                                    onBackPressed();
                                 }
 
                                 @Override
                                 public void onCancelled(DatabaseError databaseError) {
-
+                                    Log.e(TAG, "Cancelled ");
+                                    onBackPressed();
                                 }
                             });
 
@@ -270,10 +267,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     break;
 
                 case R.id.googleSignIn:
-
                     if (!MainActivity.isNetWorkAvailable(this)) {
                         Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
                         return;
+                    }
+                    if (progressDialog != null && !progressDialog.isShowing()) {
+                        progressDialog.show();
                     }
                     signIn();
                     break;
@@ -293,19 +292,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         try {
             if (requestCode == RC_SIGN_IN) {
-                if (progressDialog != null && !progressDialog.isShowing()) {
-                    progressDialog.show();
-                }
+
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 if (result != null) {
-
                     if (result.isSuccess()) {
+                        accountManager.logout();
                         GoogleSignInAccount account = result.getSignInAccount();
-                        Log.e(TAG, account.getDisplayName());
                         firebaseAuthWithGoogle(account);
                     } else {
                         Log.e(TAG, "FAiled ");
@@ -332,6 +326,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onBackPressed() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+            return;
+        }
         setResult(RESULT_OK);
         super.onBackPressed();
         overridePendingTransition(R.anim.anim_fragment_in_from_left, R.anim.anim_fragment_out_from_left);

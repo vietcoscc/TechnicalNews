@@ -461,6 +461,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     showLoginSnackBar();
                 } else {
                     Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    intent.putExtra("tag", TAG);
                     startActivityForResult(intent, RC_PROFILE);
                 }
 

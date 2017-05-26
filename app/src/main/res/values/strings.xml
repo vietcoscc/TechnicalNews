@@ -41,6 +41,10 @@
     <string name="action_view_profile">Profile</string>
     <string name="action_manage">Manager</string>
     <string name="action_delete">Delete</string>
+    <string name="filter_newest">Newest</string>
+    <string name="filter_favorite">Favorite</string>
+    <string name="filter_view">View</string>
+    <string name="filter_new">New</string>
     <string-array name="listentries">
         <item>List item 1</item>
         <item>List item 2</item>

@@ -1,5 +1,7 @@
 package com.example.vaio.technicalnews.activity;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.TOPIC;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.getChildForumItemRef;
 
 public class CommentActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "CommentActivity";
@@ -49,6 +52,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
     private CommentAdapter commentAdapter;
     private boolean begin = true;
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,7 +100,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                     topic.setNumberView(tp.getNumberView());
 
                     if (commentAdapter != null) {
-                        commentAdapter.notifyItemChanged(0);
+                        commentAdapter.notifyItemChanged(0,topic);
 
                     }
                 } catch (Exception e) {
@@ -183,8 +187,10 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
                 String string = dataSnapshot.getValue(String.class);
                 arrFavorite.add(0, string);
+
                 Log.e(TAG, "Added");
             }
 
@@ -215,7 +221,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
+                FireBaseReference.getNumberCareRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).setValue(arrFavorite.size());
             }
 
             @Override
@@ -232,6 +238,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     private void initViews() throws Exception {
 
         edtComment = (EditText) findViewById(R.id.edtComment);

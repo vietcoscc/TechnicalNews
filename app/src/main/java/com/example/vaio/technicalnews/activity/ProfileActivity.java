@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -35,6 +36,7 @@ import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static com.example.vaio.technicalnews.activity.TopicActivity.UID;
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.MAIL;
 
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
@@ -50,7 +52,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private TextView tvAdmin;
     private TextView tvJoinedDate;
     private AccountManager accountManager;
-    public static final String RC = "code";
+    private String uid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +60,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_profile);
         try {
             initToolbar();
-            initData();
             initViews();
+            initData();
             updateUI();
         } catch (Exception e) {
             e.printStackTrace();
@@ -77,6 +79,15 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private void initData() throws Exception {
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
+        String tag = getIntent().getExtras().getString("tag");
+        uid = getIntent().getExtras().getString(UID);
+        if (tag.equals(TopicActivity.TAG) && !uid.equals(accountManager.getCurrentUser().getUid())) {
+            if (layoutPosted != null) {
+                layoutPosted.setVisibility(View.GONE);
+            }
+        } else {
+            uid = accountManager.getCurrentUser().getUid();
+        }
     }
 
     private void initViews() throws Exception {
@@ -96,10 +107,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void updateUI() throws Exception {
-        if (accountManager.getCurrentUser() == null) {
-            return;
-        }
-        FireBaseReference.getAccountRef().child(accountManager.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+        FireBaseReference.getAccountRef().child(uid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
@@ -173,8 +181,11 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
         builder.setMessage(accountManager.getCurrentUser().getDisplayName());
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMarginStart((int) getResources().getDimension(R.dimen.activity_horizontal_margin));
-        params.setMarginEnd((int) getResources().getDimension(R.dimen.activity_horizontal_margin));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            params.setMarginStart((int) getResources().getDimension(R.dimen.activity_horizontal_margin));
+            params.setMarginEnd((int) getResources().getDimension(R.dimen.activity_horizontal_margin));
+        }
+
         edtDisplayName.setLayoutParams(params);
         builder.setView(edtDisplayName);
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

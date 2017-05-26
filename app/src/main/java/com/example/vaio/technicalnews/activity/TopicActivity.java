@@ -39,11 +39,15 @@ import java.util.ArrayList;
 
 import static com.example.vaio.technicalnews.fragment.ForumFragment.CHILD_FORUM_ITEM;
 import static com.example.vaio.technicalnews.fragment.ForumFragment.GROUP_FORUM_ITEM;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.NUMBER_CARE;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.NUMBER_VIEW;
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.TOPIC;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.getChildForumItemRef;
 
-public class TopicActivity extends AppCompatActivity {
-    private static final String TAG = "TopicActivity";
-    private static final int RC_COMMENT = 0;
+public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuItemClickListener {
+    public static final String TAG = "TopicActivity";
+    public static final int RC_COMMENT = 0;
+    public static final String UID = "uid";
 
     private ArrayList<Topic> arrTopic = new ArrayList<>();
     private ArrayList<Topic> arrTopicTmp = new ArrayList<>();
@@ -53,9 +57,9 @@ public class TopicActivity extends AppCompatActivity {
     private TopicsForumAdapter adapter;
 
     private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private ContentLoadingProgressBar contentLoadingProgressBar;
-    private FloatingActionButton floatingActionButton;
+    private SwipeRefreshLayout srl;
+    private ContentLoadingProgressBar loadingProgressBar;
+    private FloatingActionButton fab;
     private SearchView searchView;
     //intent data
     private GroupForumItem groupForumItem;
@@ -75,7 +79,34 @@ public class TopicActivity extends AppCompatActivity {
         setContentView(R.layout.activity_topic);
         initData();
         initToolbar();
-        initComponent();
+        initViews();
+    }
+
+    private void initViews() {
+        tvEmpty = (TextView) findViewById(R.id.tvEmpty);
+        srl = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        srl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        srl.setRefreshing(false);
+                    }
+                }, 1000);
+            }
+        });
+
+        fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(TopicActivity.this, PostActivity.class);
+                intent.putExtra(GROUP_FORUM_ITEM, groupForumItem);
+                intent.putExtra(CHILD_FORUM_ITEM, childForumItem);
+                startActivity(intent);
+            }
+        });
     }
 
     private void initData() {
@@ -83,8 +114,7 @@ public class TopicActivity extends AppCompatActivity {
         accountManager = globalData.getAccountManager();
         groupForumItem = (GroupForumItem) getIntent().getExtras().getSerializable(GROUP_FORUM_ITEM);
         childForumItem = (ChildForumItem) getIntent().getExtras().getSerializable(CHILD_FORUM_ITEM);
-//        getBanList();
-        receiveData();
+        receiveData(0);
     }
 
     private void initToolbar() {
@@ -95,7 +125,7 @@ public class TopicActivity extends AppCompatActivity {
     }
 
     private void initComponent() {
-        tvEmpty = (TextView) findViewById(R.id.tvEmpty);
+
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -104,7 +134,7 @@ public class TopicActivity extends AppCompatActivity {
         adapter.setOnCompleteLoading(new TopicsForumAdapter.OnCompleteLoading() {
             @Override
             public void onComplete() {
-                contentLoadingProgressBar.hide();
+                loadingProgressBar.hide();
             }
         });
         adapter.setClickListener(new TopicsForumAdapter.ClickListener() {
@@ -120,8 +150,6 @@ public class TopicActivity extends AppCompatActivity {
         adapter.setOnItemLongClick(new TopicsForumAdapter.OnItemLongClick() {
             @Override
             public void onLongLick(View view, final int position) {
-                Log.e(TAG, position + "");
-
                 final Topic topic = arrTopic.get(position);
                 if (accountManager.getCurrentUser() == null || !accountManager.getCurrentUser().getUid().equals(topic.getUid()) && !accountManager.getUserInfo().isAdmin()) {
                     return;
@@ -137,9 +165,15 @@ public class TopicActivity extends AppCompatActivity {
                                 FireBaseReference.getTopicKeyRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).removeValue(new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-//                                        FireBaseReference.getDeletedRef().child(accountManager.getCurrentUser().getUid()).push().setValue(topic);
+
                                     }
                                 });
+                                break;
+                            case R.id.action_view_profile:
+                                Intent intent = new Intent(TopicActivity.this, ProfileActivity.class);
+                                intent.putExtra("tag", TAG);
+                                intent.putExtra(UID, topic.getUid());
+                                startActivity(intent);
                                 break;
                         }
                         return false;
@@ -150,119 +184,131 @@ public class TopicActivity extends AppCompatActivity {
         });
         recyclerView.setAdapter(adapter);
 
-        contentLoadingProgressBar = (ContentLoadingProgressBar) findViewById(R.id.contentLoadingProgressBar);
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-//                receiveData();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
-                }, 1000);
-            }
-        });
+        loadingProgressBar = (ContentLoadingProgressBar) findViewById(R.id.contentLoadingProgressBar);
 
-        floatingActionButton = (FloatingActionButton) findViewById(R.id.floatingActionButton);
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                if (arrBan.indexOf(accountManager.getCurrentUser().getEmail().trim()) > -1) {
-//                    Snackbar.make(recyclerView, "You have been banned ! ", 1000).show();
-//                    return;
-//                }
-                Intent intent = new Intent(TopicActivity.this, PostActivity.class);
-                intent.putExtra(GROUP_FORUM_ITEM, groupForumItem);
-                intent.putExtra(CHILD_FORUM_ITEM, childForumItem);
-                startActivity(intent);
-            }
-        });
     }
 
+    private ChildEventListener newChildEvent = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            final Topic topic = dataSnapshot.getValue(Topic.class);
+            topic.setKey(dataSnapshot.getKey());
+            topic.setGroupName(groupForumItem.getName());
+            topic.setChildName(childForumItem.getName());
 
-    public void receiveData() {
-        Log.e(TAG, arrTopic.size() + "");
-
-        arrTopic.clear();
-//        arrTopicTmp.clear();
-        arrUserInfo.clear();
-//        arrUserInfoTmp.clear();
-
-        FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
-                keepSynced(true);
-
-        FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
-                addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        final Topic topic = dataSnapshot.getValue(Topic.class);
-                        topic.setKey(dataSnapshot.getKey());
-                        topic.setGroupName(groupForumItem.getName());
-                        topic.setChildName(childForumItem.getName());
-
-                        arrTopic.add(0, topic);
-                        arrTopicTmp.add(0, topic);
-                        adapter.notifyItemInserted(0);
+            arrTopic.add(0, topic);
+            arrTopicTmp.add(0, topic);
+            adapter.notifyItemInserted(0);
 //                        recyclerView.scrollToPosition(0);
-                    }
+        }
 
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                    }
+        }
 
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-                        Log.e(TAG, dataSnapshot.getKey());
-                        int n = arrTopic.size();
-                        for (int i = 0; i < n; i++) {
-                            if(arrTopic.get(i).getKey().equals(dataSnapshot.getKey())){
-                                arrTopic.remove(i);
-                                adapter.notifyItemRemoved(i);
-                                break;
-                            }
-                        }
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            Log.e(TAG, dataSnapshot.getKey());
+            int n = arrTopic.size();
+            for (int i = 0; i < n; i++) {
+                if (arrTopic.get(i).getKey().equals(dataSnapshot.getKey())) {
+                    arrTopic.remove(i);
+                    adapter.notifyItemRemoved(i);
+                    break;
+                }
+            }
 
-                    }
+        }
 
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-                    }
+        }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
 
-                    }
-                });
-        FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
+        }
+    };
+    private ValueEventListener newValueEvent = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
 
-                        contentLoadingProgressBar.hide();
-                        if (arrTopic.isEmpty()) {
-                            tvEmpty.setText("< No post >");
-                            tvEmpty.setVisibility(View.VISIBLE);
-                        } else {
-                            tvEmpty.setVisibility(View.INVISIBLE);
-                        }
+            loadingProgressBar.hide();
+            if (arrTopic.isEmpty()) {
+                tvEmpty.setText("< No post >");
+                tvEmpty.setVisibility(View.VISIBLE);
+            } else {
+                tvEmpty.setVisibility(View.INVISIBLE);
+            }
+        }
 
-                    }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+        }
+    };
 
-                    }
-                });
+    public void receiveData(int flag) {
+        Log.e(TAG, arrTopic.size() + "");
+        initComponent();
+        if (loadingProgressBar != null && !loadingProgressBar.isShown()) {
+            loadingProgressBar.show();
+        }
+        arrTopic.clear();
+        arrTopicTmp.clear();
+        arrUserInfo.clear();
+        getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
+                removeEventListener(newValueEvent);
+        getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
+                removeEventListener(newChildEvent);
+        getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                .orderByChild(NUMBER_VIEW).removeEventListener(newValueEvent);
+        getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                .orderByChild(NUMBER_VIEW).removeEventListener(newChildEvent);
+        getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                .orderByChild(NUMBER_CARE).removeEventListener(newValueEvent);
+        getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                .orderByChild(NUMBER_CARE).removeEventListener(newChildEvent);
+        switch (flag) {
+            case 0:
+                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).keepSynced(true);
+                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                        .addChildEventListener(newChildEvent);
+                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                        .addListenerForSingleValueEvent(newValueEvent);
+                break;
+            case 1:
+                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                        .orderByChild(NUMBER_CARE).keepSynced(true);
+                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                        .orderByChild(NUMBER_CARE).addChildEventListener(newChildEvent);
+                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                        .orderByChild(NUMBER_CARE).addListenerForSingleValueEvent(newValueEvent);
+                break;
+            case 2:
+                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                        .orderByChild("numberView").keepSynced(true);
+                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                        .orderByChild("numberView").addChildEventListener(newChildEvent);
+                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
+                        .orderByChild("numberView").addListenerForSingleValueEvent(newValueEvent);
+                break;
+        }
+
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_topic, menu);
+        MenuItem itemFilterNew = menu.findItem(R.id.action_filter_new);
+        MenuItem itemFilterFavorite = menu.findItem(R.id.action_filter_favorite);
+        MenuItem itemFilterView = menu.findItem(R.id.action_filter_view);
+        itemFilterNew.setOnMenuItemClickListener(this);
+        itemFilterFavorite.setOnMenuItemClickListener(this);
+        itemFilterView.setOnMenuItemClickListener(this);
         MenuItem itemSearch = menu.findItem(R.id.action_search);
         searchView = (SearchView) itemSearch.getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -274,26 +320,14 @@ public class TopicActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 Log.e(TAG, newText);
-//                arrTopic.clear();
-//                for (int i = 0; i < arrTopicTmp.size(); i++) {
-//                    Topic topic = arrTopicTmp.get(i);
-//                    String s = topic.getName() + "_" + topic.getSubject() + "_" + topic.getDate() + "+" + topic.getTime();
-//
-//                    if (s.toLowerCase().trim().contains(newText.toLowerCase().trim())) {
-//                        Log.e(TAG, s);
-//                        arrTopic.add(topic);
-//                    }
-//                }
-//                adapter.notifyDataSetChanged();
+
                 if (newText.isEmpty() || searchView.isIconified()) {
                     arrTopic.clear();
                     arrTopic.addAll(arrTopicTmp);
                     adapter.notifyDataSetChanged();
                     return true;
                 }
-
-
-                contentLoadingProgressBar.show();
+                loadingProgressBar.show();
 
                 TopicSearching topicSearching = new TopicSearching(newText);
                 topicSearching.setOnSearchingComplete(new TopicSearching.OnSearchingComplete() {
@@ -302,7 +336,7 @@ public class TopicActivity extends AppCompatActivity {
                         TopicActivity.this.arrTopic.clear();
                         TopicActivity.this.arrTopic.addAll(arrTopic);
                         adapter.notifyDataSetChanged();
-                        contentLoadingProgressBar.hide();
+                        loadingProgressBar.hide();
                     }
                 });
                 topicSearching.execute(arrTopicTmp);
@@ -328,10 +362,7 @@ public class TopicActivity extends AppCompatActivity {
         try {
             if (RC_COMMENT == requestCode) {
                 if (resultCode == RESULT_OK) {
-//                    receiveData();
-//                    if (arrTopic.size() - 1 >= 0) {
-//                        adapter.notifyItemInserted(arrTopic.size() - 1);
-//                    }
+
                 }
             }
         } catch (Exception e) {
@@ -344,5 +375,21 @@ public class TopicActivity extends AppCompatActivity {
     public void onBackPressed() {
         setResult(RESULT_OK);
         super.onBackPressed();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_filter_new:
+                receiveData(0);
+                break;
+            case R.id.action_filter_favorite:
+                receiveData(1);
+                break;
+            case R.id.action_filter_view:
+                receiveData(2);
+                break;
+        }
+        return false;
     }
 }

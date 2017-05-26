@@ -104,4 +104,8 @@ public class FireBaseReference {
     public static DatabaseReference getArrFavoriteRef(String groupForumName, String childForunName, String key) {
         return getTopicKeyRef(groupForumName, childForunName, key).child(ARR_FAVORITE);
     }
+
+    public static DatabaseReference getNumberCareRef(String groupForumName, String childForunName, String key) {
+        return getTopicKeyRef(groupForumName, childForunName, key).child(NUMBER_CARE);
+    }
 }

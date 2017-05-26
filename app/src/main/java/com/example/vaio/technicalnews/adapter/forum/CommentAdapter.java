@@ -228,14 +228,15 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             btnFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ArrayList<String> arrFavorite = topic.getArrFavorite();
+                    final ArrayList<String> arrFavorite = topic.getArrFavorite();
+
                     if (isFavorited) {
                         if (arrFavorite != null) {
                             FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).
                                     child(arrFavorite.indexOf(uid) + "").removeValue(new DatabaseReference.CompletionListener() {
                                 @Override
                                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
+                                    FireBaseReference.getNumberCareRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).setValue(arrFavorite.size()-1);
                                 }
                             });
                         } else {
@@ -251,6 +252,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         } else {
                             FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).child("0").setValue(uid);
                         }
+                        FireBaseReference.getNumberCareRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).setValue(arrFavorite.size()+1);
                         isFavorited = true;
                         btnFavorite.setCompoundDrawables(null, null, null, drawableFavorite);
                     }
