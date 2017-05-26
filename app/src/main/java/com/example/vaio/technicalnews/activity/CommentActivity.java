@@ -20,14 +20,11 @@ import com.example.vaio.technicalnews.model.application.Emoji;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;
 import com.example.vaio.technicalnews.model.application.GlobalData;
 import com.example.vaio.technicalnews.model.application.MyCalendar;
-import com.example.vaio.technicalnews.model.application.MyNotification;
 import com.example.vaio.technicalnews.model.forum.Topic;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.StreamDownloadTask;
 
 import java.util.ArrayList;
 import java.util.Calendar;

@@ -1,17 +1,12 @@
 package com.example.vaio.technicalnews.model.application;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.activity.MainActivity;
-import com.example.vaio.technicalnews.asyntask.UploadAvatarFromRegister;
-import com.example.vaio.technicalnews.model.forum.*;
 import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -20,7 +15,6 @@ import com.google.firebase.auth.*;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 
 import java.io.Serializable;
 
@@ -62,7 +56,7 @@ public class AccountManager implements Serializable {
             Toast.makeText(context, "No internet connection !", Toast.LENGTH_SHORT).show();
             return;
         }
-        logout();
+
 
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(context, "The feilds must not empty !", Toast.LENGTH_SHORT).show();
@@ -83,6 +77,7 @@ public class AccountManager implements Serializable {
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             userInfo = dataSnapshot.getValue(UserInfo.class);
                             Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
+                            logout();
                             onLoginSuccess.onSuccess();
                         }
 

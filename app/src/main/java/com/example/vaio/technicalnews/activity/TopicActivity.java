@@ -3,7 +3,6 @@ package com.example.vaio.technicalnews.activity;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -40,8 +39,6 @@ import java.util.ArrayList;
 
 import static com.example.vaio.technicalnews.fragment.ForumFragment.CHILD_FORUM_ITEM;
 import static com.example.vaio.technicalnews.fragment.ForumFragment.GROUP_FORUM_ITEM;
-import static com.example.vaio.technicalnews.fragment.ForumFragment.RC;
-import static com.example.vaio.technicalnews.model.application.FireBaseReference.MAIL;
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.TOPIC;
 
 public class TopicActivity extends AppCompatActivity {

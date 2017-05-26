@@ -2,7 +2,6 @@ package com.example.vaio.technicalnews.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -18,13 +17,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
-import com.example.vaio.technicalnews.asyntask.UploadAvatarFromRegister;
-import com.example.vaio.technicalnews.asyntask.UploadAvatarFromStream;
 import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;
 import com.example.vaio.technicalnews.model.application.GlobalData;
 import com.example.vaio.technicalnews.model.application.MyCalendar;
-import com.example.vaio.technicalnews.model.application.MySharedPreferences;
 import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -33,8 +29,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -43,7 +37,6 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 
@@ -73,12 +66,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
         arrAdmin = globalData.getArrAdmin();
         try {
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage("Loging in");
+            progressDialog.setCancelable(false);
+
             initGoogleLogin();
             initViews();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -120,24 +119,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void signIn() throws Exception {
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loging in");
-        progressDialog.setCancelable(false);
+
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) throws Exception {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         accountManager.getmAuth().signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-
-                        setClickableViews(true);
+//                        setClickableViews(true);
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
@@ -223,20 +217,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 });
     }
 
-    private void setClickableViews(boolean bool) {
-        btnLogin.setClickable(bool);
-        tvSignUp.setClickable(bool);
-        layoutFacebookLogin.setClickable(bool);
-        layoutGoogleLogin.setClickable(bool);
-    }
+//    private void setClickableViews(boolean bool) {
+//        btnLogin.setClickable(bool);
+//        tvSignUp.setClickable(bool);
+//        layoutFacebookLogin.setClickable(bool);
+//        layoutGoogleLogin.setClickable(bool);
+//    }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onClick(View view) {
         try {
-            setClickableViews(false);
+//            setClickableViews(false);
             switch (view.getId()) {
                 case R.id.btnLogin:
+                    progressDialog.show();
                     if (!MainActivity.isNetWorkAvailable(this)) {
                         Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
                         return;
@@ -250,21 +245,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         return;
                     }
 
-                    final ProgressDialog progressDialog = new ProgressDialog(this);
-                    progressDialog.setMessage("Signing in ... ");
-                    progressDialog.setCancelable(false);
-                    progressDialog.show();
-
                     accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
                         @Override
                         public void onSuccess() {
-//                            if (arrAdmin.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
-//                                accountManager.setAdmin(true);
-//
-//                            } else {
-//                                accountManager.setAdmin(false);
-//
-//                            }
                             progressDialog.dismiss();
                             onBackPressed();
                         }
@@ -276,11 +259,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         }
                     });
                     accountManager.login(userName, password);
-                    setClickableViews(true);
+//                    setClickableViews(true);
                     break;
 
                 case R.id.tvSignUp:
-                    setClickableViews(true);
+//                    setClickableViews(true);
                     Intent intent = new Intent(this, RegisterActivity.class);
                     startActivityForResult(intent, RC_REGISTER);
                     overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
@@ -319,10 +302,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 if (result != null) {
+
                     if (result.isSuccess()) {
                         GoogleSignInAccount account = result.getSignInAccount();
+                        Log.e(TAG, account.getDisplayName());
                         firebaseAuthWithGoogle(account);
                     } else {
+                        Log.e(TAG, "FAiled ");
                         if (progressDialog != null && progressDialog.isShowing()) {
                             progressDialog.dismiss();
                         }

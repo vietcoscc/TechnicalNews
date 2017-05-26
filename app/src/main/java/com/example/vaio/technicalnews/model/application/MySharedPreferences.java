@@ -3,8 +3,6 @@ package com.example.vaio.technicalnews.model.application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.vaio.technicalnews.activity.LoginActivity;
-
 /**
  * Created by vaio on 28/03/2017.
  */

@@ -27,7 +27,6 @@ import com.example.vaio.technicalnews.model.application.GlobalData;
 import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,7 +35,6 @@ import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static com.example.vaio.technicalnews.R.drawable.user;
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.MAIL;
 
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {

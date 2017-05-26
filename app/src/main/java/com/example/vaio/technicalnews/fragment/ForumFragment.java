@@ -14,14 +14,12 @@ import android.widget.ExpandableListView;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.activity.MainActivity;
-import com.example.vaio.technicalnews.activity.SplashScreenActivity;
 import com.example.vaio.technicalnews.activity.TopicActivity;
 import com.example.vaio.technicalnews.adapter.forum.GroupForumExpandableListViewAdapter;
 import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.model.forum.ChildForumItem;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;
 import com.example.vaio.technicalnews.model.forum.GroupForumItem;
-import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;

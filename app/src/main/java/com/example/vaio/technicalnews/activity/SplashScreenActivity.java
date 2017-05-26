@@ -2,7 +2,6 @@ package com.example.vaio.technicalnews.activity;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,17 +10,11 @@ import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;
 import com.example.vaio.technicalnews.model.application.GlobalData;
-import com.example.vaio.technicalnews.model.chat.ChatRoom;
 import com.example.vaio.technicalnews.model.forum.UserInfo;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class SplashScreenActivity extends AppCompatActivity {
 

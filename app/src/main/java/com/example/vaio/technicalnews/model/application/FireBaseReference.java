@@ -1,12 +1,7 @@
 package com.example.vaio.technicalnews.model.application;
 
-import android.provider.ContactsContract;
-
-import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.ArrayList;
 
 /**
  * Created by vaio on 27/03/2017.

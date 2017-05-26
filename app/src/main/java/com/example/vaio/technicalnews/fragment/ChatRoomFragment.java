@@ -26,13 +26,10 @@ import com.example.vaio.technicalnews.model.chat.ChatRoom;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
-import static com.example.vaio.technicalnews.model.application.FireBaseReference.ROOM_CHAT;
 
 /**
  * Created by vaio on 15/03/2017.

@@ -24,7 +24,6 @@ import com.example.vaio.technicalnews.model.application.Emoji;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;
 import com.example.vaio.technicalnews.model.forum.Topic;
 import com.example.vaio.technicalnews.model.forum.UserInfo;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;

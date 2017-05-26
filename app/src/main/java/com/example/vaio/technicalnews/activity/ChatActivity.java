@@ -1,6 +1,5 @@
 package com.example.vaio.technicalnews.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -18,7 +17,6 @@ import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.adapter.chat.ChatAdapter;
-import com.example.vaio.technicalnews.fragment.ChatRoomFragment;
 import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.model.application.Emoji;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;

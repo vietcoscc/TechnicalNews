@@ -38,18 +38,13 @@ import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.fragment.HomeFragment;
 import com.example.vaio.technicalnews.model.application.GlobalData;
-import com.example.vaio.technicalnews.model.application.MySharedPreferences;
 import com.example.vaio.technicalnews.model.forum.Topic;
-import com.example.vaio.technicalnews.service.NewsService;
-import com.example.vaio.technicalnews.service.NotificationService;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-
-import static com.example.vaio.technicalnews.model.application.MySharedPreferences.USER_NAME;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MenuItem.OnMenuItemClickListener, View.OnClickListener {
     public static final String TAG = "MainActivity";
