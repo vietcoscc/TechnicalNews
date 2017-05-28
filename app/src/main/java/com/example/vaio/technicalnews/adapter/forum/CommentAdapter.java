@@ -4,14 +4,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -22,8 +25,11 @@ import com.example.vaio.technicalnews.activity.MainActivity;
 import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.model.application.Emoji;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;
+import com.example.vaio.technicalnews.model.forum.Comment;
 import com.example.vaio.technicalnews.model.forum.Topic;
 import com.example.vaio.technicalnews.model.forum.UserInfo;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -87,7 +93,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
 
         if (holder instanceof HeaderViewHolder) {
-
+            arrFavorite = topic.getArrFavorite();
             HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
             headerViewHolder.tvContent.setText(Emoji.replaceInText(topic.getContent()));
             headerViewHolder.tvSubject.setText(Emoji.replaceInText(topic.getSubject()));
@@ -141,10 +147,18 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         } else {
 
             CommentViewHolder commentViewHolder = (CommentViewHolder) holder;
-            commentViewHolder.tvComment.setText(topic.getArrComment().get(position - 1).getComment());
-            commentViewHolder.tvDate.setText(topic.getArrComment().get(position - 1).getDate());
-            commentViewHolder.tvTimeStamp.setText(topic.getArrComment().get(position - 1).getTime());
+            Comment comment = topic.getArrComment().get(position - 1);
+            commentViewHolder.tvComment.setText(comment.getComment());
+            commentViewHolder.tvDate.setText(comment.getDate());
+            commentViewHolder.tvTimeStamp.setText(comment.getTime());
+            commentViewHolder.recyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+            commentViewHolder.recyclerView.setAdapter(new RelpyAdapter(context, comment.getArrReply(), accountManager));
+            commentViewHolder.ibSend.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
+                }
+            });
             FireBaseReference.getUserIdRef(topic.getArrComment().get(position - 1).getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -236,7 +250,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                     child(arrFavorite.indexOf(uid) + "").removeValue(new DatabaseReference.CompletionListener() {
                                 @Override
                                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                    FireBaseReference.getNumberCareRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).setValue(arrFavorite.size()-1);
+                                    FireBaseReference.getNumberCareRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).setValue(arrFavorite.size() - 1);
+                                    notifyDataSetChanged();
                                 }
                             });
                         } else {
@@ -247,15 +262,31 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     } else {
                         if (arrFavorite != null) {
                             if (arrFavorite.indexOf(uid) == -1) {
-                                FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).child(topic.getArrFavorite().size() + "").setValue(uid);
+                                FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).child(topic.getArrFavorite().size() + "").setValue(uid).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        notifyDataSetChanged();
+                                    }
+                                });
                             }
                         } else {
-                            FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).child("0").setValue(uid);
+                            FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).child("0").setValue(uid).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    notifyDataSetChanged();
+                                }
+                            });
                         }
-                        FireBaseReference.getNumberCareRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).setValue(arrFavorite.size()+1);
+                        FireBaseReference.getNumberCareRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).setValue(arrFavorite.size() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                notifyDataSetChanged();
+                            }
+                        });
                         isFavorited = true;
                         btnFavorite.setCompoundDrawables(null, null, null, drawableFavorite);
                     }
+
                 }
             });
 
@@ -304,13 +335,15 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    public class CommentViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
+    public class CommentViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
         TextView tvComment;
         ImageView ivAvatar;
         TextView tvDate;
         TextView tvTimeStamp;
         TextView tvName;
-
+        RecyclerView recyclerView;
+        ImageButton ibSend;
+        LinearLayout layoutReply;
 
         public CommentViewHolder(View itemView) {
             super(itemView);
@@ -319,8 +352,12 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             tvDate = (TextView) itemView.findViewById(R.id.tvDate);
             tvTimeStamp = (TextView) itemView.findViewById(R.id.tvTimeStamp);
             ivAvatar = (ImageView) itemView.findViewById(R.id.ivAvatar);
+            recyclerView = (RecyclerView) itemView.findViewById(R.id.recyclerView);
+            ibSend = (ImageButton) itemView.findViewById(R.id.ibSend);
+            layoutReply = (LinearLayout) itemView.findViewById(R.id.layoutReply);
 
             itemView.setOnLongClickListener(this);
+            itemView.setOnClickListener(this);
         }
 
         @Override
@@ -330,13 +367,34 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
             return true;
         }
+
+        @Override
+        public void onClick(View v) {
+            if (onItemClick != null) {
+                onItemClick.onClick(v, getPosition());
+            }
+            if (layoutReply.getVisibility() == View.VISIBLE) {
+                layoutReply.setVisibility(View.GONE);
+            } else {
+                layoutReply.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     public void setOnItemLongClick(OnItemLongClick onItemLongClick) {
         this.onItemLongClick = onItemLongClick;
     }
 
+    public void setOnItemClick(OnItemClick onItemClick) {
+        this.onItemClick = onItemClick;
+    }
+
     private OnItemLongClick onItemLongClick;
+    private OnItemClick onItemClick;
+
+    public interface OnItemClick {
+        void onClick(View view, int positon);
+    }
 
     public interface OnItemLongClick {
         void onLongClick(View view, int position);

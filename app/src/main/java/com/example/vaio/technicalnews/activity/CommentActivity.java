@@ -100,7 +100,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                     topic.setNumberView(tp.getNumberView());
 
                     if (commentAdapter != null) {
-                        commentAdapter.notifyItemChanged(0,topic);
+                        commentAdapter.notifyItemChanged(0, topic);
 
                     }
                 } catch (Exception e) {
@@ -297,7 +297,9 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                 String comment = Emoji.replaceInText(edtComment.getText().toString()).trim();
 
                 edtComment.setText("");
-                Comment cmt = new Comment(accountManager.getCurrentUser().getUid(), comment, date, time);
+                ArrayList<Comment> arrReply = new ArrayList<>();
+                arrReply.add(new Comment(accountManager.getCurrentUser().getUid(), comment, date, time, new ArrayList<Comment>()));
+                Comment cmt = new Comment(accountManager.getCurrentUser().getUid(), comment, date, time, arrReply);
 
                 FireBaseReference.getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).child(arrComment.size() + "").setValue(cmt);
                 try {

@@ -14,6 +14,7 @@ public class FireBaseReference {
 
     public static final String POSITION = "position";
     public static final String ARR_COMMENT = "arrComment";
+    public static final String ARR_REPLY = "arrReply";
     public static final String POST_NUMBER = "postNumber";
     public static final String TOPIC_NUMBER = "topicNumber";
     public static final String ARR_CHILD_FORUM_ITEM = "arrChildForumItem";

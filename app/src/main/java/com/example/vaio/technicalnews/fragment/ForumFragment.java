@@ -52,6 +52,9 @@ public class ForumFragment extends Fragment {
     private ArrayList<String> arrAdmin = new ArrayList<>();
     private ArrayList<String> arrBan = new ArrayList<>();
 
+    public ForumFragment() {
+    }
+
     public ForumFragment(AccountManager accountManager) {
         this.accountManager = accountManager;
     }

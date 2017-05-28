@@ -10,4 +10,5 @@
     <dimen name="tvLoginSize">40sp</dimen>
     <dimen name="default_margin">16dp</dimen>
     <dimen name="buttonGravity">48dp</dimen>
+    <dimen name="default_margin_long">52dp</dimen>
 </resources>

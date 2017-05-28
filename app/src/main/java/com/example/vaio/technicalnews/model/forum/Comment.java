@@ -1,6 +1,7 @@
 package com.example.vaio.technicalnews.model.forum;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Created by vaio on 23/03/2017.
@@ -8,22 +9,30 @@ import java.io.Serializable;
 
 public class Comment implements Serializable {
     private String key;
-
     private String uid;
 
     private String comment;
     private String date;
     private String time;
+    private ArrayList<Comment> arrReply = new ArrayList<>();
 
     public Comment() {
     }
 
-    public Comment(String uid, String comment, String date, String time) {
-
+    public Comment(String uid, String comment, String date, String time, ArrayList<Comment> arrReply) {
         this.uid = uid;
         this.comment = comment;
         this.date = date;
         this.time = time;
+        this.arrReply = arrReply;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getUid() {
@@ -58,11 +67,11 @@ public class Comment implements Serializable {
         this.time = time;
     }
 
-    public String getKey() {
-        return key;
+    public ArrayList<Comment> getArrReply() {
+        return arrReply;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setArrReply(ArrayList<Comment> arrReply) {
+        this.arrReply = arrReply;
     }
 }

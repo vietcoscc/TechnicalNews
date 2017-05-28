@@ -125,9 +125,6 @@ public class PostActivity extends AppCompatActivity {
         } else {
             time = calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) + " AM";
         }
-        String email = accountManager.getCurrentUser().getEmail();
-        String name = accountManager.getCurrentUser().getDisplayName();
-
         FireBaseReference.getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).
                 addValueEventListener(new ValueEventListener() {
                     @Override
@@ -143,7 +140,7 @@ public class PostActivity extends AppCompatActivity {
                     }
                 });
         ArrayList<Comment> arrComment = new ArrayList<>();
-        Comment comment = new Comment(accountManager.getCurrentUser().getUid(), "Comment !", date, time);
+        Comment comment = new Comment(accountManager.getCurrentUser().getUid(), "Comment !", date, time, new ArrayList<Comment>());
         arrComment.add(comment);
         ArrayList<String> arrFavorite = new ArrayList<>();
         arrFavorite.add(" ");
