@@ -1,5 +1,7 @@
 package com.example.vaio.technicalnews.model.application;
 
+import android.provider.ContactsContract;
+
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -108,5 +110,13 @@ public class FireBaseReference {
 
     public static DatabaseReference getNumberCareRef(String groupForumName, String childForunName, String key) {
         return getTopicKeyRef(groupForumName, childForunName, key).child(NUMBER_CARE);
+    }
+
+    public static DatabaseReference getCommentRef(String groupForumName, String childForunName, String key, String position) {
+        return getArrCommentRef(groupForumName, childForunName, key).child(position);
+    }
+
+    public static DatabaseReference getArrReplyRef(String groupForumName, String childForunName, String key, String position) {
+        return getCommentRef(groupForumName, childForunName, key, position).child(ARR_REPLY);
     }
 }

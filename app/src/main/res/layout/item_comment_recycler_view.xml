@@ -6,6 +6,8 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:background="@drawable/view_click_selector"
+        android:id="@+id/layoutComment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -45,17 +47,21 @@
                 android:textStyle="normal" />
 
             <LinearLayout
+                android:id="@+id/layoutDateTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="right"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/tvTimeStamp"
+                    style="?android:attr/textAppearanceSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
-                    android:textColor="@color/colorPrimary" />
+                    android:textColor="@color/md_grey_500"
+                    android:textSize="10sp" />
 
                 <TextView
 
@@ -65,10 +71,12 @@
 
                 <TextView
                     android:id="@+id/tvDate"
+                    style="?android:attr/textAppearanceSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
-                    android:textColor="@color/colorPrimary" />
+                    android:textColor="@color/md_grey_500"
+                    android:textSize="10sp" />
             </LinearLayout>
 
         </LinearLayout>
@@ -88,6 +96,14 @@
             android:layout_height="wrap_content"
             android:visibility="visible" />
 
+        <ImageView
+            android:id="@+id/ivReply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:src="@drawable/reply_drawable_selector"
+            android:tint="@color/colorPrimary" />
+
         <LinearLayout
 
             android:layout_width="match_parent"
@@ -96,6 +112,7 @@
             android:weightSum="10">
 
             <EditText
+                android:visibility="gone"
                 android:id="@+id/edtReply"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -103,6 +120,7 @@
                 android:hint="Reply ..." />
 
             <ImageButton
+                android:visibility="gone"
                 android:id="@+id/ibSend"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

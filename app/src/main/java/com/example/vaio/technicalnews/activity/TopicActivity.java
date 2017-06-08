@@ -195,7 +195,6 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
             topic.setKey(dataSnapshot.getKey());
             topic.setGroupName(groupForumItem.getName());
             topic.setChildName(childForumItem.getName());
-
             arrTopic.add(0, topic);
             arrTopicTmp.add(0, topic);
             adapter.notifyItemInserted(0);

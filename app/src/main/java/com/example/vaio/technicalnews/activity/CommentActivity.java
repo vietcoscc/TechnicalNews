@@ -15,6 +15,7 @@ import android.widget.ImageView;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.adapter.forum.CommentAdapter;
+import com.example.vaio.technicalnews.adapter.forum.RelpyAdapter;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.model.forum.Comment;
@@ -32,7 +33,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.TOPIC;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.getArrCommentRef;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.getArrFavoriteRef;
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.getChildForumItemRef;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.getTopicKeyRef;
 
 public class CommentActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "CommentActivity";
@@ -60,9 +64,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         try {
             initData();
             initToolbar();
-//            getTopicCreate();
             initViews();
-//            receiveData();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -80,7 +82,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         getArrComment();
         getArrFavorite();
 
-        FireBaseReference.getTopicKeyRef(groupForumItem, childForumItem, topic.getKey()).addValueEventListener(new ValueEventListener() {
+        getTopicKeyRef(groupForumItem, childForumItem, topic.getKey()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 try {
@@ -100,8 +102,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                     topic.setNumberView(tp.getNumberView());
 
                     if (commentAdapter != null) {
-                        commentAdapter.notifyItemChanged(0, topic);
-
+                        commentAdapter.notifyItemChanged(0);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -115,11 +116,12 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
 
             }
         });
-        FireBaseReference.getTopicKeyRef(groupForumItem, childForumItem, topic.getKey()).child(FireBaseReference.NUMBER_VIEW).addListenerForSingleValueEvent(new ValueEventListener() {
+        getTopicKeyRef(groupForumItem, childForumItem, topic.getKey()).
+                child(FireBaseReference.NUMBER_VIEW).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int count = dataSnapshot.getValue(Integer.class);
-                FireBaseReference.getTopicKeyRef(groupForumItem, childForumItem, topic.getKey()).child(FireBaseReference.NUMBER_VIEW).setValue(count + 1);
+                getTopicKeyRef(groupForumItem, childForumItem, topic.getKey()).child(FireBaseReference.NUMBER_VIEW).setValue(count + 1);
             }
 
             @Override
@@ -132,7 +134,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
 
     private void getArrComment() {
         arrComment.clear();
-        FireBaseReference.getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).addChildEventListener(new ChildEventListener() {
+        getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Comment comment = dataSnapshot.getValue(Comment.class);
@@ -147,7 +149,9 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+                Comment comment = dataSnapshot.getValue(Comment.class);
+                int key = Integer.valueOf(dataSnapshot.getKey());
+                commentAdapter.notifyItemChanged(key + 1);
             }
 
             @Override
@@ -165,11 +169,13 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
 
             }
         });
-        FireBaseReference.getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+        getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (begin) {
-                    recyclerView.scrollToPosition(0);
+                    if (recyclerView != null) {
+                        recyclerView.scrollToPosition(0);
+                    }
                     begin = false;
                 }
             }
@@ -183,14 +189,12 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
 
     private void getArrFavorite() {
         arrFavorite.clear();
-        FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).keepSynced(true);
-        FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).addChildEventListener(new ChildEventListener() {
+        getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).keepSynced(true);
+        getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
                 String string = dataSnapshot.getValue(String.class);
                 arrFavorite.add(0, string);
-
                 Log.e(TAG, "Added");
             }
 
@@ -203,8 +207,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
             public void onChildRemoved(DataSnapshot dataSnapshot) {
                 String string = dataSnapshot.getValue(String.class);
                 arrFavorite.remove(arrFavorite.indexOf(string));
-                commentAdapter.notifyDataSetChanged();
-
+                commentAdapter.notifyItemChanged(0);
                 Log.e(TAG, "removed");
             }
 
@@ -218,7 +221,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
 
             }
         });
-        FireBaseReference.getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+        getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 FireBaseReference.getNumberCareRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).setValue(arrFavorite.size());
@@ -250,8 +253,14 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         commentAdapter = new CommentAdapter(topic, accountManager);
+        commentAdapter.setOnItemClick(new CommentAdapter.OnItemClick() {
+            @Override
+            public void onClick(View view, int positon) {
+
+            }
+        });
         recyclerView.setAdapter(commentAdapter);
-        recyclerView.scrollToPosition(topic.getArrComment().size());
+//        recyclerView.smoothScrollToPosition(topic.getArrComment().size());
 
 
     }
@@ -293,15 +302,11 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                 } else {
                     time = MyCalendar.getTimeStamp() + " AM";
                 }
-
                 String comment = Emoji.replaceInText(edtComment.getText().toString()).trim();
-
                 edtComment.setText("");
                 ArrayList<Comment> arrReply = new ArrayList<>();
-                arrReply.add(new Comment(accountManager.getCurrentUser().getUid(), comment, date, time, new ArrayList<Comment>()));
                 Comment cmt = new Comment(accountManager.getCurrentUser().getUid(), comment, date, time, arrReply);
-
-                FireBaseReference.getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).child(arrComment.size() + "").setValue(cmt);
+                getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).child(arrComment.size() + "").setValue(cmt);
                 try {
 //                    getTopicAfter();
                 } catch (Exception e) {

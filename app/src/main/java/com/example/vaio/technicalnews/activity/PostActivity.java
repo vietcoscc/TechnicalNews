@@ -28,7 +28,11 @@ import com.example.vaio.technicalnews.model.forum.Topic;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -104,7 +108,10 @@ public class PostActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                actionPost();
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                startActivityForResult(intent, REQUEST_CODE);
+
             }
         });
     }
@@ -170,21 +177,10 @@ public class PostActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         try {
             if (REQUEST_CODE == requestCode) {
+                Uri uri = data.getData();
+                StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("Forum/");
 
-                ClipData clipData = data.getClipData();
-                if (clipData != null) {
-                    Log.e(TAG, clipData.getItemCount() + "");
-                    for (int i = 0; i < clipData.getItemCount(); i++) {
-                        ClipData.Item item = clipData.getItemAt(i);
-                        Uri uri = item.getUri();
-                        Toast.makeText(this, uri.toString(), Toast.LENGTH_SHORT).show();
-
-                    }
-                } else {
-                    Uri uri = data.getData();
-                    Toast.makeText(this, uri.toString(), Toast.LENGTH_SHORT).show();
-                }
-
+                UploadTask uploadTask = storageReference.putFile(uri);
             }
         } catch (Exception e) {
             e.printStackTrace();

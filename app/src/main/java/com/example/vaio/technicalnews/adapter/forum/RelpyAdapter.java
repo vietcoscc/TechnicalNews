@@ -63,7 +63,7 @@ public class RelpyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 if (userInfo != null) {
                     if (userInfo.getPhotoUrl().isEmpty()) {
                         Picasso.with(context).
-                                load(comment.getUid()).
+                                load(R.drawable.boss).
                                 placeholder(R.drawable.loading).
                                 error(R.drawable.warning).
                                 into(replyViewHolder.ivAvatar);
