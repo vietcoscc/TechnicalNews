@@ -51,22 +51,13 @@
             android:orientation="horizontal"
             android:weightSum="10">
 
-            <LinearLayout
+            <com.example.vaio.technicalnews.custom_view.SquareImageView
+                android:id="@+id/ivAvatar"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="@dimen/activity_horizontal_margin"
-                android:layout_weight="1.5"
-                android:gravity="start">
-
-                <ImageView
-                    android:id="@+id/ivAvatar"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:scaleType="center"/>
-
-            </LinearLayout>
-
+                android:layout_height="48dp"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:layout_weight="2"
+                android:scaleType="centerCrop" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -77,8 +68,9 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:textStyle="normal"
                     android:id="@+id/tvName"
-                    style="?android:attr/textAppearanceSmall"
+                    style="?android:attr/textAppearanceMedium"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
@@ -88,12 +80,12 @@
         </LinearLayout>
 
         <EditText
-            android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:id="@+id/edtSubject"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:gravity="top"
             android:hint="Subject..." />
 

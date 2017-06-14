@@ -34,10 +34,10 @@ public class MyCalendar {
     }
 
     public static String getDate() {
-        return getDay() + " / " + getMonth() + " / " + getYear();
+        return getDay() + "/" + getMonth() + "/" + getYear();
     }
 
     public static String getTimeStamp() {
-        return getHour() + " : " + getMinute() + " : " + getSecond();
+        return getHour() + ":" + getMinute() + ":" + getSecond();
     }
 }
