@@ -31,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.fragment.ChatRoomFragment;
@@ -43,10 +44,13 @@ import com.example.vaio.technicalnews.model.forum.Topic;
 import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.example.vaio.technicalnews.service.NewsService;
 import com.example.vaio.technicalnews.service.NotificationService;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -247,9 +251,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getAccountRef().child(accountManager.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
-                accountManager.setUserInfo(userInfo);
-                Log.e(TAG, userInfo.getDisplayName());
+                try{
+                    UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
+                    if (userInfo != null) {
+                        accountManager.setUserInfo(userInfo);
+                        if (userInfo.isAdmin()) {
+                            if (manager != null) {
+                                manager.setVisible(true);
+                            }
+                        }else {
+                            if (manager != null) {
+                                manager.setVisible(false);
+                            }
+                        }
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -467,18 +485,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 signUp = menu.findItem(R.id.action_sign_up);
                 signOut = menu.findItem(R.id.action_sign_out);
                 profile = menu.findItem(R.id.action_view_profile);
-
                 manager = menu.findItem(R.id.action_mangage);
-                if (accountManager.getUserInfo() != null && !accountManager.getUserInfo().isAdmin()) {
+                if(!accountManager.getUserInfo().isAdmin()){
                     manager.setVisible(false);
-                } else {
-                    manager.setOnMenuItemClickListener(this);
                 }
                 signUp.setOnMenuItemClickListener(this);
                 signIn.setOnMenuItemClickListener(this);
                 signOut.setOnMenuItemClickListener(this);
                 profile.setOnMenuItemClickListener(this);
-
+                manager.setOnMenuItemClickListener(this);
                 break;
 
         }
@@ -508,6 +523,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     progressDialog.show();
                     accountManager.logout();
                     manager.setVisible(false);
+                    progressDialog.dismiss();
                     break;
                 case R.id.action_view_profile:
                     if (accountManager.getCurrentUser() == null) {
@@ -611,7 +627,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             if (requestCode == RC_PROFILE) {
                 if (resultCode == RESULT_OK) {
-                    showLoginSnackBar();
+                    Log.e(TAG, "Profile");
+                    StorageReference storePhotoAuth = FirebaseStorage.getInstance().getReference().child("Auth/" + accountManager.getCurrentUser().getUid());
+                    storePhotoAuth.getDownloadUrl().addOnSuccessListener(this, new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            getAccountRef().child(accountManager.getCurrentUser().getUid()).child("photoUrl").setValue(uri.toString());
+                            accountManager.logout();
+                            try {
+                                updateUI();
+                                showLoginSnackBar();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    });
+
+
                 }
             }
         } catch (Exception e) {

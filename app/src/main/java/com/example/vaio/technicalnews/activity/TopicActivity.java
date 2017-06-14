@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.adapter.forum.TopicsForumAdapter;
@@ -174,39 +175,58 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
                 MenuItem menuItem = popupMenu.getMenu().findItem(R.id.action_ban);
                 MenuItem menuItem2 = popupMenu.getMenu().findItem(R.id.action_delete);
                 MenuItem menuItem3 = popupMenu.getMenu().findItem(R.id.action_view_profile);
+                MenuItem menuItem4 = popupMenu.getMenu().findItem(R.id.action_set_admin);
                 if (!accountManager.getUserInfo().isAdmin()) {
                     menuItem.setVisible(false);
+                    menuItem4.setVisible(false);
                     if (!accountManager.getUserInfo().getUid().equals(topic.getUid())) {
                         menuItem2.setVisible(false);
+                    }
+                } else {
+                    if (accountManager.getUserInfo().getUid().equals(topic.getUid())) {
+                        menuItem.setVisible(false);
+                        menuItem4.setVisible(false);
                     }
                 }
 
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.action_delete:
-                                if (!accountManager.getUserInfo().isAdmin()) {
-                                    return false;
-                                }
-                                FireBaseReference.getTopicKeyRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).removeValue(new DatabaseReference.CompletionListener() {
-                                    @Override
-                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                        FireBaseReference.getDeletedRef().child(accountManager.getCurrentUser().getUid()).push().setValue(topic);
+                        try {
+                            switch (item.getItemId()) {
+                                case R.id.action_delete:
+                                    Toast.makeText(TopicActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
+                                    if (!accountManager.getUserInfo().isAdmin()) {
+                                        return false;
                                     }
-                                });
-                                break;
-                            case R.id.action_view_profile:
-                                Intent intent = new Intent(TopicActivity.this, ProfileActivity.class);
-                                intent.putExtra("tag", TAG);
-                                intent.putExtra(UID, topic.getUid());
-                                startActivity(intent);
-                                break;
-                            case R.id.action_ban:
-                                if (!topic.getUid().equals(accountManager.getCurrentUser().getUid())) {
-                                    FireBaseReference.getAccountRef().child(topic.getUid()).child(FireBaseReference.BAN).setValue(true);
-                                }
-                                break;
+                                    FireBaseReference.getTopicKeyRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).removeValue(new DatabaseReference.CompletionListener() {
+                                        @Override
+                                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                            FireBaseReference.getDeletedRef().child(accountManager.getCurrentUser().getUid()).push().setValue(topic);
+                                        }
+                                    });
+                                    break;
+                                case R.id.action_view_profile:
+                                    Intent intent = new Intent(TopicActivity.this, ProfileActivity.class);
+                                    intent.putExtra("tag", TAG);
+                                    intent.putExtra(UID, topic.getUid());
+                                    startActivity(intent);
+                                    break;
+                                case R.id.action_ban:
+                                    Toast.makeText(TopicActivity.this, "Banned", Toast.LENGTH_SHORT).show();
+                                    if (!topic.getUid().equals(accountManager.getCurrentUser().getUid())) {
+                                        FireBaseReference.getAccountRef().child(topic.getUid()).child(FireBaseReference.BAN).setValue(true);
+                                    }
+                                    break;
+                                case R.id.action_set_admin:
+                                    Toast.makeText(TopicActivity.this, "Set as admin", Toast.LENGTH_SHORT).show();
+                                    if (!topic.getUid().equals(accountManager.getCurrentUser().getUid())) {
+                                        FireBaseReference.getAccountRef().child(topic.getUid()).child(FireBaseReference.ADMIN).setValue(true);
+                                    }
+                                    break;
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
                         }
                         return false;
                     }

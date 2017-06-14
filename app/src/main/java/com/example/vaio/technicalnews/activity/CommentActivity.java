@@ -205,7 +205,6 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
 
     private void getArrFavorite() throws Exception {
         arrFavorite.clear();
-        getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).keepSynced(true);
         getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {

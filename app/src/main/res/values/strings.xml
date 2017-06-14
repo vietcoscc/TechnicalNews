@@ -46,6 +46,7 @@
     <string name="filter_view">View</string>
     <string name="filter_new">New</string>
     <string name="action_ban">Ban</string>
+    <string name="action_set_admin">Set as admin</string>
     <string-array name="listentries">
         <item>List item 1</item>
         <item>List item 2</item>

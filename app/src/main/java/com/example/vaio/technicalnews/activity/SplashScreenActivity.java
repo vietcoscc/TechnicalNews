@@ -24,7 +24,7 @@ public class SplashScreenActivity extends AppCompatActivity {
     private static final int RC_MAIN = 1;
     private GlobalData globalData;
     private AccountManager accountManager;
-
+    private boolean isCalled;
 //    private String[] room = {"Thông tin công nghệ", "Thương mại điện tử", "Đám mây, Dịch vụ trực tuyến", "Thăm dò công nghệ", "Quảng cáo - Khuyến mãi"
 //            , "Quảng cáo - Khuyến mãi", "App", "Thông tin - Sự kiện", "Windows", "Apple - Mac OS X", "Linux", "Chrome OS", "Tư vấn chọn mua Máy tính", "Máy tính"
 //            , "iOS", "Android", "Windows Phone", "BlackBerry", "Symbian", "Mạng di động", "Điện thoại"};
@@ -37,8 +37,15 @@ public class SplashScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+        try {
+            if (!isCalled) {
+                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+                isCalled = true;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         globalData = (GlobalData) getApplication();
         accountManager = new AccountManager(SplashScreenActivity.this);
         globalData.setAccountManager(accountManager);
@@ -52,7 +59,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                         accountManager.setUserInfo(userInfo);
                         Intent intent = new Intent(SplashScreenActivity.this, MainActivity.class);
                         startActivityForResult(intent, RC_MAIN);
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 

@@ -3,6 +3,8 @@ package com.example.vaio.technicalnews.activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -11,6 +13,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,17 +30,29 @@ import com.example.vaio.technicalnews.model.application.FireBaseReference;
 import com.example.vaio.technicalnews.model.application.GlobalData;
 import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.example.vaio.technicalnews.activity.TopicActivity.UID;
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.MAIL;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.getAccountRef;
 
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
     public static final String TAG = "ProfileActivity";
@@ -87,6 +102,10 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             }
         } else {
             uid = accountManager.getCurrentUser().getUid();
+            layoutEmail.setOnClickListener(this);
+            layoutDisplayName.setOnClickListener(this);
+            layoutPosted.setOnClickListener(this);
+            ivAvatar.setOnClickListener(this);
         }
     }
 
@@ -100,10 +119,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         tvAdmin = (TextView) findViewById(R.id.tvAdmin);
         tvJoinedDate = (TextView) findViewById(R.id.tvJoinedDate);
 
-        layoutEmail.setOnClickListener(this);
-        layoutDisplayName.setOnClickListener(this);
-        layoutPosted.setOnClickListener(this);
-        ivAvatar.setOnClickListener(this);
+
     }
 
     private void updateUI() throws Exception {
@@ -124,7 +140,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                     tvEmail.setText(email);
                     tvJoinedDate.setText(userInfo.getJoinedDate());
                     tvAdmin.setText(userInfo.isAdmin() + "");
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -229,7 +245,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void onBackPressed() {
-        setResult(RESULT_OK);
         super.onBackPressed();
     }
 
@@ -240,42 +255,29 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
             if (requestCode == RC_PICK_IMAGE) {
                 final Uri uri = data.getData();
-//                Toast.makeText(this, uri + "", Toast.LENGTH_SHORT).show();
-//                Toast.makeText(this, uri.getPath() + "", Toast.LENGTH_SHORT).show();
+                final ProgressDialog progressDialog = new ProgressDialog(ProfileActivity.this);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
 
-//                Toast.makeText(this, b.getWidth() + "", Toast.LENGTH_SHORT).show();
-//                final ProgressDialog progressDialog = new ProgressDialog(ProfileActivity.this);
-//                progressDialog.setCancelable(false);
-//                progressDialog.show();
-//
-//                Log.e(TAG, uri.toString());
-//                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().
-//                        setPhotoUri(uri).build();
-//                accountManager.getCurrentUser().updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        Toast.makeText(ProfileActivity.this, "Successful !", Toast.LENGTH_SHORT).show();
-//                        progressDialog.dismiss();
-//                        accountManager.logout();
-//                        onBackPressed();
-//                    }
-//                });
-//                StorageReference storePhotoAuth = FirebaseStorage.getInstance().getReference().child("Auth/" + accountManager.getCurrentUser().getUid());
-//                UploadTask uploadTask = storePhotoAuth.putBytes(byteArray);
-//                uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-//                        FirebaseStorage.getInstance().getReference().child("Auth/" + accountManager.getCurrentUser().getUid()).
-//                                getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                            @Override
-//                            public void onSuccess(Uri uri) {
-//
-//                            }
-//                        });
-//
-//                    }
-//                });
-//
+                Log.e(TAG, uri.toString());
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream);
+                byte b[] = byteArrayOutputStream.toByteArray();
+
+                StorageReference storePhotoAuth = FirebaseStorage.getInstance().getReference().child("Auth/" + accountManager.getCurrentUser().getUid());
+                final UploadTask uploadTask = storePhotoAuth.putBytes(b);
+
+                uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        Toast.makeText(ProfileActivity.this, "Successful !", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                        setResult(RESULT_OK);
+                        onBackPressed();
+                    }
+                });
+
 
             }
         } catch (Exception e) {

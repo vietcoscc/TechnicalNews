@@ -201,7 +201,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                             progressDialog.dismiss();
                                         }
                                         onBackPressed();
-                                    }catch (Exception e){
+                                    } catch (Exception e) {
                                         e.printStackTrace();
                                     }
 
@@ -263,7 +263,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             }
                         });
                         accountManager.login(userName, password);
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 //                    setClickableViews(true);
@@ -274,7 +274,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         Intent intent = new Intent(this, RegisterActivity.class);
                         startActivityForResult(intent, RC_REGISTER);
                         overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 //                    setClickableViews(true);
@@ -291,7 +291,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             progressDialog.show();
                         }
                         signIn();
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
@@ -351,6 +351,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return;
         }
         setResult(RESULT_OK);
+        getFragmentManager().beginTransaction().commitAllowingStateLoss();
         super.onBackPressed();
         overridePendingTransition(R.anim.anim_fragment_in_from_left, R.anim.anim_fragment_out_from_left);
     }
