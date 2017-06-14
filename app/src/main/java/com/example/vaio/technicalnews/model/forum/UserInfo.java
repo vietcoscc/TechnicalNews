@@ -12,17 +12,27 @@ public class UserInfo {
     String joinedDate;
 
     boolean isAdmin;
+    boolean isBanned;
 
     public UserInfo() {
     }
 
-    public UserInfo(String uid, String displayName, String email, String photoUrl, String joinedDate, boolean isAdmin) {
+    public UserInfo(String uid, String displayName, String email, String photoUrl, String joinedDate, boolean isAdmin, boolean isBanned) {
         this.uid = uid;
         this.displayName = displayName;
         this.email = email;
         this.photoUrl = photoUrl;
         this.joinedDate = joinedDate;
         this.isAdmin = isAdmin;
+        this.isBanned = isBanned;
+    }
+
+    public boolean isBanned() {
+        return isBanned;
+    }
+
+    public void setBanned(boolean banned) {
+        isBanned = banned;
     }
 
     public String getUid() {

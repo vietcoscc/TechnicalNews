@@ -15,19 +15,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "1058858081722-oh1b4j1but660lra87tu2cf8ja03c5hc.apps.googleusercontent.com",
+          "client_id": "1058858081722-ral0er4jf4ljieoddi2k2hq7dels7hup.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.vaio.technicalnews",
-            "certificate_hash": "950398c465701c088c8a618a18c39e4d11f8a92e"
+            "certificate_hash": "a82c496902d3b07bd6c88d68e73c16f8dab3752a"
           }
         },
         {
-          "client_id": "1058858081722-1j6nmev99rqbm9e910ljsko99q8t8pea.apps.googleusercontent.com",
+          "client_id": "1058858081722-ne2hg2iprgaah3ngpptf1tj253boo6vs.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.vaio.technicalnews",
-            "certificate_hash": "aab33cb6e8bfe0249d263bb544e422e4aeb40bd1"
+            "certificate_hash": "287abb5b5ebd849ef92d54848d4e39d62fcc061e"
           }
         },
         {

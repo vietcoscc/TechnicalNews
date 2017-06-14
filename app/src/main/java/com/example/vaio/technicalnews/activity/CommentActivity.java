@@ -1,7 +1,9 @@
 package com.example.vaio.technicalnews.activity;
 
+import android.annotation.TargetApi;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,11 +20,14 @@ import com.example.vaio.technicalnews.adapter.forum.CommentAdapter;
 import com.example.vaio.technicalnews.adapter.forum.RelpyAdapter;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.model.application.AccountManager;
+import com.example.vaio.technicalnews.model.application.MyNotification;
+import com.example.vaio.technicalnews.model.forum.ChildForumItem;
 import com.example.vaio.technicalnews.model.forum.Comment;
 import com.example.vaio.technicalnews.model.application.Emoji;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;
 import com.example.vaio.technicalnews.model.application.GlobalData;
 import com.example.vaio.technicalnews.model.application.MyCalendar;
+import com.example.vaio.technicalnews.model.forum.GroupForumItem;
 import com.example.vaio.technicalnews.model.forum.Topic;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -36,6 +41,7 @@ import static com.example.vaio.technicalnews.model.application.FireBaseReference
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.getArrCommentRef;
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.getArrFavoriteRef;
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.getChildForumItemRef;
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.getNotifocationRef;
 import static com.example.vaio.technicalnews.model.application.FireBaseReference.getTopicKeyRef;
 
 public class CommentActivity extends AppCompatActivity implements View.OnClickListener {
@@ -69,6 +75,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
             e.printStackTrace();
         }
     }
+
 
     private void initData() {
         GlobalData globalData = (GlobalData) getApplication();
@@ -120,7 +127,10 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                 child(FireBaseReference.NUMBER_VIEW).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                int count = dataSnapshot.getValue(Integer.class);
+                Integer count = dataSnapshot.getValue(Integer.class);
+                if (count == null) {
+                    return;
+                }
                 getTopicKeyRef(groupForumItem, childForumItem, topic.getKey()).child(FireBaseReference.NUMBER_VIEW).setValue(count + 1);
             }
 
@@ -290,6 +300,10 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
 
                 break;
             case R.id.ibSend:
+                if (accountManager.getUserInfo().isBanned()) {
+                    Snackbar.make(v, "You have been banned !", 2000).show();
+                    return;
+                }
                 if (edtComment.getText().toString().isEmpty()) {
                     return;
                 }
@@ -303,10 +317,16 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                     time = MyCalendar.getTimeStamp() + " AM";
                 }
                 String comment = Emoji.replaceInText(edtComment.getText().toString()).trim();
-                edtComment.setText("");
+
                 ArrayList<Comment> arrReply = new ArrayList<>();
                 Comment cmt = new Comment(accountManager.getCurrentUser().getUid(), comment, date, time, arrReply);
                 getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).child(arrComment.size() + "").setValue(cmt);
+                if (!accountManager.getCurrentUser().getUid().equals(topic.getUid())) {
+                    getNotifocationRef().push().setValue(new MyNotification(accountManager.getCurrentUser().getDisplayName(),
+                            topic.getSubject(), edtComment.getText().toString(), accountManager.getCurrentUser().getUid(), topic.getUid(),
+                            new GroupForumItem(null, groupForumItem, null), new ChildForumItem(0, childForumItem, "", ""), topic));
+                }
+                edtComment.setText("");
                 try {
 //                    getTopicAfter();
                 } catch (Exception e) {

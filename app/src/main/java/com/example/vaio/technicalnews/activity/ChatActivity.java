@@ -1,5 +1,7 @@
 package com.example.vaio.technicalnews.activity;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -64,50 +66,12 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private void initAccountManager() throws Exception {
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
-//        arrBan = globalData.getArrBan();
-        receiveBanList();
     }
 
     private void initData() throws Exception {
         chatRoom = (ChatRoom) getIntent().getExtras().getSerializable(CHAT_ROOM);
         Toast.makeText(this, chatRoom.getName(), Toast.LENGTH_SHORT).show();
         receiveData();
-    }
-
-    private void receiveBanList() {
-        arrBan.clear();
-        FireBaseReference.getBanRef().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String mail = dataSnapshot.getValue(String.class);
-                if (!(arrBan.indexOf(mail) > -1)) {
-                    arrBan.add(mail);
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                String mail = dataSnapshot.getValue(String.class);
-//                arrBan.remove(arrBan.indexOf(mail));
-                Log.e(TAG, mail);
-                Log.e(TAG, "REmoved");
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void receiveData() {
@@ -152,6 +116,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         getSupportActionBar().setHomeButtonEnabled(true);
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void initComponent() throws Exception {
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -213,8 +178,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ibSend:
-                if (arrBan.indexOf(accountManager.getCurrentUser().getEmail()) > -1) {
-                    Snackbar.make(v, "You have been banned ! ", 1000).show();
+                if (accountManager.getUserInfo().isBanned()) {
+                    Snackbar.make(v, "You have been banned !", 2000).show();
                     return;
                 }
                 final String chat = Emoji.replaceInText(edtComment.getText().toString()).trim();

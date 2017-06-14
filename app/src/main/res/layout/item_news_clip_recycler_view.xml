@@ -37,7 +37,6 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:lines="2"
-                    android:text="@string/app_name"
                     android:textColor="@android:color/black" />
 
                 <LinearLayout
@@ -50,8 +49,7 @@
                         style="?android:attr/textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:text="@string/app_name" />
+                        android:singleLine="true" />
 
                     <TextView
                         android:id="@+id/tvTimeStamp"
@@ -59,8 +57,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:singleLine="true"
-                        android:text="@string/app_name" />
+                        android:singleLine="true" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

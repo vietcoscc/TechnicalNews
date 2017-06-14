@@ -12,7 +12,6 @@ public class GlobalData extends Application {
     private AccountManager accountManager;
     private ArrayList<String> arrAdmin;
 
-
     public ArrayList<String> getArrAdmin() {
         return arrAdmin;
     }

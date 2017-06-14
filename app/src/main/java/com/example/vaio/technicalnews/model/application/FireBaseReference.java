@@ -40,8 +40,8 @@ public class FireBaseReference {
     public static final String ARR_FAVORITE = "arrFavorite";
     //
     public static final String TOPIC_KEY = "Topic key";
-    private static final String ADMIN = "Admin";
-    private static final String BAN = "Ban";
+    public static final String ADMIN = "Admin";
+    public static final String BAN = "banned";
     public static final String DELETED = "Deleted";
     public static final String NOTIFICATION = "Notificaition";
     //

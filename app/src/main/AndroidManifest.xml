@@ -13,9 +13,9 @@
     <application
         android:name=".model.application.GlobalData"
         android:allowBackup="true"
+        android:icon="@drawable/news"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:icon="@drawable/news"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
@@ -42,7 +42,8 @@
             android:label="Setting"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.DeviceDefault.Light" />
-        <activity android:name=".activity.CommentActivity" />
+        <activity
+            android:name=".activity.CommentActivity"/>
         <activity android:name=".activity.YoutubePlayerActivity" />
         <activity android:name=".activity.ChatActivity" />
         <activity
@@ -51,7 +52,9 @@
         <activity
             android:name=".activity.RegisterActivity"
             android:windowSoftInputMode="adjustResize|adjustUnspecified" />
-        <activity android:name=".activity.TopicActivity" />
+        <activity
+            android:name=".activity.TopicActivity"
+            android:parentActivityName=".activity.MainActivity" />
         <activity android:name=".activity.ProfileActivity" />
         <activity android:name=".activity.PostedActivity" />
         <activity android:name=".activity.ManagerActivity"></activity>

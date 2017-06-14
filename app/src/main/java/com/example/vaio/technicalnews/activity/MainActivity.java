@@ -38,13 +38,23 @@ import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.fragment.ForumFragment;
 import com.example.vaio.technicalnews.fragment.HomeFragment;
 import com.example.vaio.technicalnews.model.application.GlobalData;
+import com.example.vaio.technicalnews.model.application.MySharedPreferences;
 import com.example.vaio.technicalnews.model.forum.Topic;
+import com.example.vaio.technicalnews.model.forum.UserInfo;
+import com.example.vaio.technicalnews.service.NewsService;
+import com.example.vaio.technicalnews.service.NotificationService;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.example.vaio.technicalnews.model.application.FireBaseReference.getAccountRef;
+import static com.example.vaio.technicalnews.model.application.MySharedPreferences.USER_NAME;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MenuItem.OnMenuItemClickListener, View.OnClickListener {
     public static final String TAG = "MainActivity";
@@ -107,16 +117,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             loadContentFragment(HOME_TAG);
             initOthers();
             updateUI();
-//            if (!isMyServiceRunning(NewsService.class)) {
-//                Intent intentService = new Intent(MainActivity.this, NewsService.class);
-//                startService(intentService);
-//            }
-//            if (!isMyServiceRunning(NotificationService.class)) {
-//                MySharedPreferences.putString(MainActivity.this, USER_NAME, accountManager.getCurrentUser().getEmail());
-//                Intent intent = new Intent(MainActivity.this, NotificationService.class);
-//                intent.putExtra(USER_NAME, accountManager.getCurrentUser().getEmail());
-//                startService(intent);
-//            }
+            if (!isMyServiceRunning(NewsService.class)) {
+                Intent intentService = new Intent(MainActivity.this, NewsService.class);
+                startService(intentService);
+            }
+            if (!isMyServiceRunning(NotificationService.class)) {
+                MySharedPreferences.putString(MainActivity.this, USER_NAME, accountManager.getCurrentUser().getUid());
+                Intent intent = new Intent(MainActivity.this, NotificationService.class);
+                intent.putExtra(USER_NAME, accountManager.getCurrentUser().getUid());
+                startService(intent);
+            }
 
 
         } catch (Exception e) {
@@ -228,6 +238,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tvEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tvEmail);
         ivAvatar = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.ivAvatar);
         progressDialog = new ProgressDialog(this);
+
+        getAccountRef().child(accountManager.getCurrentUser().getUid()).keepSynced(true);
+        getAccountRef().child(accountManager.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
+                accountManager.setUserInfo(userInfo);
+                Log.e(TAG, userInfo.getDisplayName());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void initToolbar() throws Exception {
@@ -486,6 +511,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
+        if (!isMyServiceRunning(NewsService.class)) {
+            Intent intentService = new Intent(MainActivity.this, NewsService.class);
+            startService(intentService);
+        }
+        if (!isMyServiceRunning(NotificationService.class)) {
+            MySharedPreferences.putString(MainActivity.this, USER_NAME, accountManager.getCurrentUser().getUid());
+            Intent intent = new Intent(MainActivity.this, NotificationService.class);
+            intent.putExtra(USER_NAME, accountManager.getCurrentUser().getUid());
+            startService(intent);
+        }
         if (onMenuItemForumSelected) {
             return;
         }
@@ -499,6 +534,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
+
                     setResult(RESULT_OK);
                     finish();
                 }

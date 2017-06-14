@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.example.vaio.technicalnews.R;
 import com.example.vaio.technicalnews.model.application.AccountManager;
 import com.example.vaio.technicalnews.model.application.FireBaseReference;
+import com.example.vaio.technicalnews.model.forum.UserInfo;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -65,14 +66,7 @@ public class BannedFragment extends Fragment {
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        FireBaseReference.getBanRef().child(arrKey.get(position)).removeValue(new DatabaseReference.CompletionListener() {
-                            @Override
-                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                Toast.makeText(getContext(), "Unbanned ", Toast.LENGTH_SHORT).show();
-                                receiveData();
-                                adapter.notifyDataSetChanged();
-                            }
-                        });
+                        FireBaseReference.getAccountRef().child(arrKey.get(position)).child(FireBaseReference.BAN).setValue(false);
                         return false;
                     }
                 });
@@ -85,14 +79,15 @@ public class BannedFragment extends Fragment {
 
         arrBanned.clear();
         arrKey.clear();
-        FireBaseReference.getBanRef().addChildEventListener(new ChildEventListener() {
+        FireBaseReference.getAccountRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String value = dataSnapshot.getValue(String.class);
-                Log.e(TAG, value);
-                arrBanned.add(value);
-                arrKey.add(dataSnapshot.getKey());
-                adapter.notifyDataSetChanged();
+                UserInfo value = dataSnapshot.getValue(UserInfo.class);
+                if (value.isBanned()) {
+                    arrBanned.add(value.getEmail() + "\n" + value.getDisplayName());
+                    arrKey.add(dataSnapshot.getKey());
+                    adapter.notifyDataSetChanged();
+                }
                 if (arrBanned.isEmpty()) {
                     tvEmpty.setVisibility(View.VISIBLE);
                 } else {
@@ -102,11 +97,23 @@ public class BannedFragment extends Fragment {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                try {
+                    UserInfo value = dataSnapshot.getValue(UserInfo.class);
+                    Log.e(TAG, arrBanned.indexOf(value.getEmail() + "\n" + value.getDisplayName()) + "");
+                    if (arrBanned.indexOf(value.getEmail() + "\n" + value.getDisplayName()) >= arrBanned.size()) {
+                        return;
+                    }
+                    arrBanned.remove(arrBanned.indexOf(value.getEmail() + "\n" + value.getDisplayName()));
+                    adapter.notifyDataSetChanged();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+
                 adapter.notifyDataSetChanged();
             }
 

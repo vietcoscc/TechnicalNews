@@ -204,16 +204,20 @@ public class PostedActivity extends AppCompatActivity {
                                 addChildEventListener(new ChildEventListener() {
                                     @Override
                                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                                        Topic topic = dataSnapshot.getValue(Topic.class);
-                                        if (topic.getUid().equals(accountManager.getCurrentUser().getUid())) {
-                                            //
-                                            topic.setGroupName(groupForumItem.getName());
-                                            topic.setChildName(childForumItem.getName());
-                                            topic.setKey(dataSnapshot.getKey());
-                                            //
-                                            arrTopic.add(topic);
-                                            arrTopicTmp.add(topic);
-                                            adapter.notifyDataSetChanged();
+                                        try {
+                                            Topic topic = dataSnapshot.getValue(Topic.class);
+                                            if (topic.getUid().equals(accountManager.getCurrentUser().getUid())) {
+                                                //
+                                                topic.setGroupName(groupForumItem.getName());
+                                                topic.setChildName(childForumItem.getName());
+                                                topic.setKey(dataSnapshot.getKey());
+                                                //
+                                                arrTopic.add(topic);
+                                                arrTopicTmp.add(topic);
+                                                adapter.notifyDataSetChanged();
+                                            }
+                                        }catch (Exception e){
+                                            e.printStackTrace();
                                         }
                                     }
 

@@ -1,8 +1,10 @@
 package com.example.vaio.technicalnews.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -72,6 +74,7 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
             "Advertising - Promotions", "App", "Information - Events", "Windows", "Apple - Mac OS X",
             "Linux", "Chrome OS", "Computer Consulting", "Computer", "iOS", "Android", "Windows Phone",
             "BlackBerry", "Symbian", "Mobile network", "Phone"};
+    ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +86,8 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
     }
 
     private void initViews() {
+        dialog = new ProgressDialog(this);
+        dialog.setProgressStyle(android.R.style.Widget_DeviceDefault_Light_ProgressBar_Horizontal);
         tvEmpty = (TextView) findViewById(R.id.tvEmpty);
         srl = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         srl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -101,6 +106,10 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (accountManager.getUserInfo().isBanned()) {
+                    Snackbar.make(v, "You have been banned !", 2000).show();
+                    return;
+                }
                 Intent intent = new Intent(TopicActivity.this, PostActivity.class);
                 intent.putExtra(GROUP_FORUM_ITEM, groupForumItem);
                 intent.putExtra(CHILD_FORUM_ITEM, childForumItem);
@@ -140,32 +149,50 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
         adapter.setClickListener(new TopicsForumAdapter.ClickListener() {
             @Override
             public void onItemClick(final View view, final int position) {
+                if (accountManager.getUserInfo().isBanned()) {
+                    Snackbar.make(view, "You have been banned !", 2000).show();
+                    return;
+                }
                 Intent intent = new Intent(TopicActivity.this, CommentActivity.class);
                 intent.putExtra(GROUP_FORUM_ITEM, groupForumItem.getName());
                 intent.putExtra(CHILD_FORUM_ITEM, childForumItem.getName());
                 intent.putExtra(TOPIC, arrTopic.get(position));
+                dialog.show();
                 startActivityForResult(intent, RC_COMMENT);
             }
         });
         adapter.setOnItemLongClick(new TopicsForumAdapter.OnItemLongClick() {
             @Override
             public void onLongLick(View view, final int position) {
-                final Topic topic = arrTopic.get(position);
-                if (accountManager.getCurrentUser() == null || !accountManager.getCurrentUser().getUid().equals(topic.getUid()) && !accountManager.getUserInfo().isAdmin()) {
+
+                if (accountManager.getCurrentUser() == null) {
                     return;
                 }
+                final Topic topic = arrTopic.get(position);
                 final PopupMenu popupMenu = new PopupMenu(TopicActivity.this, view);
                 popupMenu.getMenuInflater().inflate(R.menu.menu_topic_more, popupMenu.getMenu());
+                MenuItem menuItem = popupMenu.getMenu().findItem(R.id.action_ban);
+                MenuItem menuItem2 = popupMenu.getMenu().findItem(R.id.action_delete);
+                MenuItem menuItem3 = popupMenu.getMenu().findItem(R.id.action_view_profile);
+                if (!accountManager.getUserInfo().isAdmin()) {
+                    menuItem.setVisible(false);
+                    if (!accountManager.getUserInfo().getUid().equals(topic.getUid())) {
+                        menuItem2.setVisible(false);
+                    }
+                }
+
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.action_delete:
-
+                                if (!accountManager.getUserInfo().isAdmin()) {
+                                    return false;
+                                }
                                 FireBaseReference.getTopicKeyRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).removeValue(new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
+                                        FireBaseReference.getDeletedRef().child(accountManager.getCurrentUser().getUid()).push().setValue(topic);
                                     }
                                 });
                                 break;
@@ -174,6 +201,11 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
                                 intent.putExtra("tag", TAG);
                                 intent.putExtra(UID, topic.getUid());
                                 startActivity(intent);
+                                break;
+                            case R.id.action_ban:
+                                if (!topic.getUid().equals(accountManager.getCurrentUser().getUid())) {
+                                    FireBaseReference.getAccountRef().child(topic.getUid()).child(FireBaseReference.BAN).setValue(true);
+                                }
                                 break;
                         }
                         return false;
@@ -248,6 +280,15 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
 
         }
     };
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.e(TAG, "Stop");
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
+    }
 
     public void receiveData(int flag) {
         Log.e(TAG, arrTopic.size() + "");
@@ -356,8 +397,18 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        dialog.show();
+        Log.e(TAG, "Pause");
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
         try {
             if (RC_COMMENT == requestCode) {
                 if (resultCode == RESULT_OK) {

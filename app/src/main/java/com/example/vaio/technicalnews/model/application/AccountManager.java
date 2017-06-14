@@ -77,7 +77,6 @@ public class AccountManager implements Serializable {
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             userInfo = dataSnapshot.getValue(UserInfo.class);
                             Toast.makeText(context, "Successful", Toast.LENGTH_SHORT).show();
-                            logout();
                             onLoginSuccess.onSuccess();
                         }
 
@@ -128,7 +127,7 @@ public class AccountManager implements Serializable {
                                                 onRegisterFail.onFail();
                                             }
                                         } else {
-                                            final UserInfo userInfo = new UserInfo(user.getUid(), yourName, user.getEmail(), "", MyCalendar.getDate(), false);
+                                            final UserInfo userInfo = new UserInfo(user.getUid(), yourName, user.getEmail(), "", MyCalendar.getDate(), false, false);
                                             FireBaseReference.getUserIdRef(userInfo.getUid()).setValue(userInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
                                                 public void onSuccess(Void aVoid) {

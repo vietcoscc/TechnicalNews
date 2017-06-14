@@ -192,7 +192,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                     UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
                                     if (userInfo == null) {
                                         FirebaseUser user = accountManager.getCurrentUser();
-                                        UserInfo userInfo1 = new UserInfo(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhotoUrl().toString(), MyCalendar.getDate(), true);
+                                        UserInfo userInfo1 = new UserInfo(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhotoUrl().toString(), MyCalendar.getDate(), true, false);
+                                        accountManager.setUserInfo(userInfo1);
                                         FireBaseReference.getAccountRef().child(accountManager.getCurrentUser().getUid()).setValue(userInfo1);
                                     }
                                     if (progressDialog != null && progressDialog.isShowing()) {

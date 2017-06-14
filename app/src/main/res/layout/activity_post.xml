@@ -61,10 +61,9 @@
 
                 <ImageView
                     android:id="@+id/ivAvatar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:scaleType="center"
-                    android:src="@mipmap/ic_launcher" />
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:scaleType="center"/>
 
             </LinearLayout>
 
@@ -89,6 +88,7 @@
         </LinearLayout>
 
         <EditText
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:id="@+id/edtSubject"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -100,7 +100,7 @@
         <EditText
             android:id="@+id/edtContent"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:autoLink="web"
@@ -115,5 +115,5 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/ic_add_white_24dp" />
+        app:srcCompat="@android:drawable/ic_menu_gallery" />
 </android.support.design.widget.CoordinatorLayout>

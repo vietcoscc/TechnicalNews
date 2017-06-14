@@ -1,5 +1,6 @@
 package com.example.vaio.technicalnews.adapter.forum;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -112,21 +113,16 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         Html.ImageGetter imageGetter = new Html.ImageGetter() {
             public Drawable getDrawable(String urlString) {
                 try {
-                    Log.d(TAG, "getDrawable: " + urlString);
-                    FetchImageUrl f = new FetchImageUrl(context);
-                    f.execute(urlString).get();
-                    Drawable drawable = f.getDrawable();
-                    WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-                    int x = windowManager.getDefaultDisplay().getWidth();
-
-                    drawable.setBounds(0, 0, x, x * drawable.getIntrinsicHeight() / drawable.getIntrinsicWidth());
-                    return drawable;
+                    FetchImageUrl fetchImageUrl = new FetchImageUrl(context);
+                    fetchImageUrl.execute(urlString).get();
+                    return fetchImageUrl.getDrawable();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return context.getResources().getDrawable(R.drawable.boss);
+                    return null;
                 }
             }
         };
+
         return imageGetter;
     }
 
@@ -136,13 +132,12 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (holder instanceof HeaderViewHolder) {
             arrFavorite = topic.getArrFavorite();
             final HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
-//            headerViewHolder.tvContent.setText(Emoji.replaceInText(topic.getContent()));
             Spanned spanned = Html.fromHtml(Emoji.replaceInText(topic.getContent()), getImageHTML(), null);
             headerViewHolder.tvContent.setText(spanned);
             headerViewHolder.tvSubject.setText(Emoji.replaceInText(topic.getSubject()));
             headerViewHolder.tvTimeStamp.setText(topic.getTime());
             headerViewHolder.tvDate.setText(topic.getDate());
-            headerViewHolder.tvfavorite.setText((arrFavorite.size()-1) + "");
+            headerViewHolder.tvfavorite.setText((arrFavorite.size() - 1) + "");
 
             if (arrFavorite != null && arrFavorite.indexOf(accountManager.getCurrentUser().getUid()) > -1) {
                 isFavorited = true;

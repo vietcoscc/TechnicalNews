@@ -37,6 +37,7 @@ public class SplashScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         globalData = (GlobalData) getApplication();
         accountManager = new AccountManager(SplashScreenActivity.this);
@@ -44,7 +45,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 //        new LongOperation().execute();
         if (accountManager.getCurrentUser() != null) {
             getAccountRef().child(accountManager.getCurrentUser().getUid()).keepSynced(true);
-            getAccountRef().child(accountManager.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+            getAccountRef().child(accountManager.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
