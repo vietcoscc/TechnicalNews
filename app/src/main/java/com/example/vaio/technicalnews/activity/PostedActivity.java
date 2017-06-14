@@ -59,12 +59,17 @@ public class PostedActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_posted);
-        initData();
-        initToolbar();
-        initComponent();
+        try {
+            initData();
+            initToolbar();
+            initComponent();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
-    private void initData() {
+    private void initData() throws Exception {
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
         email = getIntent().getExtras().getString(MAIL);
@@ -72,14 +77,14 @@ public class PostedActivity extends AppCompatActivity {
         Log.e(TAG, email);
     }
 
-    private void initToolbar() {
+    private void initToolbar() throws Exception{
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Posted");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void initComponent() {
+    private void initComponent()throws Exception {
         tvEmpty = (TextView) findViewById(R.id.tvEmpty);
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
@@ -136,7 +141,11 @@ public class PostedActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                receiveData();
+                try {
+                    receiveData();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -156,17 +165,21 @@ public class PostedActivity extends AppCompatActivity {
         startActivityForResult(intent2, RC_COMMENT);
     }
 
-    public void receiveData() {
+    public void receiveData()throws Exception {
         arrGroupForumItem.clear();
         arrTopic.clear();
         arrTopicTmp.clear();
         FireBaseReference.getForumRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                GroupForumItem groupForumItem = dataSnapshot.getValue(GroupForumItem.class);
-                groupForumItem.setKey(dataSnapshot.getKey());
-//                Log.e(TAG, groupForumItem.getName());
-                arrGroupForumItem.add(groupForumItem);
+                try {
+                    GroupForumItem groupForumItem = dataSnapshot.getValue(GroupForumItem.class);
+                    groupForumItem.setKey(dataSnapshot.getKey());
+                    arrGroupForumItem.add(groupForumItem);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
             }
 
             @Override

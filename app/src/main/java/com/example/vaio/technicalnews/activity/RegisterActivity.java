@@ -35,10 +35,14 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         accountManager = globalData.getAccountManager();
         accountManager.setOnRegisterSuccess(this);
         accountManager.setOnRegisterFail(this);
-        initViews();
+        try {
+            initViews();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private void initViews() {
+    private void initViews()throws Exception {
         edtYourName = (EditText) findViewById(R.id.yourName);
         edtUserName = (EditText) findViewById(R.id.userName);
         edtPassword = (EditText) findViewById(R.id.password);
@@ -53,30 +57,35 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.btnSignUp:
-                btnSignUp.setClickable(false);
+        try {
+            switch (view.getId()) {
+                case R.id.btnSignUp:
+                    btnSignUp.setClickable(false);
 
-                progressDialog.show();
+                    progressDialog.show();
 
-                if (!MainActivity.isNetWorkAvailable(this)) {
-                    Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                    if (!MainActivity.isNetWorkAvailable(this)) {
+                        Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                String yourName = edtYourName.getText().toString();
-                String userName = edtUserName.getText().toString();
-                String password = edtPassword.getText().toString();
-                if (userName.isEmpty() || password.isEmpty() || yourName.isEmpty()) {
+                    String yourName = edtYourName.getText().toString();
+                    String userName = edtUserName.getText().toString();
+                    String password = edtPassword.getText().toString();
+                    if (userName.isEmpty() || password.isEmpty() || yourName.isEmpty()) {
+                        btnSignUp.setClickable(true);
+                        Toast.makeText(this, "The feilds must not empty", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    accountManager.register(yourName, userName, password);
                     btnSignUp.setClickable(true);
-                    Toast.makeText(this, "The feilds must not empty", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                accountManager.register(yourName, userName, password);
-                btnSignUp.setClickable(true);
-                break;
+                    break;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
     }
 
     @Override

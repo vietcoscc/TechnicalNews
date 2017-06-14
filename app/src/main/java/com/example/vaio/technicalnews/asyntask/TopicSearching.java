@@ -23,7 +23,7 @@ public class TopicSearching extends AsyncTask<ArrayList<Topic>, Void, ArrayList<
         ArrayList<Topic> arrTopicTmp = new ArrayList<>();
         int n = arrTopic.size();
         for (int i = 0; i < n; i++) {
-            if (arrTopic.get(i).toString().contains(text)) {
+            if (arrTopic.get(i).toString().toLowerCase().contains(text)) {
                 arrTopicTmp.add(arrTopic.get(i));
             }
         }

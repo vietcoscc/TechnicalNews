@@ -35,17 +35,22 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_youtube_player);
-        prepairData();
-        initViews();
-        playClip();
+        try{
+            prepairData();
+            initViews();
+            playClip();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
-    private void prepairData() {
+    private void prepairData() throws Exception{
         bundleData = getIntent().getExtras();
         arrNewsClipItem = bundleData.getParcelableArrayList(ReviewsFragment.ARR_CLIPS_DATA);
     }
 
-    private void playClip() {
+    private void playClip()throws Exception {
         final String youtubeId = bundleData.getString(ReviewsFragment.YOUTUBE_ID);
         youTubePlayerView = (YouTubePlayerView) findViewById(R.id.youtubePlayerView);
         youTubePlayerView.initialize(ReviewsFragment.API_KEY, new YouTubePlayer.OnInitializedListener() {
@@ -63,7 +68,7 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity {
         });
     }
 
-    private void initViews() {
+    private void initViews() throws Exception{
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));

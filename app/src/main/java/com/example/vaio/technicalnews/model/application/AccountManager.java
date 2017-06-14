@@ -113,36 +113,39 @@ public class AccountManager implements Serializable {
                 mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isComplete()) {
-                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().
-                                    setDisplayName(yourName).setPhotoUri(MainActivity.getUriToDrawable(context, R.drawable.boss)).build();
-                            final FirebaseUser user = mAuth.getCurrentUser();
-                            if (user != null) {
-                                user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (!task.isSuccessful()) {
-                                            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
-                                            if (onRegisterFail != null) {
-                                                onRegisterFail.onFail();
-                                            }
-                                        } else {
-                                            final UserInfo userInfo = new UserInfo(user.getUid(), yourName, user.getEmail(), "", MyCalendar.getDate(), false, false);
-                                            FireBaseReference.getUserIdRef(userInfo.getUid()).setValue(userInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    Toast.makeText(context, userInfo.getDisplayName(), Toast.LENGTH_SHORT).show();
-                                                    onRegisterSuccess.onSuccses();
+                        try {
+                            if (task.isComplete()) {
+                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().
+                                        setDisplayName(yourName).setPhotoUri(MainActivity.getUriToDrawable(context, R.drawable.boss)).build();
+                                final FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (!task.isSuccessful()) {
+                                                Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+                                                if (onRegisterFail != null) {
+                                                    onRegisterFail.onFail();
                                                 }
-                                            });
+                                            } else {
+                                                final UserInfo userInfo = new UserInfo(user.getUid(), yourName, user.getEmail(), "", MyCalendar.getDate(), false, false);
+                                                FireBaseReference.getUserIdRef(userInfo.getUid()).setValue(userInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        Toast.makeText(context, userInfo.getDisplayName(), Toast.LENGTH_SHORT).show();
+                                                        onRegisterSuccess.onSuccses();
+                                                    }
+                                                });
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
+                            } else {
+
                             }
-                        } else {
-
+                        }catch (Exception e){
+                            e.printStackTrace();
                         }
-
                     }
                 });
             }

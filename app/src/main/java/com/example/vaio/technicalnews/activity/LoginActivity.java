@@ -84,7 +84,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private void initViews() {
+    private void initViews() throws Exception {
         edtUserName = (EditText) findViewById(R.id.userName);
         edtPassword = (EditText) findViewById(R.id.password);
         btnLogin = (Button) findViewById(R.id.btnLogin);
@@ -189,17 +189,22 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             FireBaseReference.getAccountRef().child(accountManager.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                    UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
-                                    if (userInfo == null) {
-                                        FirebaseUser user = accountManager.getCurrentUser();
-                                        UserInfo userInfo1 = new UserInfo(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhotoUrl().toString(), MyCalendar.getDate(), true, false);
-                                        accountManager.setUserInfo(userInfo1);
-                                        FireBaseReference.getAccountRef().child(accountManager.getCurrentUser().getUid()).setValue(userInfo1);
+                                    try {
+                                        UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
+                                        if (userInfo == null) {
+                                            FirebaseUser user = accountManager.getCurrentUser();
+                                            UserInfo userInfo1 = new UserInfo(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhotoUrl().toString(), MyCalendar.getDate(), true, false);
+                                            accountManager.setUserInfo(userInfo1);
+                                            FireBaseReference.getAccountRef().child(accountManager.getCurrentUser().getUid()).setValue(userInfo1);
+                                        }
+                                        if (progressDialog != null && progressDialog.isShowing()) {
+                                            progressDialog.dismiss();
+                                        }
+                                        onBackPressed();
+                                    }catch (Exception e){
+                                        e.printStackTrace();
                                     }
-                                    if (progressDialog != null && progressDialog.isShowing()) {
-                                        progressDialog.dismiss();
-                                    }
-                                    onBackPressed();
+
                                 }
 
                                 @Override
@@ -229,53 +234,67 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //            setClickableViews(false);
             switch (view.getId()) {
                 case R.id.btnLogin:
-                    progressDialog.show();
-                    if (!MainActivity.isNetWorkAvailable(this)) {
-                        Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    String userName = edtUserName.getText().toString();
-                    String password = edtPassword.getText().toString();
-                    if (userName.isEmpty() || password.isEmpty()) {
-                        btnLogin.setClickable(true);
-                        Toast.makeText(this, "The feilds must not empty", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
-                        @Override
-                        public void onSuccess() {
-                            progressDialog.dismiss();
-                            onBackPressed();
+                    try {
+                        progressDialog.show();
+                        if (!MainActivity.isNetWorkAvailable(this)) {
+                            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
+                            return;
                         }
-                    });
-                    accountManager.setOnLoginFail(new AccountManager.OnLoginFail() {
-                        @Override
-                        public void onFail() {
-                            progressDialog.dismiss();
+
+                        String userName = edtUserName.getText().toString();
+                        String password = edtPassword.getText().toString();
+                        if (userName.isEmpty() || password.isEmpty()) {
+                            btnLogin.setClickable(true);
+                            Toast.makeText(this, "The feilds must not empty", Toast.LENGTH_SHORT).show();
+                            return;
                         }
-                    });
-                    accountManager.login(userName, password);
+
+                        accountManager.setOnLoginSuccess(new AccountManager.OnLoginSuccess() {
+                            @Override
+                            public void onSuccess() {
+                                progressDialog.dismiss();
+                                onBackPressed();
+                            }
+                        });
+                        accountManager.setOnLoginFail(new AccountManager.OnLoginFail() {
+                            @Override
+                            public void onFail() {
+                                progressDialog.dismiss();
+                            }
+                        });
+                        accountManager.login(userName, password);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
 //                    setClickableViews(true);
                     break;
 
                 case R.id.tvSignUp:
+                    try {
+                        Intent intent = new Intent(this, RegisterActivity.class);
+                        startActivityForResult(intent, RC_REGISTER);
+                        overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
 //                    setClickableViews(true);
-                    Intent intent = new Intent(this, RegisterActivity.class);
-                    startActivityForResult(intent, RC_REGISTER);
-                    overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
+
                     break;
 
                 case R.id.googleSignIn:
-                    if (!MainActivity.isNetWorkAvailable(this)) {
-                        Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
-                        return;
+                    try {
+                        if (!MainActivity.isNetWorkAvailable(this)) {
+                            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (progressDialog != null && !progressDialog.isShowing()) {
+                            progressDialog.show();
+                        }
+                        signIn();
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
-                    if (progressDialog != null && !progressDialog.isShowing()) {
-                        progressDialog.show();
-                    }
-                    signIn();
+
                     break;
 
                 case R.id.facebookSignIn:

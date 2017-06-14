@@ -86,27 +86,27 @@ public class PostActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post);
-        groupForumItem = (GroupForumItem) getIntent().getExtras().getSerializable(GROUP_FORUM_ITEM);
-        childForumItem = (ChildForumItem) getIntent().getExtras().getSerializable(CHILD_FORUM_ITEM);
+        try {
+            groupForumItem = (GroupForumItem) getIntent().getExtras().getSerializable(GROUP_FORUM_ITEM);
+            childForumItem = (ChildForumItem) getIntent().getExtras().getSerializable(CHILD_FORUM_ITEM);
 //        groupForumKey = getIntent().getExtras().getString(ForumFragment.GROUP_FORUM_KEY);
 //        childForumPosition = getIntent().getExtras().getInt(ForumFragment.CHILD_FORUM_POSITION);
-        Log.e(TAG, groupForumItem.getName());
-        Log.e(TAG, childForumItem.getName());
-        Log.e(TAG, childForumItem.getPosition() + "");
-//        Log.e(TAG, groupForumKey);
-        GlobalData globalData = (GlobalData) getApplication();
-        accountManager = globalData.getAccountManager();
-        initToolbar();
-        initViews();
+            GlobalData globalData = (GlobalData) getApplication();
+            accountManager = globalData.getAccountManager();
+            initToolbar();
+            initViews();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private void initToolbar() {
+    private void initToolbar() throws Exception {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void initViews() {
+    private void initViews() throws Exception {
 
 
         ivAvatar = (ImageView) findViewById(R.id.ivAvatar);
@@ -154,13 +154,17 @@ public class PostActivity extends AppCompatActivity {
                     Snackbar.make(v, "You have been banned !", 2000);
                     return;
                 }
-                actionPost();
+                try {
+                    actionPost();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 
     }
 
-    private void actionPost() {
+    private void actionPost() throws Exception {
 
         String content = Emoji.replaceInText(edtContent.getText().toString()).trim();
         String subject = Emoji.replaceInText(edtSubject.getText().toString()).trim();
@@ -180,9 +184,13 @@ public class PostActivity extends AppCompatActivity {
                 addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        long count = dataSnapshot.getChildrenCount();
-                        Log.e(TAG, count + "");
-                        FireBaseReference.getPostNumberRef(groupForumItem.getKey(), childForumItem.getPosition()).setValue(count + "");
+                        try {
+                            long count = dataSnapshot.getChildrenCount();
+                            Log.e(TAG, count + "");
+                            FireBaseReference.getPostNumberRef(groupForumItem.getKey(), childForumItem.getPosition()).setValue(count + "");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     @Override

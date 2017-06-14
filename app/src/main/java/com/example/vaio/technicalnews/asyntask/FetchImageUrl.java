@@ -1,5 +1,6 @@
 package com.example.vaio.technicalnews.asyntask;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,11 +10,15 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.view.WindowManager;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -38,7 +43,10 @@ public class FetchImageUrl extends AsyncTask<String, Void, Boolean> {
         String url = params[0];
         try {
             URL url1 = new URL(url);
-            URLConnection connection = url1.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) url1.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setUseCaches(true);
+            connection.connect();
             InputStream stream = connection.getInputStream();
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
             drawable = new BitmapDrawable(bitmap);

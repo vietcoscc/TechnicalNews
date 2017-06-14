@@ -74,16 +74,20 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         receiveData();
     }
 
-    private void receiveData() {
+    private void receiveData() throws Exception {
         arrChat.clear();
         FireBaseReference.getRoomChatRef(chatRoom.getName()).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                ItemChat itemChat = dataSnapshot.getValue(ItemChat.class);
-                itemChat.setKey(dataSnapshot.getKey());
-                arrChat.add(itemChat);
-                chatAdapter.notifyItemInserted(arrChat.size() - 1);
-                recyclerView.scrollToPosition(arrChat.size() - 1);
+                try{
+                    ItemChat itemChat = dataSnapshot.getValue(ItemChat.class);
+                    itemChat.setKey(dataSnapshot.getKey());
+                    arrChat.add(itemChat);
+                    chatAdapter.notifyItemInserted(arrChat.size() - 1);
+                    recyclerView.scrollToPosition(arrChat.size() - 1);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -176,22 +180,27 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.ibSend:
-                if (accountManager.getUserInfo().isBanned()) {
-                    Snackbar.make(v, "You have been banned !", 2000).show();
-                    return;
-                }
-                final String chat = Emoji.replaceInText(edtComment.getText().toString()).trim();
-                if (!chat.isEmpty()) {
-                    String date = MyCalendar.getDate();
-                    String time = MyCalendar.getTimeStamp();
-                    ItemChat itemChat = new ItemChat(accountManager.getCurrentUser().getUid(), chat, date, time);
-                    FireBaseReference.getRoomChatRef(chatRoom.getName()).push().setValue(itemChat);
-                    edtComment.setText("");
-                }
-                break;
+        try {
+            switch (v.getId()) {
+                case R.id.ibSend:
+                    if (accountManager.getUserInfo().isBanned()) {
+                        Snackbar.make(v, "You have been banned !", 2000).show();
+                        return;
+                    }
+                    final String chat = Emoji.replaceInText(edtComment.getText().toString()).trim();
+                    if (!chat.isEmpty()) {
+                        String date = MyCalendar.getDate();
+                        String time = MyCalendar.getTimeStamp();
+                        ItemChat itemChat = new ItemChat(accountManager.getCurrentUser().getUid(), chat, date, time);
+                        FireBaseReference.getRoomChatRef(chatRoom.getName()).push().setValue(itemChat);
+                        edtComment.setText("");
+                    }
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
     @Override

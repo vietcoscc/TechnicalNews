@@ -36,10 +36,14 @@ public class ManagerActivity extends AppCompatActivity {
         managerFragment = new ManagerFragment(accountManager, this);
         bannedFragment = new BannedFragment(accountManager);
         deletedFragment = new DeletedFragment(accountManager);
-        loadContentMain(managerFragment);
+        try {
+            loadContentMain(managerFragment);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public void loadContentMain(Fragment fragment) {
+    public void loadContentMain(Fragment fragment) throws Exception{
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_left);
         transaction.replace(R.id.layoutContentMain, fragment);
@@ -47,20 +51,25 @@ public class ManagerActivity extends AppCompatActivity {
     }
 
     public void loadContentMain(String tag) {
-        switch (tag) {
-            case MANAGER_TAG:
-                currentTag = MANAGER_TAG;
-                loadContentMain(managerFragment);
-                break;
-            case BANNED_TAG:
-                currentTag = BANNED_TAG;
-                loadContentMain(bannedFragment);
-                break;
-            case DELETED_TAG:
-                currentTag = DELETED_TAG;
-                loadContentMain(deletedFragment);
-                break;
+        try {
+            switch (tag) {
+                case MANAGER_TAG:
+                    currentTag = MANAGER_TAG;
+                    loadContentMain(managerFragment);
+                    break;
+                case BANNED_TAG:
+                    currentTag = BANNED_TAG;
+                    loadContentMain(bannedFragment);
+                    break;
+                case DELETED_TAG:
+                    currentTag = DELETED_TAG;
+                    loadContentMain(deletedFragment);
+                    break;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
     }
 
     @Override

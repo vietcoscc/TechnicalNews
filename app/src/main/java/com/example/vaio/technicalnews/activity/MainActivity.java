@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
+    private boolean isMyServiceRunning(Class<?> serviceClass) throws Exception {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
@@ -155,7 +155,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         accountManager.setOnLogout(new AccountManager.OnLogout() {
             @Override
             public void logout() {
-                updateUI();
+                try {
+                    updateUI();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
@@ -179,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void updateUI() {
+    private void updateUI() throws Exception {
         Log.e(TAG, "updateUI");
         try {
             FirebaseUser user = null;
@@ -224,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public static final Uri getUriToDrawable(@NonNull Context context,
-                                             @AnyRes int drawableId) {
+                                             @AnyRes int drawableId) throws Exception {
         Uri imageUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
                 "://" + context.getResources().getResourcePackageName(drawableId)
                 + '/' + context.getResources().getResourceTypeName(drawableId)
@@ -297,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.addDrawerListener(toggle);
     }
 
-    private void loadContentFragment(String contentTag) {
+    private void loadContentFragment(String contentTag) throws Exception {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         switch (contentTag) {
@@ -320,46 +324,65 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         switch (id) {
             case R.id.home:
-                AppBarLayout.LayoutParams params = new AppBarLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
-                toolbar.setLayoutParams(params);
-                loadContentFragment(HOME_TAG);
-                toolbar.setTitle("News");
+                try {
+                    AppBarLayout.LayoutParams params = new AppBarLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
+                    toolbar.setLayoutParams(params);
+                    loadContentFragment(HOME_TAG);
+                    toolbar.setTitle("News");
 //                floatingActionButton.setVisibility(View.GONE);
-                menuRes = R.menu.menu_home;
-                onCreateOptionsMenu(menu);
-                drawerLayout.closeDrawer(GravityCompat.START);
+                    menuRes = R.menu.menu_home;
+                    onCreateOptionsMenu(menu);
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 break;
             case R.id.forum:
-                AppBarLayout.LayoutParams params1 = new AppBarLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                params1.setScrollFlags(0);
-                toolbar.setLayoutParams(params1);
-                loadContentFragment(FORUM_TAG);
-                toolbar.setTitle("Forum");
+                try {
+                    AppBarLayout.LayoutParams params1 = new AppBarLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    params1.setScrollFlags(0);
+                    toolbar.setLayoutParams(params1);
+                    loadContentFragment(FORUM_TAG);
+                    toolbar.setTitle("Forum");
 //                floatingActionButton.setVisibility(View.VISIBLE);
-                if (accountManager.getCurrentUser() == null) {
-                    Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            showActivityLogin();
-                        }
-                    }).show();
+                    if (accountManager.getCurrentUser() == null) {
+                        Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                try {
+                                    showActivityLogin();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).show();
+                    }
+                    menuRes = R.menu.menu_forum;
+                    onCreateOptionsMenu(menu);
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                menuRes = R.menu.menu_forum;
-                onCreateOptionsMenu(menu);
-                drawerLayout.closeDrawer(GravityCompat.START);
+
                 break;
             case R.id.chat_room:
-                toolbar.setTitle("Chat room");
-                AppBarLayout.LayoutParams params2 = new AppBarLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                params2.setScrollFlags(0);
-                toolbar.setLayoutParams(params2);
-                menuRes = R.menu.menu_forum;
-                onCreateOptionsMenu(menu);
+                try {
+                    toolbar.setTitle("Chat room");
+                    AppBarLayout.LayoutParams params2 = new AppBarLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    params2.setScrollFlags(0);
+                    toolbar.setLayoutParams(params2);
+                    menuRes = R.menu.menu_forum;
+                    onCreateOptionsMenu(menu);
 //                floatingActionButton.setVisibility(View.GONE);
-                loadContentFragment(CHAT_ROOM_TAG);
-                drawerLayout.closeDrawer(GravityCompat.START);
+                    loadContentFragment(CHAT_ROOM_TAG);
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
 
                 break;
 
@@ -399,25 +422,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    public void showActivityLogin() {
+    public void showActivityLogin() throws Exception {
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivityForResult(intent, RC_LOGIN);
         overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
     }
 
-    public void showLoginSnackBar() {
+    public void showLoginSnackBar() throws Exception {
         if (accountManager.getCurrentUser() == null) {
             Snackbar.make(findViewById(R.id.content_main), "Sign in now ?", Snackbar.LENGTH_LONG).setAction("SIGN IN", new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    showActivityLogin();
+                    try {
+                        showActivityLogin();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }).show();
 
         }
     }
 
-    private void showActivityRegister() {
+    private void showActivityRegister() throws Exception {
         Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
         startActivity(intent);
         overridePendingTransition(R.anim.anim_fragment_in_from_right, R.anim.anim_fragment_out_from_right);
@@ -462,40 +489,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onMenuItemClick(MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
-            case R.id.action_list:
+        try {
+            switch (menuItem.getItemId()) {
+                case R.id.action_list:
 
-                break;
-            case R.id.action_grid:
+                    break;
+                case R.id.action_grid:
 
-                break;
-            case R.id.action_sign_in:
-                showActivityLogin();
-                break;
-            case R.id.action_sign_up:
-                showActivityRegister();
-                break;
-            case R.id.action_sign_out:
-                progressDialog.setMessage("Singing out ...");
-                progressDialog.show();
-                accountManager.logout();
-                manager.setVisible(false);
-                break;
-            case R.id.action_view_profile:
-                if (accountManager.getCurrentUser() == null) {
-                    showLoginSnackBar();
-                } else {
-                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                    intent.putExtra("tag", TAG);
-                    startActivityForResult(intent, RC_PROFILE);
-                }
+                    break;
+                case R.id.action_sign_in:
+                    showActivityLogin();
+                    break;
+                case R.id.action_sign_up:
+                    showActivityRegister();
+                    break;
+                case R.id.action_sign_out:
+                    progressDialog.setMessage("Singing out ...");
+                    progressDialog.show();
+                    accountManager.logout();
+                    manager.setVisible(false);
+                    break;
+                case R.id.action_view_profile:
+                    if (accountManager.getCurrentUser() == null) {
+                        showLoginSnackBar();
+                    } else {
+                        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                        intent.putExtra("tag", TAG);
+                        startActivityForResult(intent, RC_PROFILE);
+                    }
 
-                break;
-            case R.id.action_mangage:
-                Intent intent = new Intent(MainActivity.this, ManagerActivity.class);
-                startActivity(intent);
-                break;
+                    break;
+                case R.id.action_mangage:
+                    Intent intent = new Intent(MainActivity.this, ManagerActivity.class);
+                    startActivity(intent);
+                    break;
+            }
+        } catch (Exception e) {
+
         }
+
         return false;
     }
 
@@ -511,23 +543,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        if (!isMyServiceRunning(NewsService.class)) {
-            Intent intentService = new Intent(MainActivity.this, NewsService.class);
-            startService(intentService);
-        }
-        if (!isMyServiceRunning(NotificationService.class)) {
-            MySharedPreferences.putString(MainActivity.this, USER_NAME, accountManager.getCurrentUser().getUid());
-            Intent intent = new Intent(MainActivity.this, NotificationService.class);
-            intent.putExtra(USER_NAME, accountManager.getCurrentUser().getUid());
-            startService(intent);
+        try {
+            if (!isMyServiceRunning(NewsService.class)) {
+                Intent intentService = new Intent(MainActivity.this, NewsService.class);
+                startService(intentService);
+            }
+            if (!isMyServiceRunning(NotificationService.class)) {
+                MySharedPreferences.putString(MainActivity.this, USER_NAME, accountManager.getCurrentUser().getUid());
+                Intent intent = new Intent(MainActivity.this, NotificationService.class);
+                intent.putExtra(USER_NAME, accountManager.getCurrentUser().getUid());
+                startService(intent);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         if (onMenuItemForumSelected) {
             return;
         }
-        showAcceptQuitingDialog();
+        try {
+            showAcceptQuitingDialog();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public void showAcceptQuitingDialog() {
+    public void showAcceptQuitingDialog() throws Exception {
         try {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Are you sure you want to quit ?");

@@ -42,17 +42,20 @@ public class SplashScreenActivity extends AppCompatActivity {
         globalData = (GlobalData) getApplication();
         accountManager = new AccountManager(SplashScreenActivity.this);
         globalData.setAccountManager(accountManager);
-//        new LongOperation().execute();
         if (accountManager.getCurrentUser() != null) {
             getAccountRef().child(accountManager.getCurrentUser().getUid()).keepSynced(true);
             getAccountRef().child(accountManager.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
-                    accountManager.setUserInfo(userInfo);
-                    Intent intent = new Intent(SplashScreenActivity.this, MainActivity.class);
-                    startActivityForResult(intent, RC_MAIN);
-                    Log.e(TAG, userInfo.getDisplayName());
+                    try {
+                        UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
+                        accountManager.setUserInfo(userInfo);
+                        Intent intent = new Intent(SplashScreenActivity.this, MainActivity.class);
+                        startActivityForResult(intent, RC_MAIN);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
                 }
 
                 @Override

@@ -313,7 +313,6 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
                 .orderByChild(NUMBER_CARE).removeEventListener(newChildEvent);
         switch (flag) {
             case 0:
-                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName()).keepSynced(true);
                 getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
                         .addChildEventListener(newChildEvent);
                 getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
@@ -321,15 +320,11 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
                 break;
             case 1:
                 getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
-                        .orderByChild(NUMBER_CARE).keepSynced(true);
-                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
                         .orderByChild(NUMBER_CARE).addChildEventListener(newChildEvent);
                 getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
                         .orderByChild(NUMBER_CARE).addListenerForSingleValueEvent(newValueEvent);
                 break;
             case 2:
-                getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
-                        .orderByChild("numberView").keepSynced(true);
                 getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
                         .orderByChild("numberView").addChildEventListener(newChildEvent);
                 getChildForumItemRef(groupForumItem.getName(), childForumItem.getName())
@@ -359,27 +354,32 @@ public class TopicActivity extends AppCompatActivity implements MenuItem.OnMenuI
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Log.e(TAG, newText);
+                try {
+                    Log.e(TAG, newText);
 
-                if (newText.isEmpty() || searchView.isIconified()) {
-                    arrTopic.clear();
-                    arrTopic.addAll(arrTopicTmp);
-                    adapter.notifyDataSetChanged();
-                    return true;
-                }
-                loadingProgressBar.show();
-
-                TopicSearching topicSearching = new TopicSearching(newText);
-                topicSearching.setOnSearchingComplete(new TopicSearching.OnSearchingComplete() {
-                    @Override
-                    public void onComplete(ArrayList<Topic> arrTopic) {
-                        TopicActivity.this.arrTopic.clear();
-                        TopicActivity.this.arrTopic.addAll(arrTopic);
+                    if (newText.isEmpty() || searchView.isIconified()) {
+                        arrTopic.clear();
+                        arrTopic.addAll(arrTopicTmp);
                         adapter.notifyDataSetChanged();
-                        loadingProgressBar.hide();
+                        return true;
                     }
-                });
-                topicSearching.execute(arrTopicTmp);
+                    loadingProgressBar.show();
+
+                    TopicSearching topicSearching = new TopicSearching(newText.toLowerCase());
+                    topicSearching.setOnSearchingComplete(new TopicSearching.OnSearchingComplete() {
+                        @Override
+                        public void onComplete(ArrayList<Topic> arrTopic) {
+                            TopicActivity.this.arrTopic.clear();
+                            TopicActivity.this.arrTopic.addAll(arrTopic);
+                            adapter.notifyDataSetChanged();
+                            loadingProgressBar.hide();
+                        }
+                    });
+                    topicSearching.execute(arrTopicTmp);
+                    return true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return true;
             }
         });

@@ -110,19 +110,24 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         FireBaseReference.getAccountRef().child(uid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
-                ivAvatar.setVisibility(View.VISIBLE);
-                String uri = userInfo.getPhotoUrl();
-                if (uri != null && !uri.isEmpty()) {
-                    Picasso.with(ProfileActivity.this).load(uri).error(R.drawable.warning).placeholder(R.drawable.loading).into(ivAvatar);
+                try {
+                    UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
+                    ivAvatar.setVisibility(View.VISIBLE);
+                    String uri = userInfo.getPhotoUrl();
+                    if (uri != null && !uri.isEmpty()) {
+                        Picasso.with(ProfileActivity.this).load(uri).error(R.drawable.warning).placeholder(R.drawable.loading).into(ivAvatar);
+                    }
+
+                    String displayName = userInfo.getDisplayName();
+                    String email = userInfo.getEmail();
+                    tvDisplayName.setText(displayName);
+                    tvEmail.setText(email);
+                    tvJoinedDate.setText(userInfo.getJoinedDate());
+                    tvAdmin.setText(userInfo.isAdmin() + "");
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
 
-                String displayName = userInfo.getDisplayName();
-                String email = userInfo.getEmail();
-                tvDisplayName.setText(displayName);
-                tvEmail.setText(email);
-                tvJoinedDate.setText(userInfo.getJoinedDate());
-                tvAdmin.setText(userInfo.isAdmin() + "");
             }
 
             @Override

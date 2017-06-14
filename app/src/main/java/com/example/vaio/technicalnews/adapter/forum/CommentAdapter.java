@@ -97,7 +97,11 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         drawableFavorite.setBounds(0, 0, 48, 48);
         drawableUnFavorite.setBounds(0, 0, 48, 48);
 
-        this.uri = MainActivity.getUriToDrawable(context, R.drawable.boss);
+        try {
+            this.uri = MainActivity.getUriToDrawable(context, R.drawable.boss);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         this.uid = accountManager.getCurrentUser().getUid();
 
         if (viewType == VIEW_TYPE_HEADER) {

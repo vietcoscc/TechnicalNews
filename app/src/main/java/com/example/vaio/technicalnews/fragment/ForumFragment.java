@@ -66,17 +66,26 @@ public class ForumFragment extends Fragment {
         View view = layoutInflater.inflate(R.layout.fragment_forum, container, false);
 //        receiveBanList();
 //        receiveAdmin();
-        receiveData();
-        initViews(view);
+        try {
+            receiveData();
+            initViews(view);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         return view;
     }
 
-    private void initViews(final View view) {
+    private void initViews(final View view) throws Exception{
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                receiveData();
+                try {
+                    receiveData();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -96,7 +105,11 @@ public class ForumFragment extends Fragment {
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 if (accountManager.getCurrentUser() == null) {
                     MainActivity mainActivity = (MainActivity) getContext();
-                    mainActivity.showLoginSnackBar();
+                    try {
+                        mainActivity.showLoginSnackBar();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     return false;
                 }
 
@@ -193,7 +206,7 @@ public class ForumFragment extends Fragment {
 //        });
     }
 
-    private void receiveData() {
+    private void receiveData() throws Exception {
 
         arrGroupForumItem.clear();
         FireBaseReference.getForumRef().keepSynced(true);
@@ -246,7 +259,11 @@ public class ForumFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_POST) {
             if (resultCode == RESULT_OK) {
-                receiveData();
+                try {
+                    receiveData();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

@@ -77,7 +77,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
     }
 
 
-    private void initData() {
+    private void initData() throws Exception {
         GlobalData globalData = (GlobalData) getApplication();
         accountManager = globalData.getAccountManager();
         groupForumItem = getIntent().getExtras().getString(ForumFragment.GROUP_FORUM_ITEM);
@@ -142,18 +142,24 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
     }
 
 
-    private void getArrComment() {
+    private void getArrComment() throws Exception {
         arrComment.clear();
         getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Comment comment = dataSnapshot.getValue(Comment.class);
-                arrComment.add(comment);
-                if (commentAdapter != null && arrComment != null) {
-                    commentAdapter.notifyItemInserted(arrComment.size() + 1);
-                }
-                if (!begin) {
-                    recyclerView.scrollToPosition(arrComment.size());
+                try {
+                    Comment comment = dataSnapshot.getValue(Comment.class);
+                    arrComment.add(comment);
+                    if (commentAdapter != null && arrComment != null) {
+                        commentAdapter.notifyItemInserted(arrComment.size() + 1);
+                    }
+                    if (!begin) {
+                        if (accountManager.getUserInfo().getUid().equals(comment.getUid())) {
+                            recyclerView.scrollToPosition(arrComment.size());
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 
@@ -197,15 +203,20 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
 
-    private void getArrFavorite() {
+    private void getArrFavorite() throws Exception {
         arrFavorite.clear();
         getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).keepSynced(true);
         getArrFavoriteRef(topic.getGroupName(), topic.getChildName(), topic.getKey()).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String string = dataSnapshot.getValue(String.class);
-                arrFavorite.add(0, string);
-                Log.e(TAG, "Added");
+                try {
+                    String string = dataSnapshot.getValue(String.class);
+                    arrFavorite.add(0, string);
+                    Log.e(TAG, "Added");
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
             }
 
             @Override
@@ -215,10 +226,15 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                String string = dataSnapshot.getValue(String.class);
-                arrFavorite.remove(arrFavorite.indexOf(string));
-                commentAdapter.notifyItemChanged(0);
-                Log.e(TAG, "removed");
+                try{
+                    String string = dataSnapshot.getValue(String.class);
+                    arrFavorite.remove(arrFavorite.indexOf(string));
+                    commentAdapter.notifyItemChanged(0);
+                    Log.e(TAG, "removed");
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
             }
 
             @Override
@@ -244,7 +260,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
 
-    private void initToolbar() {
+    private void initToolbar() throws Exception{
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(childForumItem);
         setSupportActionBar(toolbar);
@@ -297,38 +313,36 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
         switch (v.getId()) {
             case R.id.edtComment:
 
-
                 break;
             case R.id.ibSend:
-                if (accountManager.getUserInfo().isBanned()) {
-                    Snackbar.make(v, "You have been banned !", 2000).show();
-                    return;
-                }
-                if (edtComment.getText().toString().isEmpty()) {
-                    return;
-                }
-                Calendar calendar = Calendar.getInstance();
-
-                String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + (calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.YEAR) + "";
-                String time;
-                if (calendar.get(Calendar.AM_PM) == 1) {
-                    time = MyCalendar.getTimeStamp() + " PM";
-                } else {
-                    time = MyCalendar.getTimeStamp() + " AM";
-                }
-                String comment = Emoji.replaceInText(edtComment.getText().toString()).trim();
-
-                ArrayList<Comment> arrReply = new ArrayList<>();
-                Comment cmt = new Comment(accountManager.getCurrentUser().getUid(), comment, date, time, arrReply);
-                getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).child(arrComment.size() + "").setValue(cmt);
-                if (!accountManager.getCurrentUser().getUid().equals(topic.getUid())) {
-                    getNotifocationRef().push().setValue(new MyNotification(accountManager.getCurrentUser().getDisplayName(),
-                            topic.getSubject(), edtComment.getText().toString(), accountManager.getCurrentUser().getUid(), topic.getUid(),
-                            new GroupForumItem(null, groupForumItem, null), new ChildForumItem(0, childForumItem, "", ""), topic));
-                }
-                edtComment.setText("");
                 try {
-//                    getTopicAfter();
+                    if (accountManager.getUserInfo().isBanned()) {
+                        Snackbar.make(v, "You have been banned !", 2000).show();
+                        return;
+                    }
+                    if (edtComment.getText().toString().isEmpty()) {
+                        return;
+                    }
+                    Calendar calendar = Calendar.getInstance();
+
+                    String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + (calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.YEAR) + "";
+                    String time;
+                    if (calendar.get(Calendar.AM_PM) == 1) {
+                        time = MyCalendar.getTimeStamp() + " PM";
+                    } else {
+                        time = MyCalendar.getTimeStamp() + " AM";
+                    }
+                    String comment = Emoji.replaceInText(edtComment.getText().toString()).trim();
+
+                    ArrayList<Comment> arrReply = new ArrayList<>();
+                    Comment cmt = new Comment(accountManager.getCurrentUser().getUid(), comment, date, time, arrReply);
+                    getArrCommentRef(groupForumItem, childForumItem, topic.getKey()).child(arrComment.size() + "").setValue(cmt);
+                    if (!accountManager.getCurrentUser().getUid().equals(topic.getUid())) {
+                        getNotifocationRef().push().setValue(new MyNotification(accountManager.getCurrentUser().getDisplayName(),
+                                topic.getSubject(), edtComment.getText().toString(), accountManager.getCurrentUser().getUid(), topic.getUid(),
+                                new GroupForumItem(null, groupForumItem, null), new ChildForumItem(0, childForumItem, "", ""), topic));
+                    }
+                    edtComment.setText("");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

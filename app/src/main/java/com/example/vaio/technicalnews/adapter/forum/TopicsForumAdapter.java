@@ -58,26 +58,30 @@ public class TopicsForumAdapter extends RecyclerView.Adapter<TopicsForumAdapter.
             FireBaseReference.getUserIdRef(topic.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Log.e(TAG, dataSnapshot.getKey());
-                    UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
+                    try {
+                        UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
 
-                    if (userInfo != null) {
-                        if (userInfo.getPhotoUrl().isEmpty()) {
-                            Picasso.with(context).
-                                    load(MainActivity.getUriToDrawable(context, R.drawable.boss)).
-                                    placeholder(R.drawable.loading).
-                                    error(R.drawable.warning).
-                                    into(holder.ivAvatar);
+                        if (userInfo != null) {
+                            if (userInfo.getPhotoUrl().isEmpty()) {
+                                Picasso.with(context).
+                                        load(MainActivity.getUriToDrawable(context, R.drawable.boss)).
+                                        placeholder(R.drawable.loading).
+                                        error(R.drawable.warning).
+                                        into(holder.ivAvatar);
 
-                        } else {
-                            Picasso.with(context).
-                                    load(userInfo.getPhotoUrl()).
-                                    placeholder(R.drawable.loading).
-                                    error(R.drawable.warning).
-                                    into(holder.ivAvatar);
+                            } else {
+                                Picasso.with(context).
+                                        load(userInfo.getPhotoUrl()).
+                                        placeholder(R.drawable.loading).
+                                        error(R.drawable.warning).
+                                        into(holder.ivAvatar);
+                            }
+                            holder.tvEmail.setText(userInfo.getDisplayName());
                         }
-                        holder.tvEmail.setText(userInfo.getDisplayName());
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
+
                 }
 
                 @Override

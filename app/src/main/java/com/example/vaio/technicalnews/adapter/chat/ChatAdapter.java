@@ -55,25 +55,28 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         FireBaseReference.getUserIdRef(itemChat.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.e(TAG, dataSnapshot.getKey());
-                UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
+                try {
+                    UserInfo userInfo = dataSnapshot.getValue(UserInfo.class);
 
-                if (userInfo != null) {
-                    if (userInfo.getPhotoUrl().isEmpty()) {
-                        Picasso.with(context).
-                                load(MainActivity.getUriToDrawable(context, R.drawable.boss)).
-                                placeholder(R.drawable.loading).
-                                error(R.drawable.warning).
-                                into( holder.circleImageView);
+                    if (userInfo != null) {
+                        if (userInfo.getPhotoUrl().isEmpty()) {
+                            Picasso.with(context).
+                                    load(MainActivity.getUriToDrawable(context, R.drawable.boss)).
+                                    placeholder(R.drawable.loading).
+                                    error(R.drawable.warning).
+                                    into( holder.circleImageView);
 
-                    } else {
-                        Picasso.with(context).
-                                load(userInfo.getPhotoUrl()).
-                                placeholder(R.drawable.loading).
-                                error(R.drawable.warning).
-                                into( holder.circleImageView);
+                        } else {
+                            Picasso.with(context).
+                                    load(userInfo.getPhotoUrl()).
+                                    placeholder(R.drawable.loading).
+                                    error(R.drawable.warning).
+                                    into( holder.circleImageView);
+                        }
+                        holder.tvName.setText(userInfo.getDisplayName());
                     }
-                    holder.tvName.setText(userInfo.getDisplayName());
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
             }
 

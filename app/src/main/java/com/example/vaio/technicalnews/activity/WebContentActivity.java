@@ -27,10 +27,14 @@ public class WebContentActivity extends AppCompatActivity implements MenuItem.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_content);
-        initViews();
+        try {
+            initViews();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private void initViews() {
+    private void initViews() throws Exception{
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
