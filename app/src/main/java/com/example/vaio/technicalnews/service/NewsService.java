@@ -55,6 +55,7 @@ public class NewsService extends Service {
                             .userAgent("Mozilla")
                             .timeout(5000)
                             .get();
+
                     Elements elements = doc.select("div.fdListingContainer").select("div.riverPost");
                     Element elementRoot = elements.get(0);
                     String name = elementRoot.select("a.assetHed").select("h3").text().trim();
