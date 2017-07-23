@@ -67,6 +67,7 @@ public class NewsService extends Service {
                     NewsItem newsItem = new NewsItem(name, contentPreview, timeStamp, contentLink, imageLinkWrapper, topicName, author);
                     if (newestItem == null) {
                         newestItem = newsItem;
+
                     } else {
                         if (!newestItem.getContentLink().equals(newsItem.getContentLink())) {
                             Intent intent = new Intent(NewsService.this, SplashScreenActivity.class);
