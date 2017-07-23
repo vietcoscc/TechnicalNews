@@ -76,7 +76,6 @@ public class NewsService extends Service {
                                     setContentTitle(newestItem.getName()).
                                     setContentText(newestItem.getContentPreview()).
                                     setContentIntent(pending);
-
                             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                             manager.notify(MyCalendar.getSecond(), build.build());
                             newestItem = newsItem;
